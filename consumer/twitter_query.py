@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from twython import Twython
+from twython import Twython, TwythonError
 import pandas as pd
 
 
@@ -94,8 +94,8 @@ class TwitterQuery():
                 'lang': 'en',
             }
 
+        @params, parameters to return.
         @keys, list of lists, recursive params key through end value.
-        @sorted, dict of panda 'sort_values'.
 
         Note: additional search arguments, as well as full response
               'statuses' can be utilized and referenced:
@@ -106,7 +106,7 @@ class TwitterQuery():
 
         keys = []
         [keys.extend(self.get_dict_path(k)) if isinstance(k, dict) else keys.append([k]) for k in params]
-        self.result = {x[-1]: [] for x in keys}
+        results = {x[-1]: [] for x in keys}
 
         #
         # query
@@ -116,7 +116,46 @@ class TwitterQuery():
         #       print(repr(status).encode('utf-8'))
         #
         for status in self.conn.search(**query)['statuses']:
-            [self.result[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(self.result.items())]
+            [results[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(results.items())]
 
-        self.df = pd.DataFrame(self.result)
-        return(self.df)
+        self.df_query = pd.DataFrame(results)
+        return(self.df_query)
+
+    def query_user(
+        self,
+        screen_name,
+        params=[{'user': ['screen_name']}, 'created_at', 'text'],
+        count=200
+    ):
+        '''
+
+        search tweets by supplied screen name.
+
+        @screen_name, user timeline to query.
+        @params, parameters to return.
+        @count, number of tweets to return.
+        @keys, list of lists, recursive params key through end value.
+
+        '''
+
+        try:
+            timeline = self.conn.get_user_timeline(screen_name=screen_name, count=count)
+        except TwythonError as e:
+            print(e)
+
+        keys = []
+        [keys.extend(self.get_dict_path(k)) if isinstance(k, dict) else keys.append([k]) for k in params]
+        results = {x[-1]: [] for x in keys}
+
+        #
+        # query
+        #
+        # Note: to debug within the loop, and access 'status':
+        #
+        #       print(repr(tweet).encode('utf-8'))
+        #
+        for tweet in timeline:
+            [results[k].append(self.get_dict_val(tweet, keys[i])) for i, (k,v) in enumerate(results.items())]
+
+        self.df_timeline = pd.DataFrame(results)
+        return(self.df_timeline)
