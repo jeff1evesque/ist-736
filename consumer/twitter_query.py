@@ -59,7 +59,7 @@ class TwitterQuery():
         for k,v in d.items():
             if isinstance(v, dict):
                 temp.append(k)
-                get_dict_path(v)
+                self.get_dict_path(v)
             else:
                 if isinstance(v, list):
                     [result.append(x) for x in v]
@@ -101,7 +101,7 @@ class TwitterQuery():
         '''
 
         keys = []
-        [keys.extend(get_dict_path(k)) if isinstance(k, dict) else [k] for k in params]
+        [keys.extend(self.get_dict_path(k)) if isinstance(k, dict) else [k] for k in params]
         self.result = {x[-1]: [] for x in keys}
 
         # query
