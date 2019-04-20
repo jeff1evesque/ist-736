@@ -60,10 +60,14 @@ class TwitterQuery():
             if isinstance(v, dict):
                 temp.append(k)
                 self.get_dict_path(v)
+
             else:
                 if isinstance(v, list):
-                    [result.append(x) for x in v]
+                    temp.append(k)
+                    [temp.append(x) for x in v]
+                    result.append(temp)
                     temp = []
+
                 else:
                     temp.append(v)
                     result.append(temp)
@@ -101,10 +105,16 @@ class TwitterQuery():
         '''
 
         keys = []
-        [keys.extend(self.get_dict_path(k)) if isinstance(k, dict) else [k] for k in params]
+        [keys.extend(self.get_dict_path(k)) if isinstance(k, dict) else keys.append([k]) for k in params]
         self.result = {x[-1]: [] for x in keys}
 
+        #
         # query
+        #
+        # Note: to debug within the loop, and access 'status':
+        #
+        #       print(repr(status).encode('utf-8'))
+        #
         for status in self.conn.search(**query)['statuses']:
             [self.result[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(self.result.items())]
 
