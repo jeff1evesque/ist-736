@@ -1,36 +1,24 @@
 #!/usr/bin/python
 
-import csv
-import json
-from twython import Twython  
-from twython import TwythonStreamer
+from twython import Twython
+import pandas as pd
 
 
-class Twitter(TwythonStreamer):
+class TwitterQuery():     
     '''
 
-    wrapper to the twython package.
+    requires instance of TwitterStream.
 
     '''
 
-    def __init__(
-        self,
-        config='{}/config.py'.format(Path(__file__).resolve().parents[1])
-    ):
+    def __init__(self, key, secret):
         '''
 
         define class variables.
 
         '''
 
-        # inherit base class
-        super(Twitter, self).__init__()
-
-        # twitter configurations
-        with open(config, 'r') as fp:
-            creds = json.load(fp)
-
-        self.python_tweets = Twython(creds['CONSUMER_KEY'], creds['CONSUMER_SECRET'])
+        self.conn = Twython(key, secret)
 
     def get_dict_val(self, d, keys):
         '''
@@ -83,14 +71,24 @@ class Twitter(TwythonStreamer):
 
         return(result)
 
-    def set_query(
+    def query(
         self,
+        query,
         params=[{'user': ['screen_name']}, 'created_at', 'text']
         sorted=None
     ):
         '''
 
         search tweets using provided parameters and default credentials.
+
+        @query, query parameters of the form:
+
+            {
+                'q': 'learn python',  
+                'result_type': 'popular',
+                'count': 10,
+                'lang': 'en',
+            }
 
         @keys, list of lists, recursive params key through end value.
         @sorted, dict of panda 'sort_values'.
@@ -104,37 +102,11 @@ class Twitter(TwythonStreamer):
 
         keys = []
         [keys.extend(get_dict_path(k)) if isinstance(k, dict) else [k] for k in params]
+        self.result = {x[-1]: [] for x in keys}
 
-        self.params = {x[-1]: [] for x in keys}
-        [self.params[k].append(get_dict_val(keys, i)) for i, (k,v) in enumerate(self.params.items())]
+        # query
+        for status in self.conn.search(**query)['statuses']:
+            [self.result[k].append(get_dict_val(status, keys[i])) for i, (k,v) in enumerate(self.result.items())]
 
-    def on_success(self, data):
-        '''
-
-        required 'TwythonStreamer' method called when twitter returns data. 
-
-        '''
-
-        tweet_data = self.result
-        self.save_to_csv(tweet_data)
-
-    def on_error(self, status_code, data):
-        '''
-
-        required 'TwythonStreamer' method called when twitter returns an error. 
-
-        '''
-
-        print(status_code, data)
-        self.disconnect()
-
-    def save_to_csv(self, tweet):
-        '''
-
-        optional 'TwythonStreamer' method to store tweets into a file. 
-
-        '''
-
-        with open(r'saved_tweets.csv', 'a') as file:
-            writer = csv.writer(file)
-            writer.writerow(list(tweet.values()))    
+        self.df = pd.DataFrame(self.result)
+        return(self.df)
