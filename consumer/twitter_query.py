@@ -106,7 +106,7 @@ class TwitterQuery():
 
         # query
         for status in self.conn.search(**query)['statuses']:
-            [self.result[k].append(get_dict_val(status, keys[i])) for i, (k,v) in enumerate(self.result.items())]
+            [self.result[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(self.result.items())]
 
         self.df = pd.DataFrame(self.result)
         return(self.df)
