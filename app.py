@@ -18,12 +18,33 @@ stream = False
 # single query
 #
 q = TwitterQuery(creds['CONSUMER_KEY'], creds['CONSUMER_SECRET'])
+
+#
+# many filters can be implemented with the twitter api:
+#
+# - https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
+#
+# examples:
+#
+# @q, utf-8, url-encoded search query of 500 characters maximum, including operators.
+#     Queries may additionally be limited by complexity.
+# @geocode, returns tweets by users located within a given radius of the given latitude
+#     and longitude. The location is preferentially taking from the Geotagging API, but
+#     will fall back to their Twitter profile.
+# @lang, restricts tweets to the given language.
+# @result_type, type of search results (i.e. mixed, recent, popular)
+#
 q.query({
-    'q': 'learn python',
+    'q': 'python',
     'result_type': 'popular',
     'count': 10,
     'lang': 'en',
 })
+
+#
+# single query: timeline of screen name.
+#
+q.query_user('elonmusk')
 
 #
 # stream query
