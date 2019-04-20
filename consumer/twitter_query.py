@@ -74,7 +74,7 @@ class TwitterQuery():
     def query(
         self,
         query,
-        params=[{'user': ['screen_name']}, 'created_at', 'text']
+        params=[{'user': ['screen_name']}, 'created_at', 'text'],
         sorted=None
     ):
         '''
