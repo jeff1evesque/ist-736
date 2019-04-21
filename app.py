@@ -1,15 +1,14 @@
 #!/usr/bin/python
 
-import json
-from consumer.twitter_stream import TwitterStream
-from consumer.twitter_query import TwitterQuery
-from config import twitter_api as creds
-
 #
 # this project requires the following packages:
 #
-#   - Twython
+#   pip install Twython
 #
+
+from consumer.twitter_stream import TwitterStream
+from consumer.twitter_query import TwitterQuery
+from config import twitter_api as creds
 
 # local variables
 stream = False
