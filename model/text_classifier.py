@@ -92,14 +92,10 @@ class Model():
             self.vectorize()
             self.split()
 
-    def split(self, size=0.20, kfold=False, pos_split=False):
+    def split(self, size=0.20, pos_split=False):
         '''
 
         split data into train and test.
-
-        @kfold, indicator to perform kfold splits.
-        @size, indicates number of folds if 'kfold=True'. Otherwise, indicates
-            test set size in a train-test split.
 
         '''
 
