@@ -6,9 +6,11 @@
 #   pip install Twython
 #
 
+import re
 from consumer.twitter_stream import TwitterStream
 from consumer.twitter_query import TwitterQuery
 from config import twitter_api as creds
+from model.text_classifier import Model as model
 
 # local variables
 stream = False
@@ -43,7 +45,30 @@ q.query({
 #
 # single query: timeline of screen name.
 #
-q.query_user('elonmusk')
+df_elon = q.query_user('elonmusk')
+df_bezos = q.query_user('JeffBezos')
+df_overall = df_elon.append(df_bezos)
+df_overall.replace({'screen_name': {'elonmusk': 0, 'JeffBezos': 1}})
+
+# reduce to ascii
+df_overall['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_overall['text']]
+
+# unigram: perform unigram analysis.
+unigram = model(df_overall, key_text='text', key_class='screen_name')
+
+# unigram vectorize
+unigram_params = unigram.get_split()
+unigram_vectorized = unigram.get_tfidf()
+
+# unigram classifier
+model_unigram = unigram.model(
+    unigram_vectorized,
+    unigram_params['y_train'],
+    validate=(unigram_params['X_test'], unigram_params['y_test'])
+)
+
+# plot unigram
+unigram.plot_cm(filename='cm_unigram.png')
 
 #
 # stream query
