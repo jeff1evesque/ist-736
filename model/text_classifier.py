@@ -89,8 +89,8 @@ class Model():
 
         # vectorize data
         if vectorize:
-            self.vectorize()
             self.split()
+            self.vectorize()
 
     def split(self, size=0.20, pos_split=False):
         '''
@@ -228,7 +228,7 @@ class Model():
         '''
 
         # conditionally select model
-        if (model_choice == 'svm):
+        if (model_choice == 'svm'):
             if multiclass:
                 clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
             else:
@@ -369,7 +369,7 @@ class Model():
         bow = self.count_vect.fit_transform(self.df[self.key_text])
 
         # conditionally select model
-        if (model_choice == 'svm):
+        if (model_choice == 'svm'):
             if multiclass:
                 clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
             else:
