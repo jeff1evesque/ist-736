@@ -10,7 +10,7 @@ import re
 from consumer.twitter_stream import TwitterStream
 from consumer.twitter_query import TwitterQuery
 from config import twitter_api as creds
-from model.classifier import Model as model
+from model.text_classifier import Model as model
 
 # local variables
 stream = False
