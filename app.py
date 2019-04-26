@@ -10,7 +10,7 @@ import re
 from consumer.twitter_stream import TwitterStream
 from consumer.twitter_query import TwitterQuery
 from config import twitter_api as creds
-from model.naive_bayes import Model as nb
+from model.classifier import Model as model
 
 # local variables
 stream = False
@@ -47,12 +47,12 @@ q.query({
 #
 df_result = q.query_user('elonmusk')
 
-#
+# reduce to ascii
 df_result['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_result['text']]
 print(df_result)
 
 # unigram: perform unigram analysis.
-unigram = nb(df_result, key_text='text', key_class='screen_name')
+unigram = model(df_result, key_text='text', key_class='screen_name')
 
 # unigram vectorize
 unigram.split()
