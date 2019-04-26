@@ -49,13 +49,11 @@ df_result = q.query_user('elonmusk')
 
 # reduce to ascii
 df_result['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_result['text']]
-print(df_result)
 
 # unigram: perform unigram analysis.
 unigram = model(df_result, key_text='text', key_class='screen_name')
 
 # unigram vectorize
-unigram.split()
 unigram_params = unigram.get_split()
 unigram_vectorized = unigram.get_tfidf()
 
