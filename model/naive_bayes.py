@@ -67,13 +67,15 @@ class Model():
             self.df = pd.read_csv(fp)
 
         #
-        # clean: remove punctuations and urls, lowercase, stem each word.
+        # clean: remove twitter account, punctuations and urls, lowercase,
+        #        stem each word.
         #
         # @string.punctuation, '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
         #
+        pattern_twitter_act = '@[a-zA-Z0-9_]{0,15}'
         pattern_punctuation = '[{p}]'.format(p=string.punctuation)
         pattern_url = 'https?://[A-Za-z0-9./]+'
-        pattern = '|'.join((pattern_punctuation, pattern_url))
+        pattern = '|'.join((pattern_twitter_act, pattern_punctuation, pattern_url))
 
         self.df[self.key_text] = [re.sub(pattern, '', w) for w in self.df[self.key_text]]
 
@@ -236,20 +238,21 @@ class Model():
             # validate
             if validate and len(validate) == 2:
                 predictions = []
-	        for item in list(validate[0]):
-                    prediction = self.count_vect.transform([item])
-                    predictions.append(
-                        self.clf.predict(prediction)
-                    )
 
-                self.actual = validate[1]
-                self.predicted = predictions
+            for item in list(validate[0]):
+                prediction = self.count_vect.transform([item])
+                predictions.append(
+                    self.clf.predict(prediction)
+                )
 
-                return({
-                    'model': self.clf,
-                    'actual': validate[1],
-                    'predicted': predictions
-                })
+            self.actual = validate[1]
+            self.predicted = predictions
+
+            return({
+                'model': self.clf,
+                'actual': validate[1],
+                'predicted': predictions
+            })
 
         else:
             self.clf = MultinomialNB()
