@@ -138,16 +138,12 @@ class Model():
 
         '''
 
-        if self.kf:
-            return(self.kf)
-
-        else:
-            return({
-                'X_train': self.X_train,
-                'X_test': self.X_test,
-                'y_train': self.y_train,
-                'y_test': self.y_test,
-            })
+        return({
+            'X_train': self.X_train,
+            'X_test': self.X_test,
+            'y_train': self.y_train,
+            'y_test': self.y_test,
+        })
 
     def get_pos(self, l, pos_length=280):
         '''
@@ -364,7 +360,7 @@ class Model():
 
         kf = KFold(self.df, n_folds=size, shuffle=shuffle)
 
-	# bag of words: with 'english' stopwords
+        # bag of words: with 'english' stopwords
         count_vect = CountVectorizer(stop_words=stop_words)
         bow = self.count_vect.fit_transform(self.df[self.key_text])
 
