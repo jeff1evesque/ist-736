@@ -45,13 +45,16 @@ q.query({
 #
 # single query: timeline of screen name.
 #
-df_result = q.query_user('elonmusk')
+df_elon = q.query_user('elonmusk')
+df_bezos = q.query_user('JeffBezos')
+df_overall = df_elon.append(df_bezos)
+df_overall.replace({'screen_name': {'elonmusk': 0, 'JeffBezos': 1}})
 
 # reduce to ascii
-df_result['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_result['text']]
+df_overall['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_overall['text']]
 
 # unigram: perform unigram analysis.
-unigram = model(df_result, key_text='text', key_class='screen_name')
+unigram = model(df_overall, key_text='text', key_class='screen_name')
 
 # unigram vectorize
 unigram_params = unigram.get_split()
