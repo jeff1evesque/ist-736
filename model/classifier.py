@@ -21,6 +21,7 @@ from nltk.stem.porter import PorterStemmer
 from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
 from sklearn.model_selection import cross_val_predict, train_test_split
 import matplotlib.pyplot as plt
@@ -214,7 +215,7 @@ class Model():
 
         return(self.df)
 
-    def model(self, X, y, validate=False, max_length=280, model_choice=None):
+    def model(self, X, y, validate=False, max_length=280, model_choice=None, multiclass=False):
         '''
 
         create naive bayes model.
@@ -224,11 +225,23 @@ class Model():
 
             - bernoulli
             - multinomial (default)
+            - svm, with linear kernel since text is high dimensional.
+
+        @multiclass, svm indicator of greater than binary classification.
 
         '''
 
         # conditionally select model
-        if (
+        if (model_choice == 'svm):
+            if multiclass:
+                clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
+            else:
+                clf = svm.SVC(gamma='scale', kernel='linear')
+
+            tfidf_transformer = TfidfTransformer()
+            data = self.tfidf_transformer.fit_transform(bow)
+
+        elif (
             (model_choice == 'bernoulli') or
             (not model_choice and all(len(sent) <= max_length for sent in self.X_train))
         ):
@@ -239,19 +252,25 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-            for item in list(validate[0]):
-                prediction = self.count_vect.transform([item])
-                predictions.append(
-                    self.clf.predict(prediction)
-                )
+                for item in list(validate[0]):
+                    prediction = self.count_vect.transform([item])
+                    predictions.append(
+                        self.clf.predict(prediction)
+                    )
 
-            self.actual = validate[1]
-            self.predicted = predictions
+                self.actual = validate[1]
+                self.predicted = predictions
+
+                return({
+                    'model': self.clf,
+                    'actual': validate[1],
+                    'predicted': predictions
+                })
 
             return({
                 'model': self.clf,
-                'actual': validate[1],
-                'predicted': predictions
+                'actual': None,
+                'predicted': None
             })
 
         else:
@@ -276,11 +295,11 @@ class Model():
                     'predicted': predictions
                 })
 
-        return({
-            'model': self.clf,
-            'actual': None,
-            'predicted': None
-        })
+            return({
+                'model': self.clf,
+                'actual': None,
+                'predicted': None
+            })
 
     def plot_cm(
         self,
@@ -328,7 +347,8 @@ class Model():
         stop_words='english',
         max_length=280,
         shuffle=True,
-        model_choice=None
+        model_choice=None,
+        multiclass=False
     ):
         '''
 
@@ -340,6 +360,9 @@ class Model():
 
             - bernoulli
             - multinomial (default)
+            - svm, with linear kernel since text is high dimensional.
+
+        @multiclass, svm indicator of greater than binary classification.
 
         '''
 
@@ -350,7 +373,16 @@ class Model():
         bow = self.count_vect.fit_transform(self.df[self.key_text])
 
         # conditionally select model
-        if (
+        if (model_choice == 'svm):
+            if multiclass:
+                clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
+            else:
+                clf = svm.SVC(gamma='scale', kernel='linear')
+
+            tfidf_transformer = TfidfTransformer()
+            data = self.tfidf_transformer.fit_transform(bow)
+
+        elif (
             (model_choice == 'bernoulli') or
             (not model_choice and all(len(sent) <= max_length for sent in self.X_train))
         ):
