@@ -111,10 +111,6 @@ class TwitterQuery():
         #
         # query
         #
-        # Note: to debug within the loop, and access 'status':
-        #
-        #       print(repr(status).encode('utf-8'))
-        #
         for status in self.conn.search(**query)['statuses']:
             [results[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(results.items())]
 
@@ -149,10 +145,6 @@ class TwitterQuery():
 
         #
         # query
-        #
-        # Note: to debug within the loop, and access 'status':
-        #
-        #       print(repr(tweet).encode('utf-8'))
         #
         for tweet in timeline:
             [results[k].append(self.get_dict_val(tweet, keys[i])) for i, (k,v) in enumerate(results.items())]

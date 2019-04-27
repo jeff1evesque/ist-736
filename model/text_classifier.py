@@ -145,34 +145,22 @@ class Model():
             'y_test': self.y_test,
         })
 
-    def get_pos(self, l, pos_length=280):
+    def get_pos(self, l):
         '''
 
         apply pos tagger to supplied list.
 
-        @pos_length, maximum number of words in tweets.
-
         '''
 
-        result_word = []
-        result_pos = []
-        pos = [pos_tag(x) for x in l]
-        for y in pos:
-            result_word.append([x[0] for x in y if x[0] not in stop_words])
-            result_pos.append(
-                [penn_scale[x[1]] if x[1] in penn_scale and x[0] not in stop_words else 1 for x in y]
-            )
-
-        # consistent length
-        for i,x in enumerate(result_pos):
-            if len(x) < pos_length:
-                difference = pos_length - len(x)
-                result_pos[i].extend([1] * difference)
-            else:
-                difference = len(x) - pos_length
-                result_pos[i] = result_pos[i][:len(result_pos[i]) - difference]
-
-        return(result_word, result_pos)
+        pos = pos_tag(l)
+        result = ' '.join(['{word}-{pos}'.format(
+            word=l[i],
+            pos=penn_scale[x[1]]
+        ) if x[1] in penn_scale else '{word}-{pos}'.format(
+            word=l[i],
+            pos=1
+        ) for i,x in enumerate(pos)])
+        return(result)
 
     def vectorize(self, stop_words='english'):
         '''
