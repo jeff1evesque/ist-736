@@ -198,7 +198,7 @@ class Model():
     def model(self, X, y, validate=False, max_length=280, model_choice=None, multiclass=False):
         '''
 
-        create naive bayes model.
+        create classifier model.
 
         @validate, must have tuple shape (X_test, y_test)
         @model_choice, override default behavior with defined model.
