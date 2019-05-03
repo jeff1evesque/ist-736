@@ -6,11 +6,16 @@
 #   pip install Twython
 #
 
+import os
 import re
+from config import twitter_api as creds
 from consumer.twitter_stream import TwitterStream
 from consumer.twitter_query import TwitterQuery
-from config import twitter_api as creds
-from model.text_classifier import Model as model
+import pandas as pd
+from pathlib import Path
+from controller.classifier import classify
+from view.exploratory import explore
+from view.classifier import plot_bar
 
 # local variables
 stream = False
@@ -42,6 +47,10 @@ q.query({
     'lang': 'en',
 })
 
+# ensure directory
+if not os.path.exists('viz'):
+    os.makedirs('viz')
+
 #
 # single query: timeline of screen name.
 #
@@ -50,25 +59,24 @@ df_bezos = q.query_user('JeffBezos')
 df_overall = df_elon.append(df_bezos)
 df_overall.replace({'screen_name': {'elonmusk': 0, 'JeffBezos': 1}})
 
-# reduce to ascii
-df_overall['text'] = [re.sub(r'[^\x00-\x7f]', r' ', s) for s in df_overall['text']]
+#
+# exploratory
+#
+explore(df_overall, sent_cases={'screen_name': ['elonmusk', 'JeffBezos']})
 
-# unigram: perform unigram analysis.
-unigram = model(df_overall, key_text='text', key_class='screen_name')
-
-# unigram vectorize
-unigram_params = unigram.get_split()
-unigram_vectorized = unigram.get_tfidf()
-
-# unigram classifier
-model_unigram = unigram.model(
-    unigram_vectorized,
-    unigram_params['y_train'],
-    validate=(unigram_params['X_test'], unigram_params['y_test'])
+#
+# unigram sentiment analysis
+#
+c_sentiment = classify(
+    df_overall,
+    key_class='text',
+    key_text='screen_name',
+    n_splits=2
 )
 
-# plot unigram
-unigram.plot_cm(filename='cm_unigram.png')
+[plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
+    model=k
+)) for k,v in c_sentiment[1].items()]
 
 #
 # stream query
