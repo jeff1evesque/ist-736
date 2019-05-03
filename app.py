@@ -7,7 +7,6 @@
 #
 
 import os
-import re
 from config import twitter_api as creds
 from consumer.twitter_stream import TwitterStream
 from consumer.twitter_query import TwitterQuery
@@ -67,12 +66,7 @@ explore(df_overall, sent_cases={'screen_name': ['elonmusk', 'JeffBezos']})
 #
 # unigram sentiment analysis
 #
-c_sentiment = classify(
-    df_overall,
-    key_class='text',
-    key_text='screen_name',
-    n_splits=2
-)
+c_sentiment = classify(df_overall, n_splits=2)
 
 [plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
     model=k
