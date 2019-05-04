@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import re
 from twython import Twython, TwythonError
 import pandas as pd
 
@@ -18,6 +19,7 @@ class TwitterQuery():
 
         '''
 
+        self.regex = r'[^\x00-\x7f]'
         self.conn = Twython(key, secret)
 
     def get_dict_val(self, d, keys):
@@ -79,7 +81,8 @@ class TwitterQuery():
         self,
         query,
         params=[{'user': ['screen_name']}, 'created_at', 'text'],
-        sorted=None
+        sorted=None,
+        force_ascii=True
     ):
         '''
 
@@ -115,13 +118,18 @@ class TwitterQuery():
             [results[k].append(self.get_dict_val(status, keys[i])) for i, (k,v) in enumerate(results.items())]
 
         self.df_query = pd.DataFrame(results)
+
+        if force_ascii:
+            self.df_query['text'] = [re.sub(self.regex, r' ', s) for s in self.df_query['text']]
+
         return(self.df_query)
 
     def query_user(
         self,
         screen_name,
         params=[{'user': ['screen_name']}, 'created_at', 'text'],
-        count=200
+        count=200,
+        force_ascii=True
     ):
         '''
 
@@ -150,4 +158,8 @@ class TwitterQuery():
             [results[k].append(self.get_dict_val(tweet, keys[i])) for i, (k,v) in enumerate(results.items())]
 
         self.df_timeline = pd.DataFrame(results)
+
+        if force_ascii:
+            self.df_timeline['text'] = [re.sub(self.regex, r' ', s) for s in (self.df_timeline['text'])]
+
         return(self.df_timeline)
