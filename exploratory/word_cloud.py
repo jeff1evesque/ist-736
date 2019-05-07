@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from wordcloud import WordCloud, STOPWORDS
+from nltk.corpus import stopwords as stp
+from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 
@@ -19,7 +20,8 @@ def word_cloud(
     '''
 
     # extend stopwords
-    stopwords = stopwords.extend(STOPWORDS)
+    stopwords_english = set(stp.words('english'))
+    stopwords.extend(stopwords_english)
 
     # generate wordcloud
     text = df.values

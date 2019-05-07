@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import re
+import string
 import pandas as pd
 
 def standardize_df(fp, delimiter=','):
@@ -35,3 +37,20 @@ def standardize_df(fp, delimiter=','):
     #
     df = pd.read_csv(fp, header=None, delimiter=delimiter, names=column_names)
     return(df.iloc[1:])
+
+def cleanse(df, column):
+    '''
+
+    remove twitter account, punctuations, urls, lowercase.
+
+    @string.punctuation, '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+
+    '''
+
+    pattern_twitter_act = '@[a-zA-Z0-9_]{0,15}'
+    pattern_url = 'https?://[A-Za-z0-9./]+'
+    pattern_punctuation = '[{p}]'.format(p=string.punctuation)
+    pattern = '|'.join((pattern_twitter_act, pattern_url, pattern_punctuation))
+    r = re.compile(pattern)
+
+    return([re.sub(r, '', w) for w in df[column]])

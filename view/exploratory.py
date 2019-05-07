@@ -4,8 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from exploratory.sentiment import Sentiment
 from exploratory.word_cloud import word_cloud
+from utility.dataframe import cleanse
 
-def explore(df, sent_cases, target='text'):
+def explore(df, sent_cases, stopwords='', target='full_text'):
     '''
 
     generate wordclouds and sentiment series plot.
@@ -19,12 +20,17 @@ def explore(df, sent_cases, target='text'):
     cases = []
     for k,val in sent_cases.items():
         for v in val:
+            # load select data
             wc_temp = df.loc[df[k] == v]
+
+            # clean text
+            wc_temp[target] = cleanse(wc_temp, target)
 
             # create wordcloud
             word_cloud(
                 wc_temp[target],
-                filename='viz/{value}/wc_{key}.png'.format(value=v, key=k)
+                filename='viz/{value}/wc_{key}.png'.format(value=v, key=k),
+                stopwords=stopwords
             )
 
             # create sentiment plot
