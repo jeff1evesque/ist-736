@@ -63,15 +63,13 @@ class Sentiment():
                     result['positive'].append(ss[k])
 
         # append results
-        self.df_adjusted = pd.DataFrame({
-            'compound': result['compound'],
-            'negative': result['negative'],
-            'neutral': result['neutral'],
-            'positive': result['positive']
-        })
+        self.df['compound'] = result['compound']
+        self.df['negative'] = result['negative']
+        self.df['neutral'] = result['neutral']
+        self.df['positive'] = result['positive']
 
         # return scores
-        return(self.df_adjusted)
+        return(self.df)
 
     def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png'):
         '''
@@ -83,9 +81,9 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.df_adjusted.negative.plot(color='r', legend=True)
-            self.df_adjusted.positive.plot(color='g', legend=True)
-            self.df_adjusted.neutral.plot(color='b', legend=True)
+            self.df.negative.plot(color='r', legend=True)
+            self.df.positive.plot(color='g', legend=True)
+            self.df.neutral.plot(color='b', legend=True)
         plt.title(title)
 
         # save plot
