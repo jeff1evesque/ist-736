@@ -8,10 +8,11 @@
 
 import os
 import re
-from consumer.twitter_query import TwitterQuery
-from config import twitter_api as creds
 from pathlib import Path
 import pandas as pd
+from config import twitter_api as creds
+from consumer.twitter_query import TwitterQuery
+from view.exploratory import explore
 
 #
 # local variables
