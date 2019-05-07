@@ -70,7 +70,7 @@ for i,sn in enumerate(screen_name):
                     {'entities': ['user_mentions']}
                 ],
                 count=600,
-                rate_limit=1
+                rate_limit=900
             )
 
             # sentiment analysis
