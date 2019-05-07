@@ -32,16 +32,21 @@ screen_name = [
 if not os.path.exists('data/twitter'):
     os.makedirs('data/twitter')
 
-if not os.path.exists('viz'):
-    os.makedirs('viz')
-
+#
 # instantiate api
+#
 q = TwitterQuery(
     creds['CONSUMER_KEY'],
     creds['CONSUMER_SECRET']
 )
 
 for sn in screen_name:
+    #
+    # create directories
+    #
+    if not os.path.exists('viz/{sn}'.format(sn)):
+        os.makedirs('viz/{sn}'.format(sn))
+
     #
     # harvest tweets
     #
