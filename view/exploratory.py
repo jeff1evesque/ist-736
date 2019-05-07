@@ -24,7 +24,7 @@ def explore(df, sent_cases, target='text'):
             # create wordcloud
             word_cloud(
                 wc_temp[target],
-                filename='viz/wc_{key}_{value}.png'.format(key=k, value=v)
+                filename='viz/{value}/wc_{key}.png'.format(value=v, key=k)
             )
 
             # create sentiment plot
@@ -32,7 +32,7 @@ def explore(df, sent_cases, target='text'):
             sent_temp.vader_analysis()
             sent_temp.plot_ts(
                 title='{value}'.format(value=v),
-                filename='viz/sentiment_{key}_{value}.png'.format(key=k, value=v)
+                filename='viz/{value}/sentiment_{key}.png'.format(value=v, key=k)
             )
 
         word_cloud(df[target], filename='viz/wc_overall.png')
