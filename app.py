@@ -16,85 +16,65 @@ from controller.classifier import classify
 from view.exploratory import explore
 from view.classifier import plot_bar
 
+#
 # local variables
-stream = False
+#
+data = []
+screen_name = [
+    'jimcramer',
+    'ReformedBroker',
+    'TheStalwart',
+    'LizAnnSonders',
+    'SJosephBurns'
+]
 
 #
-# single query
+# create directories
 #
-q = TwitterQuery(creds['CONSUMER_KEY'], creds['CONSUMER_SECRET'])
+if not os.path.exists('data/twitter'):
+    os.makedirs('data/twitter')
 
-#
-# many filters can be implemented with the twitter api:
-#
-# - https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
-#
-# examples:
-#
-# @q, utf-8, url-encoded search query of 500 characters maximum, including operators.
-#     Queries may additionally be limited by complexity.
-# @geocode, returns tweets by users located within a given radius of the given latitude
-#     and longitude. The location is preferentially taking from the Geotagging API, but
-#     will fall back to their Twitter profile.
-# @lang, restricts tweets to the given language.
-# @result_type, type of search results (i.e. mixed, recent, popular)
-#
-q.query({
-    'q': 'python',
-    'result_type': 'popular',
-    'count': 10,
-    'lang': 'en',
-})
-
-# ensure directory
 if not os.path.exists('viz'):
     os.makedirs('viz')
+
+# instantiate api
+q = TwitterQuery(
+    creds['CONSUMER_KEY'],
+    creds['CONSUMER_SECRET']
+)
+
+for sn in screen_name:
+    #
+    # harvest tweets
+    #
+    if Path('data/twitter/{sn}'.format(sn=sn)).is_file():
+        data[sn] = pd.read_csv('data/twitter/{sn}'.format(sn=sn))
+
+    else:
+        data[sn] = q.query_user(
+            sn,
+            params=[
+                {'user': ['screen_name']},
+                'created_at',
+                'full_text',
+                {'retweeted_status': ['full_text']},
+                'retweet_count',
+                'favorite_count',
+                {'entities': ['user_mentions']}
+            ],
+            count=600,
+            rate_limit=900
+        )
+
+        data[sn].to_csv('data/twitter/{sn}'.format(sn=sn))
 
 #
 # single query: timeline of screen name.
 #
-df_elon = q.query_user('elonmusk')
-df_bezos = q.query_user('JeffBezos')
-df_overall = df_elon.append(df_bezos)
-df_overall.replace({'screen_name': {'elonmusk': 0, 'JeffBezos': 1}})
+df = pd.concat(data)
+df.replace({'screen_name': {v:i for i,v in enumerate(screen_name)}})
 
 #
 # exploratory
 #
-explore(df_overall, sent_cases={'screen_name': ['elonmusk', 'JeffBezos']})
-
-#
-# unigram sentiment analysis
-#
-c_sentiment = classify(df_overall, n_splits=2)
-
-[plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
-    model=k
-)) for k,v in c_sentiment[1].items()]
-
-#
-# stream query
-#
-if stream:
-    s = TwitterStream(
-        creds['CONSUMER_KEY'],
-        creds['CONSUMER_SECRET'],
-        creds['ACCESS_TOKEN'],
-        creds['ACCESS_SECRET']
-    )
-
-    #
-    # many filters can be implemented with the twitter api:
-    #
-    # - https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/basic-stream-parameters.html
-    #
-    # examples:
-    #
-    # @follow, comma-separated list of user IDs, indicating the users whose Tweets
-    #     should be delivered on the stream.
-    # @track, comma-separated list of phrases which will be used to determine what
-    #     Tweets will be delivered on the stream.
-    # @locations, comma-separated list of longitude,latitude pairs specifying a set
-    #     of bounding boxes to filter Tweets by.
-    #
-    s.statuses.filter(track='python')
+explore(df, sent_cases={'screen_name': screen_name})
