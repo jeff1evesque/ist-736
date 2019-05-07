@@ -7,14 +7,11 @@
 #
 
 import os
-from config import twitter_api as creds
-from consumer.twitter_stream import TwitterStream
+import re
 from consumer.twitter_query import TwitterQuery
-import pandas as pd
+from config import twitter_api as creds
 from pathlib import Path
-from controller.classifier import classify
-from view.exploratory import explore
-from view.classifier import plot_bar
+import pandas as pd
 
 #
 # local variables
