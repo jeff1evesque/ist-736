@@ -40,7 +40,7 @@ q = TwitterQuery(
     creds['CONSUMER_SECRET']
 )
 
-for sn in screen_name:
+for i,sn in enumerate(screen_name):
     #
     # create directories
     #
@@ -54,25 +54,29 @@ for sn in screen_name:
         data[sn] = pd.read_csv('data/twitter/{sn}.csv'.format(sn=sn))
 
     else:
-        data[sn] = q.query_user(
-            sn,
-            params=[
-                {'user': ['screen_name']},
-                'created_at',
-                'full_text',
-                {'retweeted_status': ['full_text']},
-                'retweet_count',
-                'favorite_count',
-                {'entities': ['user_mentions']}
-            ],
-            count=600,
-            rate_limit=900
-        )
+        try:
+            data[i] = q.query_user(
+                sn,
+                params=[
+                    {'user': ['screen_name']},
+                    'created_at',
+                    'full_text',
+                    {'retweeted_status': ['full_text']},
+                    'retweet_count',
+                    'favorite_count',
+                    {'entities': ['user_mentions']}
+                ],
+                count=600,
+                rate_limit=900
+            )
 
-        data[sn].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
+            data[i].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
 
+        except Exception as e:
+            print('Error: did not finish \'{sn}\'.'.format(sn=sn))
+            print(e)
 #
-# single query: timeline of screen name.
+# preprocess: combine and clean dataframe(s)
 #
 df = pd.concat(data)
 df.replace({'screen_name': {v:i for i,v in enumerate(screen_name)}})
