@@ -50,8 +50,8 @@ for sn in screen_name:
     #
     # harvest tweets
     #
-    if Path('data/twitter/{sn}'.format(sn=sn)).is_file():
-        data[sn] = pd.read_csv('data/twitter/{sn}'.format(sn=sn))
+    if Path('data/twitter/{sn}.csv'.format(sn=sn)).is_file():
+        data[sn] = pd.read_csv('data/twitter/{sn}.csv'.format(sn=sn))
 
     else:
         data[sn] = q.query_user(
@@ -69,7 +69,7 @@ for sn in screen_name:
             rate_limit=900
         )
 
-        data[sn].to_csv('data/twitter/{sn}'.format(sn=sn))
+        data[sn].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
 
 #
 # single query: timeline of screen name.
