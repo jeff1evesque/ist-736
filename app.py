@@ -44,8 +44,8 @@ for sn in screen_name:
     #
     # create directories
     #
-    if not os.path.exists('viz/{sn}'.format(sn)):
-        os.makedirs('viz/{sn}'.format(sn))
+    if not os.path.exists('viz/{sn}'.format(sn=sn)):
+        os.makedirs('viz/{sn}'.format(sn=sn))
 
     #
     # harvest tweets
