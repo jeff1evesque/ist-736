@@ -66,14 +66,19 @@ class Sentiment():
                 elif k == 'pos':
                     result['positive'].append(ss[k])
 
-        # append results
-        self.df['compound'] = result['compound']
-        self.df['negative'] = result['negative']
-        self.df['neutral'] = result['neutral']
-        self.df['positive'] = result['positive']
+        #
+        # append results: duplicate dataframe resolves the panda
+        #     'SettingWithCopyWarning' error.
+        #
+        self.df_adjusted = pd.DataFrame({
+            'compound': result['compound'],
+            'negative': result['negative'],
+            'neutral': result['neutral'],
+            'positive': result['positive']
+        })
 
         # return scores
-        return(self.df)
+        return(self.df_adjusted)
 
     def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png'):
         '''
