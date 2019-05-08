@@ -34,7 +34,7 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
             # create wordcloud
             word_cloud(
                 wc_temp[target],
-                filename='viz/{value}/wc_{key}.png'.format(value=v, key=k),
+                filename='viz/{value}/wc.png'.format(value=v, key=k),
                 stopwords=stopwords
             )
 
@@ -43,7 +43,7 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
             sent_temp.vader_analysis()
             sent_temp.plot_ts(
                 title='{value}'.format(value=v),
-                filename='viz/{value}/sentiment_{key}.png'.format(value=v, key=k)
+                filename='viz/{value}/sentiment.png'.format(value=v, key=k)
             )
 
         word_cloud(df[target], filename='viz/wc_overall.png')
