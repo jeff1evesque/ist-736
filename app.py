@@ -62,6 +62,9 @@ q = QuandlQuery(q_creds['API_KEY'])
 #
 # combine quandl with tweets
 #
+start_date = datetime(3000, 12, 25)
+end_date = datetime(1000, 12, 25)
+
 for i,sn in enumerate(screen_name):
     #
     # create directories
@@ -103,16 +106,21 @@ for i,sn in enumerate(screen_name):
             print('Error: did not finish \'{sn}\'.'.format(sn=sn))
             print(e)
 
+    # largest time span
+    start = data[screen_name[0]]['created_at'].iloc[0]
+    temp_start = datetime.strptime(start.split()[0], '%Y-%m-%d')
+    if temp_start < start_date:
+        start_date = temp_start
+
+    end = data[screen_name[0]]['created_at'].iloc[-1]
+    temp_end = datetime.strptime(end.split()[0], '%Y-%m-%d')
+    if temp_end > end_date:
+        end_date = temp_end
+
 #
 # harvest quandl: arbitrarily choose first twitter screen name for
 #     selecting 'start_date' and 'end_date' for quandl.
 #
-start = data[screen_name[0]]['created_at'].iloc[0]
-start_date = datetime.strptime(start.split()[0], '%Y-%m-%d')
-
-end = data[screen_name[0]]['created_at'].iloc[-1]
-end_date = datetime.strptime(end.split()[0], '%Y-%m-%d')
-
 if Path('data/quandl/nasdaq.csv').is_file():
     df_nasdaq = pd.read_csv('data/quandl/nasdaq.csv')
 
