@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 from exploratory.sentiment import Sentiment
@@ -22,6 +23,10 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
         for v in val:
             # load select data
             wc_temp = df.loc[df[k] == v]
+
+            # reduce to ascii
+            r re.compile(r'[^\x00-\x7f]')
+            wc_temp[target] = [re.sub(r, r' ', sent).split() for sent in wc_temp[target]]
 
             # clean text
             wc_temp[target] = cleanse(wc_temp, target)
