@@ -25,7 +25,7 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
             wc_temp = df.loc[df[k] == v]
 
             # reduce to ascii
-            r re.compile(r'[^\x00-\x7f]')
+            r = re.compile(r'[^\x00-\x7f]')
             wc_temp[target] = [re.sub(r, r' ', sent).split() for sent in wc_temp[target]]
 
             # clean text
