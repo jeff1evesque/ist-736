@@ -10,7 +10,8 @@ import os
 import re
 from pathlib import Path
 import pandas as pd
-from config import twitter_api as creds
+from config import twitter_api as t_creds
+from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
 from view.exploratory import explore
 from exploratory.sentiment import Sentiment
@@ -43,14 +44,31 @@ stopwords.extend(screen_name)
 if not os.path.exists('data/twitter'):
     os.makedirs('data/twitter')
 
+if not os.path.exists('data/quandl'):
+    os.makedirs('data/quandl')
+
 #
 # instantiate api
 #
-q = TwitterQuery(
-    creds['CONSUMER_KEY'],
-    creds['CONSUMER_SECRET']
+q = QuandlQuery(q_creds['API_KEY'])
+t = TwitterQuery(
+    t_creds['CONSUMER_KEY'],
+    t_creds['CONSUMER_SECRET']
 )
 
+#
+# harvest quandl
+#
+if Path('data/quandl/nasdaq.csv').is_file():
+    df_nasdaq = pd.read_csv('data/quandl/nasdaq.csv')
+
+else:
+    df_nasdaq = q.get_ts()
+    df_nasdaq.to_csv('data/quandl/nasdaq.csv')
+
+#
+# combine quandl with tweets
+#
 for i,sn in enumerate(screen_name):
     #
     # create directories
@@ -66,7 +84,7 @@ for i,sn in enumerate(screen_name):
 
     else:
         try:
-            data[sn] = q.query_user(
+            data[sn] = t.query_user(
                 sn,
                 params=[
                     {'user': ['screen_name']},

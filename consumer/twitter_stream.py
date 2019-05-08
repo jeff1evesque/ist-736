@@ -5,10 +5,10 @@ from twython import Twython
 from twython import TwythonStreamer
 
 
-class TwitterStream(TwythonStreamer):     
+class TwitterStream(TwythonStreamer):
     '''
 
-    TwythonStreamer subclass.
+    Implements twitter api using the TwythonStreamer subclass.
 
     '''
 

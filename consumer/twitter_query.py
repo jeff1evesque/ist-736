@@ -7,10 +7,10 @@ import pandas as pd
 from datetime import datetime
 
 
-class TwitterQuery():     
+class TwitterQuery():
     '''
 
-    requires instance of TwitterStream.
+    implements twitter api.
 
     '''
 
