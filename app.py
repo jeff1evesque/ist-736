@@ -4,6 +4,7 @@
 # this project requires the following packages:
 #
 #   pip install Twython
+#   pip install Quandl
 #
 
 import os
@@ -13,8 +14,10 @@ import pandas as pd
 from config import twitter_api as t_creds
 from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
+from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
 from exploratory.sentiment import Sentiment
+from datetime import datetime
 
 #
 # local variables
@@ -50,21 +53,11 @@ if not os.path.exists('data/quandl'):
 #
 # instantiate api
 #
-q = QuandlQuery(q_creds['API_KEY'])
 t = TwitterQuery(
     t_creds['CONSUMER_KEY'],
     t_creds['CONSUMER_SECRET']
 )
-
-#
-# harvest quandl
-#
-if Path('data/quandl/nasdaq.csv').is_file():
-    df_nasdaq = pd.read_csv('data/quandl/nasdaq.csv')
-
-else:
-    df_nasdaq = q.get_ts()
-    df_nasdaq.to_csv('data/quandl/nasdaq.csv')
+q = QuandlQuery(q_creds['API_KEY'])
 
 #
 # combine quandl with tweets
@@ -109,6 +102,24 @@ for i,sn in enumerate(screen_name):
         except Exception as e:
             print('Error: did not finish \'{sn}\'.'.format(sn=sn))
             print(e)
+
+#
+# harvest quandl: arbitrarily choose first twitter screen name for
+#     selecting 'start_date' and 'end_date' for quandl.
+#
+start = data[screen_name[0]]['created_at'].iloc[0]
+start_date = datetime.strptime(start.split()[0], '%Y-%m-%d')
+
+end = data[screen_name[0]]['created_at'].iloc[-1]
+end_date = datetime.strptime(end.split()[0], '%Y-%m-%d')
+
+if Path('data/quandl/nasdaq.csv').is_file():
+    df_nasdaq = pd.read_csv('data/quandl/nasdaq.csv')
+
+else:
+    df_nasdaq = q.get_ts(start_date=start_date, end_date=end_date)
+    df_nasdaq.to_csv('data/quandl/nasdaq.csv')
+
 #
 # preprocess: combine and clean dataframe(s)
 #
