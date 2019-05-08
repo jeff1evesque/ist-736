@@ -4,16 +4,20 @@
 # this project requires the following packages:
 #
 #   pip install Twython
+#   pip install Quandl
 #
 
 import os
 import re
 from pathlib import Path
 import pandas as pd
-from config import twitter_api as creds
+from config import twitter_api as t_creds
+from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
+from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
 from exploratory.sentiment import Sentiment
+from datetime import datetime
 
 #
 # local variables
@@ -43,13 +47,23 @@ stopwords.extend(screen_name)
 if not os.path.exists('data/twitter'):
     os.makedirs('data/twitter')
 
+if not os.path.exists('data/quandl'):
+    os.makedirs('data/quandl')
+
 #
 # instantiate api
 #
-q = TwitterQuery(
-    creds['CONSUMER_KEY'],
-    creds['CONSUMER_SECRET']
+t = TwitterQuery(
+    t_creds['CONSUMER_KEY'],
+    t_creds['CONSUMER_SECRET']
 )
+q = QuandlQuery(q_creds['API_KEY'])
+
+#
+# combine quandl with tweets
+#
+start_date = datetime(3000, 12, 25)
+end_date = datetime(1000, 12, 25)
 
 for i,sn in enumerate(screen_name):
     #
@@ -66,7 +80,7 @@ for i,sn in enumerate(screen_name):
 
     else:
         try:
-            data[sn] = q.query_user(
+            data[sn] = t.query_user(
                 sn,
                 params=[
                     {'user': ['screen_name']},
@@ -91,6 +105,29 @@ for i,sn in enumerate(screen_name):
         except Exception as e:
             print('Error: did not finish \'{sn}\'.'.format(sn=sn))
             print(e)
+
+    # largest time span
+    start = data[screen_name[0]]['created_at'].iloc[0]
+    temp_start = datetime.strptime(start.split()[0], '%Y-%m-%d')
+    if temp_start < start_date:
+        start_date = temp_start
+
+    end = data[screen_name[0]]['created_at'].iloc[-1]
+    temp_end = datetime.strptime(end.split()[0], '%Y-%m-%d')
+    if temp_end > end_date:
+        end_date = temp_end
+
+#
+# harvest quandl: arbitrarily choose first twitter screen name for
+#     selecting 'start_date' and 'end_date' for quandl.
+#
+if Path('data/quandl/nasdaq.csv').is_file():
+    df_nasdaq = pd.read_csv('data/quandl/nasdaq.csv')
+
+else:
+    df_nasdaq = q.get_ts(start_date=start_date, end_date=end_date)
+    df_nasdaq.to_csv('data/quandl/nasdaq.csv')
+
 #
 # preprocess: combine and clean dataframe(s)
 #

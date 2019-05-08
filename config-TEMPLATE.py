@@ -13,3 +13,7 @@ twitter_api = {
     'ACCESS_TOKEN': 'REPLACE-ME',
     'ACCESS_SECRET': 'REPLACE-ME'
 }
+
+quandl_api = {
+    'API_KEY': 'REPLACE-ME'
+}
