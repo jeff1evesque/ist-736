@@ -26,7 +26,15 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
-stopwords=['http', 'https', 'nhttps', 'RT', 'amp', 'co', 'TheStreet']
+stopwords=[
+    'http',
+    'https',
+    'nhttps',
+    'RT',
+    'amp',
+    'co',
+    'TheStreet'
+]
 stopwords.extend(screen_name)
 
 #
