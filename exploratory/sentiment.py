@@ -9,6 +9,7 @@
 from nltk import download
 import pandas as pd
 import matplotlib.pyplot as plt
+from utility.dataframe import cleanse
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 download('vader_lexicon')
 
@@ -31,6 +32,9 @@ class Sentiment():
         self.df = data
         self.column_name = column_name
 
+        # clean text
+        self.df[self.column_name] = cleanse(self.df, self.column_name)
+
     def vader_analysis(self):
         '''
 
@@ -49,7 +53,7 @@ class Sentiment():
         }
 
         # sentiment analysis
-        for i, s in enumerate(self.df[self.column_name]):
+        for i,s in enumerate(self.df[self.column_name]):
             ss = sid.polarity_scores(s)
 
             for k in sorted(ss):
@@ -62,14 +66,19 @@ class Sentiment():
                 elif k == 'pos':
                     result['positive'].append(ss[k])
 
-        # append results
-        self.df['compound'] = result['compound']
-        self.df['negative'] = result['negative']
-        self.df['neutral'] = result['neutral']
-        self.df['positive'] = result['positive']
+        #
+        # append results: duplicate dataframe resolves the panda
+        #     'SettingWithCopyWarning' error.
+        #
+        self.df_adjusted = pd.DataFrame({
+            'compound': result['compound'],
+            'negative': result['negative'],
+            'neutral': result['neutral'],
+            'positive': result['positive']
+        })
 
         # return scores
-        return(self.df)
+        return(self.df_adjusted)
 
     def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png'):
         '''

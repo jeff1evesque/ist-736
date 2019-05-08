@@ -13,11 +13,12 @@ import pandas as pd
 from config import twitter_api as creds
 from consumer.twitter_query import TwitterQuery
 from view.exploratory import explore
+from exploratory.sentiment import Sentiment
 
 #
 # local variables
 #
-data = []
+data = {}
 screen_name = [
     'jimcramer',
     'ReformedBroker',
@@ -25,6 +26,16 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
+stopwords=[
+    'http',
+    'https',
+    'nhttps',
+    'RT',
+    'amp',
+    'co',
+    'TheStreet'
+]
+stopwords.extend(screen_name)
 
 #
 # create directories
@@ -40,7 +51,7 @@ q = TwitterQuery(
     creds['CONSUMER_SECRET']
 )
 
-for sn in screen_name:
+for i,sn in enumerate(screen_name):
     #
     # create directories
     #
@@ -54,30 +65,39 @@ for sn in screen_name:
         data[sn] = pd.read_csv('data/twitter/{sn}.csv'.format(sn=sn))
 
     else:
-        data[sn] = q.query_user(
-            sn,
-            params=[
-                {'user': ['screen_name']},
-                'created_at',
-                'full_text',
-                {'retweeted_status': ['full_text']},
-                'retweet_count',
-                'favorite_count',
-                {'entities': ['user_mentions']}
-            ],
-            count=600,
-            rate_limit=900
-        )
+        try:
+            data[sn] = q.query_user(
+                sn,
+                params=[
+                    {'user': ['screen_name']},
+                    'created_at',
+                    'full_text',
+                    {'retweeted_status': ['full_text']},
+                    'retweet_count',
+                    'favorite_count',
+                    {'entities': ['user_mentions']}
+                ],
+                count=600,
+                rate_limit=900
+            )
 
-        data[sn].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
+            # sentiment analysis
+            s = Sentiment(data[sn], 'full_text')
+            data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
 
+            # store locally
+            data[sn].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
+
+        except Exception as e:
+            print('Error: did not finish \'{sn}\'.'.format(sn=sn))
+            print(e)
 #
-# single query: timeline of screen name.
+# preprocess: combine and clean dataframe(s)
 #
 df = pd.concat(data)
-df.replace({'screen_name': {v:i for i,v in enumerate(screen_name)}})
+df.replace({'screen_name': {v:i for i,v in enumerate([*screen_name])}})
 
 #
 # exploratory
 #
-explore(df, sent_cases={'screen_name': screen_name})
+explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})

@@ -10,8 +10,6 @@
 
 import time
 import csv
-import re
-import string
 import numpy as np
 from pathlib import Path
 import pandas as pd
@@ -27,6 +25,7 @@ from sklearn.model_selection import cross_val_score, train_test_split
 import matplotlib.pyplot as plt
 import scikitplot as skplt
 from algorithm.penn_treebank import penn_scale
+from utility.dataframe import cleanse
 stop_words = set(stopwords.words('english'))
 download('vader_lexicon')
 
@@ -67,18 +66,8 @@ class Model():
         else:
             self.df = pd.read_csv(fp)
 
-        #
-        # clean: remove twitter account, punctuations and urls, lowercase,
-        #        stem each word.
-        #
-        # @string.punctuation, '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
-        #
-        pattern_twitter_act = '@[a-zA-Z0-9_]{0,15}'
-        pattern_url = 'https?://[A-Za-z0-9./]+'
-        pattern_punctuation = '[{p}]'.format(p=string.punctuation)
-        pattern = '|'.join((pattern_twitter_act, pattern_url, pattern_punctuation))
-
-        self.df[self.key_text] = [re.sub(pattern, '', w) for w in self.df[self.key_text]]
+        # clean text
+        self.df[self.key_text] = cleanse(self.df, self.key_text)
 
         if lowercase:
             self.df[self.key_text] = [w.lower() for w in self.df[self.key_text]]
