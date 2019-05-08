@@ -90,9 +90,9 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.df.negative.plot(color='r', legend=True)
-            self.df.positive.plot(color='g', legend=True)
-            self.df.neutral.plot(color='b', legend=True)
+            self.df_adjusted.plot(color='r', legend=True)
+            self.df_adjusted.plot(color='g', legend=True)
+            self.df_adjusted.plot(color='b', legend=True)
         plt.title(title)
 
         # save plot
