@@ -24,12 +24,8 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
             # load select data
             wc_temp = df.loc[df[k] == v]
 
-            # reduce to ascii
-            r = re.compile(r'[^\x00-\x7f]')
-            wc_temp[target] = [re.sub(r, r' ', sent).split() for sent in wc_temp[target]]
-
             # clean text
-            wc_temp[target] = cleanse(wc_temp, target)
+            wc_temp[target] = cleanse(wc_temp, target, ascii=True)
 
             # create wordcloud
             word_cloud(
