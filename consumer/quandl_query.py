@@ -23,7 +23,7 @@ class QuandlQuery():
         '''
 
         self.quandl = quandl
-        self.quandl.ApiConfig.api_key(apikey)
+        self.quandl.ApiConfig.api_key = apikey
 
     def get_ts(
         self,
@@ -49,7 +49,7 @@ class QuandlQuery():
 
         if start_date and end_date:
             self.query = self.quandl.get(
-                '{s}/{t}'.format(s=source, t=ticker),
+                '{s}/{t}'.format(s=database_code, t=dataset_code),
                 collapse=collapse,
                 start_date=start_date,
                 end_date=end_date
@@ -57,21 +57,21 @@ class QuandlQuery():
 
         elif start_date:
             self.query = result = self.quandl.get(
-                '{s}/{t}'.format(s=source, t=ticker),
+                '{s}/{t}'.format(s=database_code, t=dataset_code),
                 collapse=collapse,
                 start_date=start_date
             )
 
         elif end_date:
             self.query = self.quandl.get(
-                '{s}/{t}'.format(s=source, t=ticker),
+                '{s}/{t}'.format(s=database_code, t=dataset_code),
                 collapse=collapse,
                 end_date=end_date
             )
 
         else:
             self.query = self.quandl.get(
-                '{s}/{t}'.format(s=source, t=ticker),
+                '{s}/{t}'.format(s=database_code, t=dataset_code),
                 collapse=collapse
             )
 
