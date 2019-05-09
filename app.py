@@ -136,6 +136,8 @@ for i,sn in enumerate(screen_name):
         x.split()[0],
         '%Y-%m-%d'
     ) for x in data[sn]['created_at']]
+    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+    data[sn]['full_text'] = data[sn]['full_text'].astype(str)
 
     #
     # some screen_name text multiple times a day, yet quandl only provides
@@ -145,15 +147,13 @@ for i,sn in enumerate(screen_name):
         'created_at',
         'screen_name'
     ]).agg({
-        'full_text': lambda a: ''.join(str(a))
+        'full_text': lambda a: ''.join(a)
     }).reset_index()
 
     #
     # merge tweets with quandl
     #
-    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
     data[sn] = data[sn].join(df_nasdaq.set_index(['Trade Date']), how='left', on=['created_at'])
-    data[sn].to_csv('test.csv')
 
     #
     # merge days (weekend, holidays) with no ticker value to previous day.
@@ -175,6 +175,7 @@ for i,sn in enumerate(screen_name):
     #
     # index data: relabel index as up (0) or down (1) based on previous time
     #
+    data[sn].to_csv('test.csv')
     data[sn]['trend'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'].get(i-1, 0)
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
