@@ -10,6 +10,7 @@ import os
 import re
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from config import twitter_api as t_creds
 from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
@@ -158,19 +159,33 @@ for i,sn in enumerate(screen_name):
     #
     # merge days (weekend, holidays) with no ticker value to previous day.
     #
+    drop_indices = []
     for i,row in data[sn].iterrows():
-        if not row['Index Value']:
-            if i > 1:
-                data[sn]['Index Value'].iloc[i-1,:] = data[sn]['Index Value'].iloc[i-1,:]
-                data[sn]['High'].iloc[i-1,:] = data[sn]['High'].iloc[i-1,:]
-                data[sn]['Low'].iloc[i-1,:] = data[sn]['Low'].iloc[i-1,:]
-                data[sn]['Total Market Value'].iloc[i-1,:] = data[sn]['Total Market Value'].iloc[i-1,:]
-                data[sn]['Dividend Market Value'].iloc[i-1,:] = data[sn]['Dividend Market Value'].iloc[i-1,:]
-                data[sn]['full_text'].iloc[i-1,:] = '{previous} {current}'.format(
-                    data[sn]['full_text'].iloc[i-1,:],
-                    data[sn]['full_text'].iloc[i,:]
+        if (i == 0 and np.isnan(data[sn]['Index Value'][i])):
+            data[sn]['full_text'][i+1] = '{current} {next}'.format(
+                current=data[sn]['full_text'][i],
+                next=data[sn]['full_text'][i+1]
+            )
+            drop_indices.append(i)
+
+        elif (i > 0 and not data[sn]['Index Value'][i-1]):
+            continue
+
+        elif (i > 0 and np.isnan(data[sn]['Index Value'][i])):
+            if not np.isnan(data[sn]['Index Value'][i-1]):
+                data[sn]['Index Value'][i] = data[sn]['Index Value'][i-1]
+                data[sn]['High'][i] = data[sn]['High'][i-1]
+                data[sn]['Low'][i] = data[sn]['Low'][i-1]
+                data[sn]['Total Market Value'][i] = data[sn]['Total Market Value'][i-1]
+                data[sn]['Dividend Market Value'][i] = data[sn]['Dividend Market Value'][i-1]
+                data[sn]['full_text'][i] = '{previous} {current}'.format(
+                    previous=data[sn]['full_text'][i-1],
+                    current=data[sn]['full_text'][i-1]
                 )
-            data[sn].drop(data[sn].index[i])
+                drop_indices.append(i)
+
+    # drop rows
+    data[sn].drop(data[sn].index[drop_indices], inplace=True)
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
