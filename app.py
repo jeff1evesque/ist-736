@@ -18,6 +18,7 @@ from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
 from exploratory.sentiment import Sentiment
 from datetime import datetime
+from controller.classifier import classify
 
 #
 # local variables
@@ -127,23 +128,33 @@ else:
     df_nasdaq = q.get_ts(start_date=start_date, end_date=end_date)
     df_nasdaq.to_csv('data/quandl/nasdaq.csv')
 
-#
-# preprocess: combine and clean dataframe(s)
-#
-df = pd.concat(data)
-df.replace({'screen_name': {v:i for i,v in enumerate([*screen_name])}})
 
 #
-# classification: left join on twitter dataset(s).
+# preprocess: left join on twitter dataset(s).
 #
 for i,sn in enumerate(screen_name):
     # merge with consistent date format
-    date[sn]['created_at'] = datetime.strftime(
-        '%Y-%m-%d',
-        datetime.strptime(df['date'], '%Y-%m-%d')
-    )
+    data[sn]['created_at'] = [datetime.strptime(
+        x.split()[0],
+        '%Y-%m-%d'
+    ) for x in data[sn]['created_at']]
 
-    merged_data = pd.merge(
+    #
+    # some screen_name text multiple times a day, yet quandl only provides
+    #     daily prices.
+    #
+    data[sn].groupby(by='created_at').agg({'full_text': lambda a: ' '.join(a)}).reset_index()
+    data[sn].to_csv('test.csv')
+
+    #
+    # index data: relabel index as up (0) or down (1) based on previous time
+    #
+    data[sn]['indicator'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'][i+1]
+        else 1
+        for i,x in enumerate(data[sn]['Index Value'])]
+
+    # merge dataframe
+    data[sn] = pd.merge(
         data[sn],
         df_nasdaq,
         left_on='created_at',
@@ -152,6 +163,21 @@ for i,sn in enumerate(screen_name):
     )
 
 #
+# combine each dataframes
+#
+df = pd.concat(data)
+df.replace({'screen_name': {v:i for i,v in enumerate([*screen_name])}})
+
+#
+# unigram nasdaq index
+#
+c_nasdaq = classify(df, key_class='indicator', key_text='full_text')
+
+[plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
+    model=k
+)) for k,v in c_nasdaq[1].items()]
+
+#
 # exploratory
 #
-explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
+#explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
