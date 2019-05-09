@@ -3,8 +3,7 @@
 #
 # this project requires the following packages:
 #
-#   pip install Twython
-#   pip install Quandl
+#   pip install Twython Quandl wordcloud scikit-plot
 #
 
 import os
@@ -51,9 +50,9 @@ if not os.path.exists('data/twitter'):
 if not os.path.exists('data/quandl'):
     os.makedirs('data/quandl')
 
-#
+
 # instantiate api
-#
+
 t = TwitterQuery(
     t_creds['CONSUMER_KEY'],
     t_creds['CONSUMER_SECRET']
@@ -128,7 +127,6 @@ else:
     df_nasdaq = q.get_ts(start_date=start_date, end_date=end_date)
     df_nasdaq.to_csv('data/quandl/nasdaq.csv')
 
-
 #
 # preprocess: left join on twitter dataset(s).
 #
@@ -143,24 +141,43 @@ for i,sn in enumerate(screen_name):
     # some screen_name text multiple times a day, yet quandl only provides
     #     daily prices.
     #
-    data[sn].groupby(by='created_at').agg({'full_text': lambda a: ' '.join(a)}).reset_index()
+    data[sn] = data[sn].groupby([
+        'created_at',
+        'screen_name'
+    ]).agg({
+        'full_text': lambda a: ''.join(str(a))
+    }).reset_index()
+
+    #
+    # merge tweets with quandl
+    #
+    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+    data[sn] = data[sn].join(df_nasdaq.set_index(['Trade Date']), how='left', on=['created_at'])
     data[sn].to_csv('test.csv')
+
+    #
+    # merge days (weekend, holidays) with no ticker value to previous day.
+    #
+    for i,row in data[sn].iterrows():
+        if not row['Index Value']:
+            if i > 1:
+                data[sn]['Index Value'].iloc[i-1,:] = data[sn]['Index Value'].iloc[i-1,:]
+                data[sn]['High'].iloc[i-1,:] = data[sn]['High'].iloc[i-1,:]
+                data[sn]['Low'].iloc[i-1,:] = data[sn]['Low'].iloc[i-1,:]
+                data[sn]['Total Market Value'].iloc[i-1,:] = data[sn]['Total Market Value'].iloc[i-1,:]
+                data[sn]['Dividend Market Value'].iloc[i-1,:] = data[sn]['Dividend Market Value'].iloc[i-1,:]
+                data[sn]['full_text'].iloc[i-1,:] = '{previous} {current}'.format(
+                    data[sn]['full_text'].iloc[i-1,:],
+                    data[sn]['full_text'].iloc[i,:]
+                )
+            data[sn].drop(data[sn].index[i])
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
     #
-    data[sn]['indicator'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'][i+1]
+    data[sn]['trend'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'].get(i-1, 0)
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
-
-    # merge dataframe
-    data[sn] = pd.merge(
-        data[sn],
-        df_nasdaq,
-        left_on='created_at',
-        right_on='Trade Date',
-        how='left'
-    )
 
 #
 # combine each dataframes
