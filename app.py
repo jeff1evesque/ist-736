@@ -154,7 +154,10 @@ for i,sn in enumerate(screen_name):
     #
     # merge tweets with quandl
     #
-    data[sn] = data[sn].join(df_nasdaq.set_index(['Trade Date']), how='left', on=['created_at'])
+    data[sn] = data[sn].join(
+        df_nasdaq.set_index(['Trade Date']),
+        how='left', on=['created_at']
+    )
 
     #
     # merge days (weekend, holidays) with no ticker value to previous day.
@@ -185,12 +188,11 @@ for i,sn in enumerate(screen_name):
                 drop_indices.append(i)
 
     # drop rows
-    data[sn].drop(data[sn].index[drop_indices], inplace=True)
+    data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
     #
-    data[sn].to_csv('test.csv')
     data[sn]['trend'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'].get(i-1, 0)
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
@@ -198,13 +200,12 @@ for i,sn in enumerate(screen_name):
 #
 # combine each dataframes
 #
-df = pd.concat(data)
-df.replace({'screen_name': {v:i for i,v in enumerate([*screen_name])}})
+df = pd.concat(data).reset_index()
 
 #
 # unigram nasdaq index
 #
-c_nasdaq = classify(df, key_class='indicator', key_text='full_text')
+c_nasdaq = classify(df, key_class='trend', key_text='full_text')
 
 [plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
     model=k
