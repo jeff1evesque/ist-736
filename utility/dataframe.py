@@ -58,4 +58,4 @@ def cleanse(df, column, ascii=False):
     pattern = '|'.join((pattern_twitter_act, pattern_url, pattern_punctuation, pattern_ascii))
     r = re.compile(pattern)
 
-    return([re.sub(r, ' ', str(w)) for w in df[column]])
+    return([re.sub(r, '', str(w)) for w in df[column]])
