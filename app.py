@@ -100,6 +100,7 @@ for i,sn in enumerate(screen_name):
             # sentiment analysis
             s = Sentiment(data[sn], 'full_text')
             data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
+            data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
             # store locally
             data[sn].to_csv('data/twitter/{sn}.csv'.format(sn=sn))
