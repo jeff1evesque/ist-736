@@ -8,9 +8,10 @@ from view.classifier import plot_cm, plot_bar
 def classify(
     df,
     key_class='screen_name',
-    key_text='text',
+    key_text='full_text',
     kfold=True,
     n_splits=5,
+    directory='viz',
     flag_mnb=True,
     flag_mnb_pos=True,
     flag_bnb=True,
@@ -40,10 +41,13 @@ def classify(
         model_scores['mnb'] = mnb.get_accuracy()
 
         if plot:
-            plot_cm(mnb, file_suffix=key_class)
+            plot_cm(mnb, directory=directory, file_suffix=key_class)
 
         if kfold:
-            kmnb = mnb.get_kfold_scores(model_type='multinomial', n_splits=n_splits)
+            kmnb = mnb.get_kfold_scores(
+                model_type='multinomial',
+                n_splits=n_splits
+            )
             kfold_scores['mnb'] = kmnb
 
     if flag_mnb_pos:
@@ -56,10 +60,17 @@ def classify(
         model_scores['mnb_pos'] = mnb_pos.get_accuracy()
 
         if plot:
-            plot_cm(mnb_pos, file_suffix='{}_pos'.format(key_class))
+            plot_cm(
+                mnb_pos,
+                directory=directory,
+                file_suffix='{}_pos'.format(key_class)
+            )
 
         if kfold:
-            kmnb_pos = mnb_pos.get_kfold_scores(model_type='multinomial', n_splits=n_splits)
+            kmnb_pos = mnb_pos.get_kfold_scores(
+                model_type='multinomial',
+                n_splits=n_splits
+            )
             kfold_scores['mnb_pos'] = kmnb_pos
 
     # bernoulli naive bayes
@@ -74,10 +85,18 @@ def classify(
         model_scores['bnb'] = bnb.get_accuracy()
 
         if plot:
-            plot_cm(bnb, model_type='bernoulli', file_suffix=key_class)
+            plot_cm(
+                bnb,
+                model_type='bernoulli',
+                directory=directory,
+                file_suffix=key_class
+            )
 
         if kfold:
-            kbnb = bnb.get_kfold_scores(model_type='bernoulli', n_splits=n_splits)
+            kbnb = bnb.get_kfold_scores(
+                model_type='bernoulli',
+                n_splits=n_splits
+            )
             kfold_scores['bnb'] = kbnb
 
     if flag_bnb_pos:
@@ -94,11 +113,15 @@ def classify(
             plot_cm(
                 bnb_pos,
                 model_type='bernoulli',
+                directory=directory,
                 file_suffix='{}_pos'.format(key_class)
             )
 
         if kfold:
-            kbnb_pos = bnb_pos.get_kfold_scores(model_type='bernoulli', n_splits=n_splits)
+            kbnb_pos = bnb_pos.get_kfold_scores(
+                model_type='bernoulli',
+                n_splits=n_splits
+            )
             kfold_scores['bnb_pos'] = kbnb_pos
 
     # support vector machine
@@ -112,7 +135,12 @@ def classify(
         model_scores['svm'] = svm.get_accuracy()
 
         if plot:
-            plot_cm(svm, model_type='svm', file_suffix=key_class)
+            plot_cm(
+                svm,
+                model_type='svm',
+                directory=directory,
+                file_suffix=key_class
+            )
 
         if kfold:
             ksvm = svm.get_kfold_scores(model_type='svm', n_splits=n_splits)
@@ -131,11 +159,15 @@ def classify(
             plot_cm(
                 svm_pos,
                 model_type='svm',
+                directory=directory,
                 file_suffix='{}_pos'.format(key_class)
             )
 
         if kfold:
-            ksvm_pos = svm_pos.get_kfold_scores(model_type='svm', n_splits=n_splits)
+            ksvm_pos = svm_pos.get_kfold_scores(
+                model_type='svm',
+                n_splits=n_splits
+            )
             kfold_scores['svm_pos'] = ksvm_pos
 
     # ensembled score
@@ -151,6 +183,7 @@ def classify(
         plot_bar(
             labels=labels,
             performance=performance,
+            directory=directory,
             filename='overall_accuracy_{}'.format(key_class)
         )
 
