@@ -24,6 +24,7 @@ from controller.classifier import classify
 # local variables
 #
 data = {}
+classify_results = {}
 screen_name = [
     'jimcramer',
     'ReformedBroker',
@@ -187,8 +188,12 @@ for i,sn in enumerate(screen_name):
                 )
                 drop_indices.append(i)
 
-    # drop rows
+    #
+    # drop rows: rows with no tickers and empty 'full_text'.
+    #
+    drop_indices.extend(data[sn][data[sn]['full_text'] == ''].index)
     data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
+    data[sn].to_csv('tests.csv')
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
@@ -197,21 +202,21 @@ for i,sn in enumerate(screen_name):
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
 
-#
-# combine each dataframes
-#
-df = pd.concat(data).reset_index()
+    #
+    # classify
+    #
+    classify_results[sn] = classify(
+        data[sn],
+        key_class='trend',
+        key_text='full_text'
+    )
 
-#
-# unigram nasdaq index
-#
-c_nasdaq = classify(df, key_class='trend', key_text='full_text')
-
-[plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
-    model=k
-)) for k,v in c_nasdaq[1].items()]
+    [plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
+        model=k
+    )) for k,v in classify_results[1].items()]
 
 #
 # exploratory
 #
+#df = pd.concat(data).reset_index()
 #explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
