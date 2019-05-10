@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 
 def plot_cm(
     model,
+    directory='viz',
     model_type='multinomial',
-    file_suffix='text',
+    file_suffix='text'
 ):
     '''
 
@@ -14,7 +15,8 @@ def plot_cm(
 
     '''
 
-    model.plot_cm(filename='viz/cm_{m}_{s}.png'.format(
+    model.plot_cm(filename='{d}/cm_{m}_{s}.png'.format(
+        d=directory,
         m=model_type,
         s=file_suffix
     ))
@@ -22,6 +24,7 @@ def plot_cm(
 def plot_bar(
     labels,
     performance,
+    directory='viz',
     filename='text'
 ):
     '''
@@ -34,5 +37,5 @@ def plot_bar(
     plt.bar(y_pos, performance, align='center', alpha=0.5)
     plt.xticks(y_pos, labels)
     plt.ylabel('Performance')
-    plt.savefig('viz/{f}'.format(f=filename))
+    plt.savefig('{d}/{f}'.format(d=directory, f=filename))
     plt.show()
