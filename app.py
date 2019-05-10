@@ -16,9 +16,11 @@ from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
 from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
+from view.classifier import plot_bar
 from exploratory.sentiment import Sentiment
 from datetime import datetime
 from controller.classifier import classify
+import matplotlib.pyplot as plt
 
 #
 # local variables
@@ -194,7 +196,6 @@ for i,sn in enumerate(screen_name):
     #
     drop_indices.extend(data[sn][data[sn]['full_text'] == ''].index)
     data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
-    data[sn].to_csv('tests.csv')
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
@@ -203,21 +204,38 @@ for i,sn in enumerate(screen_name):
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
 
+    data[sn].to_csv('tests.csv')
+
     #
     # classify
     #
     classify_results[sn] = classify(
         data[sn],
         key_class='trend',
-        key_text='full_text'
+        key_text='full_text',
+        directory='viz/{sn}'.format(sn=sn)
     )
 
-    [plot_bar(range(len(v)),v,'bargraph-kfold-{model}_sentiment'.format(
-        model=k
-    )) for k,v in classify_results[1].items()]
+    [plot_bar(
+        range(len(v)),
+        v,
+        directory='viz/{sn}'.format(sn=sn),
+        filename='bargraph_kfold_{model}'.format(model=k)
+    ) for k,v in classify_results[sn][1].items()]
+
+#
+# ensembled scores
+#
+y_pos = np.arange(len(screen_name))
+performance = [v[0] for k,v in classify_results.items()]
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+plt.xticks(y_pos, screen_name)
+plt.ylabel('Performance')
+plt.savefig('viz/accuracy_overall.png')
+plt.show()
 
 #
 # exploratory
 #
-#df = pd.concat(data).reset_index()
-#explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
+df = pd.concat(data).reset_index()
+explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
