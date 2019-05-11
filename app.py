@@ -111,6 +111,10 @@ for i,sn in enumerate(screen_name):
             print('Error: did not finish \'{sn}\'.'.format(sn=sn))
             print(e)
 
+    # convert to string
+    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+    data[sn]['full_text'] = data[sn]['full_text'].astype(str)
+
     # largest time span
     start = data[screen_name[i]]['created_at'].iloc[0]
     temp_start = datetime.strptime(start.split()[0], '%Y-%m-%d')
@@ -141,8 +145,6 @@ for i,sn in enumerate(screen_name):
         x.split()[0],
         '%Y-%m-%d'
     ) for x in data[sn]['created_at']]
-    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-    data[sn]['full_text'] = data[sn]['full_text'].astype(str)
 
     #
     # some screen_name text multiple times a day, yet quandl only provides
