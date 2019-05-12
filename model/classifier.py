@@ -24,7 +24,6 @@ def model(
         model = alg(key_text=key_text, key_class=key_class)
 
     # vectorize data
-    vectorized = model.get_tfidf()
     model.split()
     params = model.get_split()
 
@@ -59,11 +58,10 @@ def model_pos(
 	
     # suffix pos
     df_m['pos'] = [m.get_pos(x) for x in df_m['pos']]
-    model = alg(df=df_m, key_class=key_class, key_text=key_text, lowercase=False)
+    model = alg(df=df_m, key_class=key_class, key_text='pos', lowercase=False)
 
     # vectorize data
-    vectorized = model.get_tfidf()
-    model.split()
+    model.split(pos_split=True)
     params = model.get_split()
 
     # train classifier
