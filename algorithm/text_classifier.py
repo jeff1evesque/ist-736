@@ -90,7 +90,9 @@ class Model():
 
         '''
 
-        # split
+        #
+        # split: generally associated with pos suffix case.
+        #
         if pos_split:
             for i, row in self.df.iterrows():
                 # max length
@@ -121,6 +123,9 @@ class Model():
                 test_size=size
             )
 
+        #
+        # general case
+        #
         else:
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
                 self.tfidf,
@@ -166,6 +171,9 @@ class Model():
 
         '''
 
+        #
+        # pos case: implemented internally by 'split' when 'pos_split=True'.
+        #
         if data is not None:
             # bag of words: with 'english' stopwords
             count_vect = CountVectorizer(stop_words=stop_words)
@@ -175,13 +183,11 @@ class Model():
             tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
             tfidf = tfidf_vectorizer.fit_transform(data)
 
-            # top n tfidf words
-            feature_names = count_vect.get_feature_names()
-            sorted_items = self.sort_coo(tfidf.tocoo())
-            keywords = self.get_top_features(feature_names, sorted_items, topn)
+            return(bow, tfidf)
 
-            return(bow, tfidf, keywords)
-
+        #
+        # general case
+        #
         else:
             # bag of words: with 'english' stopwords
             self.count_vect = CountVectorizer(stop_words=stop_words)
@@ -226,12 +232,11 @@ class Model():
         # word index and corresponding tf-idf score
         for idx, score in sorted_items:
 
-        # keep track of feature name and its corresponding score
-        score_vals.append(round(score, 3))
-        feature_vals.append(feature_names[idx])
+            # keep track of feature name and its corresponding score
+            score_vals.append(round(score, 3))
+            feature_vals.append(feature_names[idx])
 
         # create a tuples of feature,score
-        # results = zip(feature_vals,score_vals)
         results = {}
         for idx in range(len(feature_vals)):
             results[feature_vals[idx]]=score_vals[idx]
