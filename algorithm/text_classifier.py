@@ -159,7 +159,7 @@ class Model():
         ) for i,x in enumerate(pos)])
         return(result)
 
-    def vectorize(self, data=None, stop_words='english'):
+    def vectorize(self, data=None, stop_words='english', topn=25):
         '''
 
         vectorize provided data.
@@ -175,7 +175,12 @@ class Model():
             tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
             tfidf = tfidf_vectorizer.fit_transform(data)
 
-            return(bow, tfidf)
+            # top n tfidf words
+            feature_names = count_vect.get_feature_names()
+            sorted_items = self.sort_coo(tfidf.tocoo())
+            keywords = self.get_top_features(feature_names, sorted_items, topn)
+
+            return(bow, tfidf, keywords)
 
         else:
             # bag of words: with 'english' stopwords
@@ -185,6 +190,53 @@ class Model():
             # tfidf weighting
             self.tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
             self.tfidf = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            # top n tfidf words
+            feature_names = self.count_vect.get_feature_names()
+            sorted_items = self.sort_coo(self.tfidf.tocoo())
+            self.keywords = self.get_top_features(
+                feature_names,
+                sorted_items,
+                topn
+            )
+
+    def sort_coo(self, coo_matrix):
+        '''
+
+        return sorted vector values while preserving the column index.
+
+        '''
+
+        tuples = zip(coo_matrix.col, coo_matrix.data)
+        return(sorted(tuples, key=lambda x: (x[1], x[0]), reverse=True))
+
+    def get_top_features(self, feature_names, sorted_items, topn):
+        '''
+
+        return feature names with associated tf-idf score of top n words.
+
+        '''
+
+        # use only topn items from vector
+        sorted_items = sorted_items[:topn]
+
+        score_vals = []
+        feature_vals = []
+
+        # word index and corresponding tf-idf score
+        for idx, score in sorted_items:
+
+        # keep track of feature name and its corresponding score
+        score_vals.append(round(score, 3))
+        feature_vals.append(feature_names[idx])
+
+        # create a tuples of feature,score
+        # results = zip(feature_vals,score_vals)
+        results = {}
+        for idx in range(len(feature_vals)):
+            results[feature_vals[idx]]=score_vals[idx]
+
+        return(results)
 
     def get_tfidf(self):
         '''
