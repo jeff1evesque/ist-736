@@ -45,6 +45,7 @@ class Model():
         key_class='Sentiment',
         stem=True,
         lowercase=True,
+        cleanse_data=True,
         fp='{}/data/sample-sentiment.csv'.format(
             Path(__file__).resolve().parents[1]
         )
@@ -67,7 +68,8 @@ class Model():
             self.df = pd.read_csv(fp)
 
         # clean text
-        self.df[self.key_text] = cleanse(self.df, self.key_text)
+        if cleanse_data:
+            self.df[self.key_text] = cleanse(self.df, self.key_text)
 
         if lowercase:
             self.df[self.key_text] = [w.lower() for w in self.df[self.key_text]]
@@ -83,55 +85,18 @@ class Model():
             self.vectorize()
             self.split()
 
-    def split(self, size=0.20, pos_split=False):
+    def split(self, size=0.20):
         '''
 
         split data into train and test.
 
         '''
 
-        #
-        # split: generally associated with pos suffix case.
-        #
-        if pos_split:
-            for i, row in self.df.iterrows():
-                # max length
-                if isinstance(self.df[self.key_text].iloc[i], str):
-                    max_length = len(self.df[self.key_text].iloc[i].split())
-                else:
-                    max_length = len(self.df[self.key_text].iloc[i].str.split())
-                pos = self.df[['pos']].iloc[i]
-
-                # rebuild 'key-text' with pos suffix
-                combined = ''
-                for j in range(max_length):
-                    if isinstance(self.df[self.key_text][i], str):
-                        word = self.df[self.key_text][i].split()[j]
-                    else:
-                        word = self.df[self.key_text].iloc[i].split()[j]
-
-                    combined = '{combined} {word}-{pos}'.format(
-                        combined=combined,
-                        word=word,
-                        pos=pos[0][j]
-                    )
-                self.df[self.key_text].iloc[[i]] = combined
-
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-                self.vectorize(self.df[self.key_text]),
-                self.df[self.key_class],
-                test_size=size
-            )
-
-        #
-        # general case
-        #
-        else:
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-                self.tfidf,
-                self.df[self.key_class],
-                test_size=size
-            )
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.tfidf,
+            self.df[self.key_class],
+            test_size=size
+        )
 
     def get_split(self):
         '''
