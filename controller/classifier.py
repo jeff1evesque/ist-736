@@ -52,7 +52,7 @@ def classify(
 
     if flag_mnb_pos:
         mnb_pos = mp_model(
-            mnb,
+            df=df,
             key_class=key_class,
             key_text=key_text,
             max_length=math.inf
@@ -101,7 +101,7 @@ def classify(
 
     if flag_bnb_pos:
         bnb_pos = mp_model(
-            bnb,
+            df=df,
             model_type='bernoulli',
             key_class=key_class,
             key_text=key_text,
@@ -148,7 +148,7 @@ def classify(
 
     if flag_svm_pos:
         svm_pos = mp_model(
-            svm,
+            df=df,
             model_type='svm',
             key_class=key_class,
             key_text=key_text
