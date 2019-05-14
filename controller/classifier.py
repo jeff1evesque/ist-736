@@ -54,8 +54,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
@@ -93,8 +93,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
@@ -135,8 +135,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
@@ -176,8 +176,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
@@ -217,8 +217,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
@@ -254,8 +254,8 @@ def classify(
 
             # plot top n words
             plot_bar(
-                labels=[k for k,v in keywords],
-                performance=[v for k,v in keywords],
+                labels=[*keywords],
+                performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_words'.format(count=top_words)
             )
