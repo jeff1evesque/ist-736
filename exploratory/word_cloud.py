@@ -11,7 +11,8 @@ def word_cloud(
     width=2000,
     height=1250,
     background_color='black',
-    stopwords=[]
+    stopwords=[],
+    show=False
 ):
     '''
 
@@ -45,4 +46,8 @@ def word_cloud(
 
     # save plot
     plt.savefig(filename)
-    plt.show()
+
+    if show:
+        plt.show()
+    else:
+        plt.close()

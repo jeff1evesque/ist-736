@@ -26,7 +26,8 @@ def plot_bar(
     performance,
     directory='viz',
     filename='text',
-    rotation=0
+    rotation=0,
+    show=False
 ):
     '''
 
@@ -39,4 +40,8 @@ def plot_bar(
     plt.xticks(y_pos, labels, rotation=rotation)
     plt.ylabel('Performance')
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))
-    plt.show()
+
+    if show:
+        plt.show()
+    else:
+        plt.close()

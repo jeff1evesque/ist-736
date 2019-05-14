@@ -80,7 +80,7 @@ class Sentiment():
         # return scores
         return(self.df_adjusted)
 
-    def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png'):
+    def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png', show=False):
         '''
 
         plot sentiment generated from 'vader_analysis'.
@@ -90,11 +90,15 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.df.negative.plot(color='r', legend=True)
-            self.df.positive.plot(color='g', legend=True)
-            self.df.neutral.plot(color='b', legend=True)
+            self.df_adjusted.negative.plot(color='r', legend=True)
+            self.df_adjusted.positive.plot(color='g', legend=True)
+            self.df_adjusted.neutral.plot(color='b', legend=True)
         plt.title(title)
 
         # save plot
         plt.savefig(filename)
-        plt.show()
+
+        if show:
+            plt.show()
+        else:
+            plt.close()

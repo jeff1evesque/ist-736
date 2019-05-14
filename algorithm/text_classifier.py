@@ -355,7 +355,8 @@ class Model():
         self,
         actual=None,
         predicted=None,
-        filename='confusion_matrix.png'
+        filename='confusion_matrix.png',
+        show=False
     ):
         '''
 
@@ -374,7 +375,11 @@ class Model():
 
         # save plot
         plt.savefig(filename)
-        plt.show()
+
+        if show:
+            plt.show()
+        else:
+            plt.close()
 
     def get_accuracy(self, actual=None, predicted=None):
         '''
