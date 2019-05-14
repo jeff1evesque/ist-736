@@ -11,6 +11,7 @@ def classify(
     key_text='full_text',
     kfold=True,
     n_splits=5,
+    top_words=20,
     directory='viz',
     flag_mnb=True,
     flag_mnb_pos=True,
@@ -43,6 +44,22 @@ def classify(
         if plot:
             plot_cm(mnb, directory=directory, file_suffix=key_class)
 
+            # extract top n words
+            tfidf = mnb.get_tfidf()
+            keywords = mnb.get_top_features(
+                mnb.get_feature_names(),
+                mnb.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
+            )
+
         if kfold:
             kmnb = mnb.get_kfold_scores(
                 model_type='multinomial',
@@ -64,6 +81,22 @@ def classify(
                 mnb_pos,
                 directory=directory,
                 file_suffix='{}_pos'.format(key_class)
+            )
+
+            # extract top n words
+            tfidf = mnb_pos.get_tfidf()
+            keywords = mnb_pos.get_top_features(
+                mnb_pos.get_feature_names(),
+                mnb_pos.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
             )
 
         if kfold:
@@ -92,6 +125,22 @@ def classify(
                 file_suffix=key_class
             )
 
+            # extract top n words
+            tfidf = bnb.get_tfidf()
+            keywords = bnb.get_top_features(
+                bnb.get_feature_names(),
+                bnb.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
+            )
+
         if kfold:
             kbnb = bnb.get_kfold_scores(
                 model_type='bernoulli',
@@ -115,6 +164,22 @@ def classify(
                 model_type='bernoulli',
                 directory=directory,
                 file_suffix='{}_pos'.format(key_class)
+            )
+
+            # extract top n words
+            tfidf = bnb_pos.get_tfidf()
+            keywords = bnb_pos.get_top_features(
+                bnb_pos.get_feature_names(),
+                bnb_pos.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
             )
 
         if kfold:
@@ -142,6 +207,22 @@ def classify(
                 file_suffix=key_class
             )
 
+            # extract top n words
+            tfidf = svm.get_tfidf()
+            keywords = svm.get_top_features(
+                svm.get_feature_names(),
+                svm.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
+            )
+
         if kfold:
             ksvm = svm.get_kfold_scores(model_type='svm', n_splits=n_splits)
             kfold_scores['svm'] = ksvm
@@ -161,6 +242,22 @@ def classify(
                 model_type='svm',
                 directory=directory,
                 file_suffix='{}_pos'.format(key_class)
+            )
+
+            # extract top n words
+            tfidf = svm_pos.get_tfidf()
+            keywords = svm_pos.get_top_features(
+                svm_pos.get_feature_names(),
+                svm_pos.sort_coo(tfidf.tocoo()),
+                top_words
+            )
+
+            # plot top n words
+            plot_bar(
+                labels=[k for k,v in keywords],
+                performance=[v for k,v in keywords],
+                directory=directory,
+                filename='top_{count}_words'.format(count=top_words)
             )
 
         if kfold:
