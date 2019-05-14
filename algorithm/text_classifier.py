@@ -208,6 +208,15 @@ class Model():
 
         return(results)
 
+    def get_feature_names(self):
+        '''
+
+        get feature names for current dataframe.
+
+        '''
+
+        return(self.count_vect.get_feature_names())
+
     def get_tfidf(self):
         '''
 
