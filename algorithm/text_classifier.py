@@ -45,6 +45,7 @@ class Model():
         key_class='Sentiment',
         stem=True,
         lowercase=True,
+        cleanse_data=True,
         fp='{}/data/sample-sentiment.csv'.format(
             Path(__file__).resolve().parents[1]
         )
@@ -67,7 +68,8 @@ class Model():
             self.df = pd.read_csv(fp)
 
         # clean text
-        self.df[self.key_text] = cleanse(self.df, self.key_text)
+        if cleanse_data:
+            self.df[self.key_text] = cleanse(self.df, self.key_text)
 
         if lowercase:
             self.df[self.key_text] = [w.lower() for w in self.df[self.key_text]]
@@ -83,50 +85,18 @@ class Model():
             self.vectorize()
             self.split()
 
-    def split(self, size=0.20, pos_split=False):
+    def split(self, size=0.20):
         '''
 
         split data into train and test.
 
         '''
 
-        # split
-        if pos_split:
-            for i, row in self.df.iterrows():
-                # max length
-                if isinstance(self.df[self.key_text].iloc[i], str):
-                    max_length = len(self.df[self.key_text].iloc[i].split())
-                else:
-                    max_length = len(self.df[self.key_text].iloc[i].str.split())
-                pos = self.df[['pos']].iloc[i]
-
-                # rebuild 'key-text' with pos suffix
-                combined = ''
-                for j in range(max_length):
-                    if isinstance(self.df[self.key_text][i], str):
-                        word = self.df[self.key_text][i].split()[j]
-                    else:
-                        word = self.df[self.key_text].iloc[i].split()[j]
-
-                    combined = '{combined} {word}-{pos}'.format(
-                        combined=combined,
-                        word=word,
-                        pos=pos[0][j]
-                    )
-                self.df[self.key_text].iloc[[i]] = combined
-
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-                self.vectorize(self.df[self.key_text]),
-                self.df[self.key_class],
-                test_size=size
-            )
-
-        else:
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-                self.tfidf,
-                self.df[self.key_class],
-                test_size=size
-            )
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.tfidf,
+            self.df[self.key_class],
+            test_size=size
+        )
 
     def get_split(self):
         '''
@@ -159,13 +129,16 @@ class Model():
         ) for i,x in enumerate(pos)])
         return(result)
 
-    def vectorize(self, data=None, stop_words='english'):
+    def vectorize(self, data=None, stop_words='english', topn=25):
         '''
 
         vectorize provided data.
 
         '''
 
+        #
+        # pos case: implemented internally by 'split' when 'pos_split=True'.
+        #
         if data is not None:
             # bag of words: with 'english' stopwords
             count_vect = CountVectorizer(stop_words=stop_words)
@@ -177,6 +150,9 @@ class Model():
 
             return(bow, tfidf)
 
+        #
+        # general case
+        #
         else:
             # bag of words: with 'english' stopwords
             self.count_vect = CountVectorizer(stop_words=stop_words)
@@ -185,6 +161,61 @@ class Model():
             # tfidf weighting
             self.tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
             self.tfidf = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            # top n tfidf words
+            feature_names = self.count_vect.get_feature_names()
+            sorted_items = self.sort_coo(self.tfidf.tocoo())
+            self.keywords = self.get_top_features(
+                feature_names,
+                sorted_items,
+                topn
+            )
+
+    def sort_coo(self, coo_matrix):
+        '''
+
+        return sorted vector values while preserving the column index.
+
+        '''
+
+        tuples = zip(coo_matrix.col, coo_matrix.data)
+        return(sorted(tuples, key=lambda x: (x[1], x[0]), reverse=True))
+
+    def get_top_features(self, feature_names, sorted_items, topn):
+        '''
+
+        return feature names with associated tf-idf score of top n words.
+
+        '''
+
+        # use only topn items from vector
+        sorted_items = sorted_items[:topn]
+
+        score_vals = []
+        feature_vals = []
+
+        # word index and corresponding tf-idf score
+        for idx, score in sorted_items:
+
+            # keep track of feature name and its corresponding score
+            score_vals.append(round(score, 3))
+            feature_vals.append(feature_names[idx])
+
+        # create a tuples of feature,score
+        results = {}
+        for idx in range(len(feature_vals)):
+            results[feature_vals[idx]]=score_vals[idx]
+
+        return(results)
+
+    def get_feature_names(self):
+        '''
+
+        get feature names for current dataframe.
+
+        '''
+
+        return(self.count_vect.get_feature_names())
 
     def get_tfidf(self):
         '''
@@ -324,7 +355,8 @@ class Model():
         self,
         actual=None,
         predicted=None,
-        filename='confusion_matrix.png'
+        filename='confusion_matrix.png',
+        show=False
     ):
         '''
 
@@ -343,7 +375,11 @@ class Model():
 
         # save plot
         plt.savefig(filename)
-        plt.show()
+
+        if show:
+            plt.show()
+        else:
+            plt.close()
 
     def get_accuracy(self, actual=None, predicted=None):
         '''

@@ -218,7 +218,8 @@ for i,sn in enumerate(screen_name):
         data[sn],
         key_class='trend',
         key_text='full_text',
-        directory='viz/{sn}'.format(sn=sn)
+        directory='viz/{sn}'.format(sn=sn),
+        top_words=25
     )
 
     [plot_bar(

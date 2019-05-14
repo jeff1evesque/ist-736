@@ -24,7 +24,6 @@ def model(
         model = alg(key_text=key_text, key_class=key_class)
 
     # vectorize data
-    vectorized = model.get_tfidf()
     model.split()
     params = model.get_split()
 
@@ -40,11 +39,12 @@ def model(
     return(model)
 
 def model_pos(
-    m,
+    df,
     model_type='multinomial',
     key_text='SentimentText',
     key_class='Sentiment',
-    max_length=280
+    max_length=280,
+    stem=False
 ):
     '''
 
@@ -52,19 +52,32 @@ def model_pos(
 
     '''
 
-    # reduce to ascii
-    regex = r'[^\x00-\x7f]'
-    df_m = m.get_df()
-    df_m['pos'] = [re.sub(regex, r' ', sent).split() for sent in df_m[key_text]]
-	
-    # suffix pos
-    df_m['pos'] = [m.get_pos(x) for x in df_m['pos']]
-    model = alg(df=df_m, key_class=key_class, key_text=key_text, lowercase=False)
+    # initialize classifier
+    if df is not None:
+        model = alg(df=df, key_text=key_text, key_class=key_class, stem=False)
+    else:
+        model = alg(key_text=key_text, key_class=key_class, stem=False)
+
+    #
+    # suffix pos: add part of speech suffix to each word.
+    #
+    df['pos'] = [sent.split() for sent in df[key_text]]
+    df['pos'] = [model.get_pos(x) for x in df['pos']]
+
+    #
+    # pos model, supplied dataframe already cleansed.
+    #
+    pos = alg(
+        df=df,
+        key_class=key_class,
+        key_text='pos',
+        stem=False,
+        cleanse_data=False
+    )
 
     # vectorize data
-    vectorized = model.get_tfidf()
-    model.split()
-    params = model.get_split()
+    pos.split()
+    params = pos.get_split()
 
     # train classifier
     model.train(
