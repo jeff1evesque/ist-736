@@ -57,7 +57,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:
@@ -96,7 +97,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:
@@ -138,7 +140,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:
@@ -179,7 +182,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:
@@ -220,7 +224,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:
@@ -257,7 +262,8 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_words'.format(count=top_words)
+                filename='top_{count}_words'.format(count=top_words),
+                rotation=90
             )
 
         if kfold:

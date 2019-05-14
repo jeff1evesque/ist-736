@@ -25,7 +25,8 @@ def plot_bar(
     labels,
     performance,
     directory='viz',
-    filename='text'
+    filename='text',
+    rotation=0
 ):
     '''
 
@@ -35,7 +36,7 @@ def plot_bar(
 
     y_pos = np.arange(len(labels))
     plt.bar(y_pos, performance, align='center', alpha=0.5)
-    plt.xticks(y_pos, labels)
+    plt.xticks(y_pos, labels, rotation=rotation)
     plt.ylabel('Performance')
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))
     plt.show()
