@@ -61,6 +61,14 @@ def classify(
                 rotation=90
             )
 
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in mnb.get_feature_distribution()],
+                performance=[x[1] for x in mnb.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
+            )
+
         if kfold:
             kmnb = mnb.get_kfold_scores(
                 model_type='multinomial',
@@ -99,6 +107,14 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in mnb_pos.get_feature_distribution()],
+                performance=[x[1] for x in mnb_pos.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
             )
 
         if kfold:
@@ -144,6 +160,14 @@ def classify(
                 rotation=90
             )
 
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in bnb.get_feature_distribution()],
+                performance=[x[1] for x in bnb.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
+            )
+
         if kfold:
             kbnb = bnb.get_kfold_scores(
                 model_type='bernoulli',
@@ -184,6 +208,14 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in bnb_pos.get_feature_distribution()],
+                performance=[x[1] for x in bnb_pos.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
             )
 
         if kfold:
@@ -228,6 +260,14 @@ def classify(
                 rotation=90
             )
 
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in svm.get_feature_distribution()],
+                performance=[x[1] for x in svm.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
+            )
+
         if kfold:
             ksvm = svm.get_kfold_scores(model_type='svm', n_splits=n_splits)
             kfold_scores['svm'] = ksvm
@@ -264,6 +304,14 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            plot_bar(
+                labels=[x[0] for x in svm_pos.get_feature_distribution()],
+                performance=[x[1] for x in svm_pos.get_feature_distribution()],
+                directory=directory,
+                filename='feature_distribution'
             )
 
         if kfold:
