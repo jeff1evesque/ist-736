@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+from collections import OrderedDict
 from model.classifier import model as m_model
 from model.classifier import model_pos as mp_model
 from view.classifier import plot_cm, plot_bar
@@ -52,6 +53,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -59,6 +66,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = mnb.get_feature_distribution()['y_train']
+            test = mnb.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:
@@ -92,6 +115,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -99,6 +128,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = mnb_pos.get_feature_distribution()['y_train']
+            test = mnb_pos.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:
@@ -135,6 +180,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -142,6 +193,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = bnb.get_feature_distribution()['y_train']
+            test = bnb.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:
@@ -177,6 +244,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -184,6 +257,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = bnb_pos.get_feature_distribution()['y_train']
+            test = bnb_pos.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:
@@ -219,6 +308,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -226,6 +321,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = svm.get_feature_distribution()['y_train']
+            test = svm.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:
@@ -257,6 +368,12 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(
+                sorted(keywords.items(),
+                key=lambda x: x[0])
+            )
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -264,6 +381,22 @@ def classify(
                 directory=directory,
                 filename='top_{count}_tfidf'.format(count=top_words),
                 rotation=90
+            )
+
+            # feature distribution
+            train = svm_pos.get_feature_distribution()['y_train']
+            test = svm_pos.get_feature_distribution()['y_test']
+            plot_bar(
+                labels=[x[0] for x in train],
+                performance=[x[1] for x in train],
+                directory=directory,
+                filename='train_distribution'
+            )
+            plot_bar(
+                labels=[x[0] for x in test],
+                performance=[x[1] for x in test],
+                directory=directory,
+                filename='test_distribution'
             )
 
         if kfold:

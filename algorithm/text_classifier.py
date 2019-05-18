@@ -13,6 +13,7 @@ import csv
 import numpy as np
 from pathlib import Path
 import pandas as pd
+from scipy.stats import itemfreq
 from nltk.corpus import stopwords
 from nltk import tokenize, download, pos_tag
 from nltk.stem.porter import PorterStemmer
@@ -110,6 +111,18 @@ class Model():
             'X_test': self.X_test,
             'y_train': self.y_train,
             'y_test': self.y_test,
+        })
+
+    def get_feature_distribution(self):
+        '''
+
+        get feature distribution on given dataset.
+
+        '''
+
+        return({
+            'y_train': itemfreq(self.y_train),
+            'y_test': itemfreq(self.y_test),
         })
 
     def get_pos(self, l):
