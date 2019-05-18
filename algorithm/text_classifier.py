@@ -121,8 +121,8 @@ class Model():
         '''
 
         return({
-            'y_train': itemfreq(set(self.y_train)),
-            'y_test': itemfreq(set(self.y_test)),
+            'y_train': itemfreq(self.y_train),
+            'y_test': itemfreq(self.y_test),
         })
 
     def get_pos(self, l):
