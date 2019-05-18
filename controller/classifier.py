@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+from collections import OrderedDict
 from model.classifier import model as m_model
 from model.classifier import model_pos as mp_model
 from view.classifier import plot_cm, plot_bar
@@ -52,6 +53,9 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -99,6 +103,9 @@ def classify(
                 mnb_pos.sort_coo(tfidf.tocoo()),
                 top_words
             )
+
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
 
             # plot top n words
             plot_bar(
@@ -151,6 +158,9 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -200,6 +210,9 @@ def classify(
                 bnb_pos.sort_coo(tfidf.tocoo()),
                 top_words
             )
+
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
 
             # plot top n words
             plot_bar(
@@ -251,6 +264,9 @@ def classify(
                 top_words
             )
 
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
+
             # plot top n words
             plot_bar(
                 labels=[*keywords],
@@ -296,6 +312,9 @@ def classify(
                 svm_pos.sort_coo(tfidf.tocoo()),
                 top_words
             )
+
+            # sort values: largest to smallest
+            keywords = OrderedDict(sorted(d.items(), key=lambda x: x[0]))
 
             # plot top n words
             plot_bar(
