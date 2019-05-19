@@ -222,13 +222,6 @@ for i,sn in enumerate(screen_name):
         top_words=25
     )
 
-    [plot_bar(
-        range(len(v)),
-        v,
-        directory='viz/{sn}'.format(sn=sn),
-        filename='bargraph_kfold_{model}'.format(model=k)
-    ) for k,v in classify_results[sn][1].items()]
-
 #
 # ensembled scores
 #
