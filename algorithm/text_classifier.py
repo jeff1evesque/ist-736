@@ -86,6 +86,24 @@ class Model():
             self.vectorize()
             self.split()
 
+    def set_df(self, df):
+        '''
+
+        update dataframe.
+
+        '''
+
+        self.df = df
+
+    def set_key_text(self, key_text):
+        '''
+
+        update key text.
+
+        '''
+
+        self.key_text = key_text
+
     def split(self, size=0.20):
         '''
 
@@ -275,11 +293,11 @@ class Model():
         # conditionally select model
         if (model_type == 'svm'):
             if multiclass:
-                self.clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
+                clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
             else:
-                self.clf = svm.SVC(gamma='scale', kernel='linear')
+                clf = svm.SVC(gamma='scale', kernel='linear')
 
-            self.clf.fit(X, y)
+            clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -287,20 +305,20 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        self.clf.predict(item)
+                        clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': self.clf,
+                    'model': clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': self.clf,
+                'model': clf,
                 'actual': None,
                 'predicted': None
             })
@@ -309,8 +327,8 @@ class Model():
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
-            self.clf = BernoulliNB()
-            self.clf.fit(X, y)
+            clf = BernoulliNB()
+            clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -318,27 +336,27 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        self.clf.predict(item)
+                        clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': self.clf,
+                    'model': clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': self.clf,
+                'model': clf,
                 'actual': None,
                 'predicted': None
             })
 
         else:
-            self.clf = MultinomialNB()
-            self.clf.fit(X, y)
+            clf = MultinomialNB()
+            clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -346,20 +364,20 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        self.clf.predict(item)
+                        clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': self.clf,
+                    'model': clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': self.clf,
+                'model': clf,
                 'actual': None,
                 'predicted': None
             })
@@ -445,7 +463,9 @@ class Model():
             else:
                 clf = svm.SVC(gamma='scale', kernel='linear')
 
-            data = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
+            # tfidf weighting
+            tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
+            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         elif (
             (model_type == 'bernoulli') or
@@ -456,13 +476,15 @@ class Model():
 
         else:
             clf = MultinomialNB()
-            data = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
+            tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words)
+            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
+        # random kfolds
         return(
             cross_val_score(
                 clf,
                 data,
                 y=self.df[self.key_class],
-                cv=n_splits
+                cv=KFold(n_splits, shuffle=True)
             )
         )

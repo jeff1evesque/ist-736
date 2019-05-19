@@ -65,19 +65,14 @@ def model_pos(
     df['pos'] = [model.get_pos(x) for x in df['pos']]
 
     #
-    # pos model, supplied dataframe already cleansed.
+    # update model: using cleansed data.
     #
-    pos = alg(
-        df=df,
-        key_class=key_class,
-        key_text='pos',
-        stem=False,
-        cleanse_data=False
-    )
+    model.set_df(df)
+    model.set_key_text('pos')
 
     # vectorize data
-    pos.split()
-    params = pos.get_split()
+    model.split()
+    params = model.get_split()
 
     # train classifier
     model.train(

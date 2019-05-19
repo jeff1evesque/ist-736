@@ -75,13 +75,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_mnb'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_mnb'
             )
 
         if kfold:
@@ -137,13 +137,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_mnb_pos'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_mnb_pos'
             )
 
         if kfold:
@@ -202,13 +202,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_bnb'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_bnb'
             )
 
         if kfold:
@@ -266,13 +266,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_bnb_pos'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_bnb_pos'
             )
 
         if kfold:
@@ -330,13 +330,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_svm'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_svm'
             )
 
         if kfold:
@@ -390,13 +390,13 @@ def classify(
                 labels=[x[0] for x in train],
                 performance=[x[1] for x in train],
                 directory=directory,
-                filename='train_distribution'
+                filename='train_distribution_svm_pos'
             )
             plot_bar(
                 labels=[x[0] for x in test],
                 performance=[x[1] for x in test],
                 directory=directory,
-                filename='test_distribution'
+                filename='test_distribution_svm_pos'
             )
 
         if kfold:
@@ -422,6 +422,13 @@ def classify(
             directory=directory,
             filename='overall_accuracy_{}'.format(key_class)
         )
+
+        [plot_bar(
+            range(len(v)),
+            v,
+            directory=directory,
+            filename='bargraph_kfold_{model}'.format(model=k)
+        ) for k,v in kfold_scores.items()]
 
     # return score
     return(score_good, kfold_scores)
