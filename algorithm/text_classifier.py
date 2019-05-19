@@ -86,6 +86,24 @@ class Model():
             self.vectorize()
             self.split()
 
+    def set_df(self, df):
+        '''
+
+        update dataframe.
+
+        '''
+
+        self.df = df
+
+    def set_key_text(self, key_text):
+        '''
+
+        update key text.
+
+        '''
+
+        self.key_text = key_text
+
     def split(self, size=0.20):
         '''
 
