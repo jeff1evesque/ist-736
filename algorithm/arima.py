@@ -74,7 +74,7 @@ class Arima():
         else:
             return(self.df_train, self.df_test)
 
-    def train_model(self, iterations, order=[1,0,0]):
+    def train(self, iterations, order=[1,0,0]):
         '''
 
         train arima model.
