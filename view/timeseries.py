@@ -8,7 +8,6 @@ def plot_ts(
     xlab='dates',
     ylab='values',
     hue='variable'
-    legend=True,
     directory='viz',
     filename='ts',
     show=False
@@ -28,11 +27,7 @@ def plot_ts(
         style='event',
         data=data
     )
-
-    if legend:
-        plt.legend(legend, ncol=2, loc='upper right')
-
-    plt.ylabel(ylab)
+    ax.set(xlabel=xlab, ylabel=ylab)
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))
 
     if show:
