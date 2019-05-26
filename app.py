@@ -56,6 +56,8 @@ if not os.path.exists('data/twitter'):
 if not os.path.exists('data/quandl'):
     os.makedirs('data/quandl')
 
+if not os.path.exists('reports'):
+    os.makedirs('reports')
 
 # instantiate api
 
@@ -229,6 +231,9 @@ for i,sn in enumerate(screen_name):
         data[sn],
         'trend'
     )
+
+    with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:
+        print(timeseries_results[sn]['arima']['adf'], file=fp)
 
 #
 # ensembled scores
