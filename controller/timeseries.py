@@ -2,8 +2,9 @@
 
 import math
 from model.timeseries import model
+from view.timeseries import plot_ts
 
-def classify(
+def timeseries(
     df,
     normalize_key,
     kfold=True,
@@ -11,7 +12,8 @@ def classify(
     directory='viz',
     flag_arima=True,
     flag_lstm=True,
-    plot=True
+    plot=True,
+    show=False
 ):
     '''
 
@@ -21,6 +23,11 @@ def classify(
 
     # local variables
     model_scores = {}
+
+    if suffix:
+        suffix = '_{suffix}'.format(suffix=suffix)
+    else:
+        suffix=''
 
     # arima: autoregressive integrated moving average
     if flag_arima:
@@ -49,12 +56,51 @@ def classify(
             )
             test_actual = a.get_differences()[0]
             predicted = a.get_differences()[1]
+            predicted_df = pd.DataFrame({
+                'actual': test_actual,
+                'predicted': predicted,
+                'dates': dates[:len(dates)]
+            })
+            predicted_df_long = pd.melt(
+                predicted_df,
+                id_vars=['dates'],
+                value_vars=['actual', 'predicted']
+            )
+
+            # plot
+            plot_ts(
+                data=pd.DataFrame({
+                    'values': train_actual,
+                    'dates': dates[:len(train_actual)]
+                })
+                x='values',
+                y='dates',
+                directory=directory,
+                filename='ts_train'
+            )
+
+            plot_ts(
+                data=predicted_df_long,
+                x='value',
+                y='dates',
+                hue='variable'
+                directory=directory,
+                filename='ts_test'
+            )
 
             # trend analysis
-            ts = l.get_decomposed()[0]['index']
-            trend = l.get_decomposed()[1]['index']
-            seasonality = l.get_decomposed()[2]['seasonality']
-            residual = l.get_decomposed()[3]['residual']
+            decomposed = l.get_decomposed()
+            decomposed.plot()
+            plot.savefig(
+                '{d}/{f}'.format(
+                    d=directory,
+                    f='trend{suffix}'.format(suffix=suffix)
+                )
+
+            if show:
+                plt.show()
+            else:
+                plt.close()
 
     # lstm: long short term memory
     if flag_lstm:
@@ -77,6 +123,38 @@ def classify(
             train_predicted = l.get_predict_test()[0]]
             test_actual = l.get_data('total', key_to_list='True')[1]
             test_predicted = l.get_predict_test()[1]
+
+            test_predicted_df = pd.DataFrame({
+                'actual': test_actual,
+                'predicted': test_predicted,
+                'dates': dates[:len(dates)]
+            })
+            test_predicted_df_long = pd.melt(
+                predicted_df,
+                id_vars=['dates'],
+                value_vars=['actual', 'predicted']
+            )
+
+            # plot
+            plot_ts(
+                data=pd.DataFrame({
+                    'values': train_actual,
+                    'dates': dates[:len(train_actual)]
+                })
+                x='values',
+                y='dates',
+                directory=directory,
+                filename='ts_train'
+            )
+
+            plot_ts(
+                data=test_predicted,
+                x='value',
+                y='dates',
+                hue='variable'
+                directory=directory,
+                filename='ts_test'
+            )
 
     # return score
     return(model_scores)
