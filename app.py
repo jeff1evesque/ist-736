@@ -20,6 +20,7 @@ from view.classifier import plot_bar
 from exploratory.sentiment import Sentiment
 from datetime import datetime
 from controller.classifier import classify
+from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
 
 #
@@ -27,6 +28,7 @@ import matplotlib.pyplot as plt
 #
 data = {}
 classify_results = {}
+timeseries_results = {}
 screen_name = [
     'jimcramer',
     'ReformedBroker',
@@ -209,8 +211,6 @@ for i,sn in enumerate(screen_name):
         else 1
         for i,x in enumerate(data[sn]['Index Value'])]
 
-    data[sn].to_csv('tests.csv')
-
     #
     # classify
     #
@@ -222,16 +222,37 @@ for i,sn in enumerate(screen_name):
         top_words=25
     )
 
+    #
+    # timeseries analysis
+    #
+    timeseries_results[sn] = timeseries(
+        data[sn],
+        'trend'
+    )
+
 #
 # ensembled scores
 #
 y_pos = np.arange(len(screen_name))
-performance = [v[0] for k,v in classify_results.items()]
-plt.bar(y_pos, performance, align='center', alpha=0.5)
+p1 = [v[0] for k,v in classify_results.items()]
+plt.bar(y_pos, p1, align='center', alpha=0.5)
 plt.xticks(y_pos, screen_name)
 plt.ylabel('Performance')
 plt.savefig('viz/accuracy_overall.png')
-plt.show()
+
+y_pos = np.arange(len(screen_name))
+p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
+plt.bar(y_pos, p2, align='center', alpha=0.5)
+plt.xticks(y_pos, screen_name)
+plt.ylabel('Performance')
+plt.savefig('viz/mse_overall_arima.png')
+
+y_pos = np.arange(len(screen_name))
+p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
+plt.bar(y_pos, p3, align='center', alpha=0.5)
+plt.xticks(y_pos, screen_name)
+plt.ylabel('Performance')
+plt.savefig('viz/mse_overall_lstm.png')
 
 #
 # exploratory
