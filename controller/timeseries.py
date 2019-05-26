@@ -7,8 +7,6 @@ from view.timeseries import plot_ts
 def timeseries(
     df,
     normalize_key,
-    kfold=True,
-    rotation=90,
     directory='viz',
     flag_arima=True,
     flag_lstm=True,
