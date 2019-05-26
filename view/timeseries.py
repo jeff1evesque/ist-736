@@ -5,21 +5,37 @@ sns.set(style='darkgrid')
 
 def plot_ts(
     data,
-    xlab='Dates',
-    ylab='Values',
+    xlab='dates',
+    ylab='values',
+    hue='variable'
+    legend=True,
     directory='viz',
-    file_suffix='text'
+    filename='ts',
+    show=False
 ):
     '''
 
     plot confusion matrix.
 
+    Note: multi-timeseries requires multiple columns melted.
+
     '''
 
-    sns.lineplot(
-        x='timepoint',
-        y='signal',
+    ax = sns.lineplot(
+        x=xlab,
+        y=ylab,
         hue='region',
         style='event',
-        data=fmri
+        data=data
     )
+
+    if legend:
+        plt.legend(legend, ncol=2, loc='upper right')
+
+    plt.ylabel(ylab)
+    plt.savefig('{d}/{f}'.format(d=directory, f=filename))
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
