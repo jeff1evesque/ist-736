@@ -249,4 +249,5 @@ class Arima():
             series = self.data[self.normalize_key]
 
         result = seasonal_decompose(series, model=model, freq=freq)
-        return(result.observed, result.trend, result.seasonal, result.resid)
+
+        return(result)
