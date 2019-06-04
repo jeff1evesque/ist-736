@@ -18,7 +18,7 @@ def model(
 
     # initialize classifier
     if model_type == 'arima':
-        model = Arima(df=df, normalize_key=normalize_key)
+        model = Arima(data=df, normalize_key=normalize_key)
 
         # train: use rolling length
         iterations = len(model.get_data(key=normalize_key)[1])
