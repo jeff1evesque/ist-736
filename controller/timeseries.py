@@ -11,7 +11,8 @@ def timeseries(
     flag_arima=True,
     flag_lstm=True,
     plot=True,
-    show=False
+    show=False,
+    suffix=None
 ):
     '''
 
