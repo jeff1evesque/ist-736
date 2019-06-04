@@ -3,7 +3,7 @@
 #
 # this project requires the following packages:
 #
-#   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow
+#   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow seaborn
 #   pip install keras==2.1.2
 #   pip install numpy==1.16.2
 #
