@@ -7,7 +7,7 @@ def plot_ts(
     data,
     xlab='dates',
     ylab='values',
-    hue='variable'
+    hue='variable',
     directory='viz',
     filename='ts',
     show=False
