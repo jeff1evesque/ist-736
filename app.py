@@ -16,7 +16,7 @@ from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
 from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
-from view.classifier import plot_bar
+from view.plot import plot_bar
 from exploratory.sentiment import Sentiment
 from datetime import datetime
 from controller.classifier import classify
