@@ -70,7 +70,7 @@ def timeseries(
                 data=pd.DataFrame({
                     'values': train_actual,
                     'dates': dates[:len(train_actual)]
-                })
+                }),
                 x='values',
                 y='dates',
                 directory=directory,
@@ -81,7 +81,7 @@ def timeseries(
                 data=predicted_df_long,
                 x='value',
                 y='dates',
-                hue='variable'
+                hue='variable',
                 directory=directory,
                 filename='ts_test'
             )
@@ -94,6 +94,7 @@ def timeseries(
                     d=directory,
                     f='trend{suffix}'.format(suffix=suffix)
                 )
+            )
 
             if show:
                 plt.show()
@@ -118,7 +119,7 @@ def timeseries(
 
         if plot:
             train_actual = l.get_data('total', key_to_list='True')[0]
-            train_predicted = l.get_predict_test()[0]]
+            train_predicted = l.get_predict_test()[0]
             test_actual = l.get_data('total', key_to_list='True')[1]
             test_predicted = l.get_predict_test()[1]
 
@@ -138,7 +139,7 @@ def timeseries(
                 data=pd.DataFrame({
                     'values': train_actual,
                     'dates': dates[:len(train_actual)]
-                })
+                }),
                 x='values',
                 y='dates',
                 directory=directory,
@@ -149,7 +150,7 @@ def timeseries(
                 data=test_predicted,
                 x='value',
                 y='dates',
-                hue='variable'
+                hue='variable',
                 directory=directory,
                 filename='ts_test'
             )
