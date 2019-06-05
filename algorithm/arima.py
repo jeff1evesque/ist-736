@@ -210,7 +210,13 @@ class Arima():
         elif not data and not self.normalize_key:
             data = 'Provide valid list'
 
-        return(adfuller(data))
+        try:
+            result = adfuller(data)
+        except Exception as e:
+            result = -999
+            print(e)
+
+        return(result)
 
     def get_differences(self):
         '''

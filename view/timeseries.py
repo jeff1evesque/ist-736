@@ -2,6 +2,7 @@
 
 import seaborn as sns
 sns.set(style='darkgrid')
+import matplotlib.pyplot as plt
 
 def plot_ts(
     data,
@@ -21,16 +22,20 @@ def plot_ts(
 
     '''
 
-    ax = sns.lineplot(
-        x=xlab,
-        y=ylab,
-        hue=hue,
-        style=style,
-        data=data
-    )
-    ax.set(xlabel=xlab, ylabel=ylab)
-    plt.savefig('{d}/{f}'.format(d=directory, f=filename))
+    if hue or style:
+        ax = sns.lineplot(
+            data=data,
+            x=xlab,
+            y=ylab,
+            hue=hue,
+            style=style
+        )
+        ax.set(xlabel=xlab, ylabel=ylab)
 
+    else:
+        plt.plot(data[xlab], data[ylab])
+
+    plt.savefig('{d}/{f}'.format(d=directory, f=filename))
     if show:
         plt.show()
     else:

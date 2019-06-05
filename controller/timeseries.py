@@ -4,6 +4,7 @@ import math
 import pandas as pd
 from model.timeseries import model
 from view.timeseries import plot_ts
+import matplotlib.pyplot as plt
 
 def timeseries(
     df,
@@ -54,12 +55,19 @@ def timeseries(
             #
             df.index = pd.to_datetime(df.index)
             dates = a.get_index()
-            train_actual = a.get_difference(
-                data=a.get_data(key=normalize_key, key_to_list='True')[0],
-                diff=diff
-            )
+
+            if diff > 1:
+                train_actual = a.get_difference(
+                    data=a.get_data(key=normalize_key, key_to_list='True')[0],
+                    diff=diff
+                )
+
+            else:
+                train_actual = a.get_data(key=normalize_key, key_to_list='True')[0]
+
             test_actual = a.get_differences()[0]
             predicted = a.get_differences()[1]
+
             predicted_df = pd.DataFrame({
                 'actual': test_actual,
                 'predicted': predicted,
@@ -70,15 +78,17 @@ def timeseries(
                 id_vars=['dates'],
                 value_vars=['actual', 'predicted']
             )
+            train_df=pd.DataFrame({
+                'values': train_actual,
+                'dates': dates[:len(train_actual)]
+            })
+            print('train_df: {}'.format(train_df))
 
             # plot
             plot_ts(
-                data=pd.DataFrame({
-                    'values': train_actual,
-                    'dates': dates[:len(train_actual)]
-                }),
-                xlab='values',
-                ylab='dates',
+                data=train_df,
+                xlab='dates',
+                ylab='values',
                 directory=directory,
                 filename='ts_train'
             )
@@ -86,16 +96,16 @@ def timeseries(
             plot_ts(
                 data=predicted_df_long,
                 xlab='value',
-                ylab='dates',
+                ylab='variable',
                 hue='variable',
                 directory=directory,
                 filename='ts_test'
             )
 
             # trend analysis
-            decomposed = l.get_decomposed()
+            decomposed = a.get_decomposed()
             decomposed.plot()
-            plot.savefig(
+            plt.savefig(
                 '{d}/{f}'.format(
                     d=directory,
                     f='trend{suffix}'.format(suffix=suffix)
@@ -147,16 +157,16 @@ def timeseries(
                     'values': train_actual,
                     'dates': dates[:len(train_actual)]
                 }),
-                xlab='values',
-                ylab='dates',
+                xlab='dates',
+                ylab='values',
                 directory=directory,
                 filename='ts_train'
             )
 
             plot_ts(
                 data=test_predicted,
-                xlab='value',
-                ylab='dates',
+                xlab='dates',
+                ylab='value',
                 hue='variable',
                 directory=directory,
                 filename='ts_test'
