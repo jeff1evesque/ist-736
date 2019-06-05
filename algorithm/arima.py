@@ -20,7 +20,8 @@ class Arima():
         data,
         train=False,
         normalize_key=None,
-        date_index='date'
+        date_index='date',
+        iterations=1
     ):
         '''
 
@@ -44,15 +45,12 @@ class Arima():
         # convert column to dataframe index
         self.data.set_index(date_index, inplace=True)
 
-        # convert dataframe columns to integer
-        self.data.total = self.data.total.astype(int)
-
         # create train + test
         self.split_data()
 
         # train
         if train:
-            self.train()
+            self.train(iterations=iterations)
 
     def split_data(self, test_size=0.20):
         '''
@@ -64,9 +62,13 @@ class Arima():
         '''
 
         # split without shuffling timeseries
-        self.train, self.test = train_test_split(self.data, test_size=test_size, shuffle=False)
-        self.df_train = pd.DataFrame(self.train)
-        self.df_test = pd.DataFrame(self.test)
+        self.X_train, self.y_test = train_test_split(
+            self.data,
+            test_size=test_size,
+            shuffle=False
+        )
+        self.df_train = pd.DataFrame(self.X_train)
+        self.df_test = pd.DataFrame(self.y_test)
 
     def get_data(self, key=None, key_to_list=False):
         '''
@@ -82,7 +84,7 @@ class Arima():
         else:
             return(self.df_train, self.df_test)
 
-    def train(self, iterations, order=[1,0,0]):
+    def train(self, iterations=1, order=[1,0,0]):
         '''
 
         train arima model.

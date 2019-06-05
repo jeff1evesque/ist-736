@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+import pandas as pd
 from model.timeseries import model
 from view.timeseries import plot_ts
 
@@ -52,7 +53,7 @@ def timeseries(
             #
             dates = a.get_index()
             train_actual = a.get_difference(
-                data=a.get_data(key='total', key_to_list='True')[0],
+                data=a.get_data(key=normalize_key, key_to_list='True')[0],
                 diff=1
             )
             test_actual = a.get_differences()[0]
@@ -60,7 +61,7 @@ def timeseries(
             predicted_df = pd.DataFrame({
                 'actual': test_actual,
                 'predicted': predicted,
-                'dates': dates[:len(dates)]
+                'dates': dates[:len(test_actual)]
             })
             predicted_df_long = pd.melt(
                 predicted_df,
@@ -122,9 +123,9 @@ def timeseries(
         }
 
         if plot:
-            train_actual = l.get_data('total', key_to_list='True')[0]
+            train_actual = l.get_data(normalize_key, key_to_list='True')[0]
             train_predicted = l.get_predict_test()[0]
-            test_actual = l.get_data('total', key_to_list='True')[1]
+            test_actual = l.get_data(normalize_key, key_to_list='True')[1]
             test_predicted = l.get_predict_test()[1]
 
             test_predicted_df = pd.DataFrame({

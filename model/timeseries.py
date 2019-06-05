@@ -22,12 +22,13 @@ def model(
         model = Arima(
             data=df,
             normalize_key=normalize_key,
-            date_index=date_index
+            date_index=date_index,
+            train=False
         )
 
         # train: use rolling length
         iterations = len(model.get_data(key=normalize_key)[1])
-        model.train(iterations)
+        model.train(iterations=iterations)
 
     elif model_type == 'lstm':
         model = Lstm(
