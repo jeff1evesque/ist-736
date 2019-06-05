@@ -75,16 +75,16 @@ def timeseries(
                     'values': train_actual,
                     'dates': dates[:len(train_actual)]
                 }),
-                x='values',
-                y='dates',
+                xlab='values',
+                ylab='dates',
                 directory=directory,
                 filename='ts_train'
             )
 
             plot_ts(
                 data=predicted_df_long,
-                x='value',
-                y='dates',
+                xlab='value',
+                ylab='dates',
                 hue='variable',
                 directory=directory,
                 filename='ts_test'
@@ -145,16 +145,16 @@ def timeseries(
                     'values': train_actual,
                     'dates': dates[:len(train_actual)]
                 }),
-                x='values',
-                y='dates',
+                xlab='values',
+                ylab='dates',
                 directory=directory,
                 filename='ts_train'
             )
 
             plot_ts(
                 data=test_predicted,
-                x='value',
-                y='dates',
+                xlab='value',
+                ylab='dates',
                 hue='variable',
                 directory=directory,
                 filename='ts_test'
