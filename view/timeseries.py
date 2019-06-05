@@ -7,9 +7,10 @@ def plot_ts(
     data,
     xlab='dates',
     ylab='values',
-    hue='variable',
     directory='viz',
     filename='ts',
+    hue=None,
+    style=None,
     show=False
 ):
     '''
@@ -23,8 +24,8 @@ def plot_ts(
     ax = sns.lineplot(
         x=xlab,
         y=ylab,
-        hue='region',
-        style='event',
+        hue=hue,
+        style=style,
         data=data
     )
     ax.set(xlabel=xlab, ylabel=ylab)
