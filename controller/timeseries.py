@@ -12,7 +12,8 @@ def timeseries(
     flag_lstm=True,
     plot=True,
     show=False,
-    suffix=None
+    suffix=None,
+    date_index='date'
 ):
     '''
 
@@ -34,7 +35,8 @@ def timeseries(
         a = model(
             df=df,
             normalize_key=normalize_key,
-            model_type='arima'
+            model_type='arima',
+            date_index=date_index
         )
         model_scores['arima'] = {
             'mse': a.get_mse(),
@@ -108,7 +110,8 @@ def timeseries(
         l = model(
             df=df,
             normalize_key=normalize_key,
-            model_type='lstm'
+            model_type='lstm',
+            date_index=date_index
         )
 
         # predict

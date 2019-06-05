@@ -230,8 +230,9 @@ for i,sn in enumerate(screen_name):
     # timeseries analysis
     #
     timeseries_results[sn] = timeseries(
-        data[sn],
-        'trend'
+        df=data[sn],
+        normalize_key='trend',
+        date_index='created_at'
     )
 
     with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:

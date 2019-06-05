@@ -9,6 +9,7 @@ def model(
     df,
     normalize_key,
     model_type='arima',
+    date_index='date'
 ):
     '''
 
@@ -18,14 +19,22 @@ def model(
 
     # initialize classifier
     if model_type == 'arima':
-        model = Arima(data=df, normalize_key=normalize_key)
+        model = Arima(
+            data=df,
+            normalize_key=normalize_key,
+            date_index=date_index
+        )
 
         # train: use rolling length
         iterations = len(model.get_data(key=normalize_key)[1])
         model.train(iterations)
 
     elif model_type == 'lstm':
-        model = Lstm(df=df, normalize_key=normalize_key)
+        model = Lstm(
+            data=df,
+            normalize_key=normalize_key,
+            date_index=date_index
+        )
         model.train()
 
     return(model)
