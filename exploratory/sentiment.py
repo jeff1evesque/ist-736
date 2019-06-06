@@ -99,8 +99,8 @@ class Sentiment():
             self.df_adjusted.negative.plot(color='r', legend=True)
             self.df_adjusted.positive.plot(color='g', legend=True)
             self.df_adjusted.neutral.plot(color='b', legend=True)
-        plt.title(title)
         plt.xticks(rotation=rotation)
+        plt.title(title)
 
         # save plot
         plt.savefig(filename)

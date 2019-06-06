@@ -89,7 +89,8 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train'
+                filename='ts_train',
+                rotation=90
             )
 
             plot_ts(
@@ -98,7 +99,8 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test'
+                filename='ts_test',
+                rotation=90
             )
 
             # trend analysis
@@ -159,7 +161,8 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train'
+                filename='ts_train',
+                rotation=90
             )
 
             plot_ts(
@@ -168,7 +171,8 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test'
+                filename='ts_test',
+                rotation=90
             )
 
     # return score
