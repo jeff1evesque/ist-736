@@ -39,7 +39,8 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
             sent_temp.vader_analysis()
             sent_temp.plot_ts(
                 title='{value}'.format(value=v),
-                filename='viz/{value}/sentiment.png'.format(value=v, key=k)
+                filename='viz/{value}/sentiment.png'.format(value=v, key=k),
+                rotation=90
             )
 
         word_cloud(df[target], filename='viz/wc_overall.png')
@@ -47,5 +48,6 @@ def explore(df, sent_cases, stopwords='', target='full_text'):
         sent_overall.vader_analysis()
         sent_overall.plot_ts(
             title='Overall Sentiment',
-            filename='viz/sentiment_overall.png'
+            filename='viz/sentiment_overall.png',
+            rotation=90
         )
