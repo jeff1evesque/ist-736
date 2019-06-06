@@ -3,6 +3,7 @@
 #
 # this project requires the following packages:
 #
+#   pip update
 #   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow seaborn
 #   pip install keras==2.1.2
 #   pip install numpy==1.16.2
@@ -232,7 +233,9 @@ for i,sn in enumerate(screen_name):
     timeseries_results[sn] = timeseries(
         df=data[sn],
         normalize_key='trend',
-        date_index='created_at'
+        date_index='created_at',
+        directory='viz/{sn}'.format(sn=sn),
+        flag_lstm=False
     )
 
     with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:
@@ -241,26 +244,26 @@ for i,sn in enumerate(screen_name):
 #
 # ensembled scores
 #
-y_pos = np.arange(len(screen_name))
-p1 = [v[0] for k,v in classify_results.items()]
-plt.bar(y_pos, p1, align='center', alpha=0.5)
-plt.xticks(y_pos, screen_name)
-plt.ylabel('Performance')
-plt.savefig('viz/accuracy_overall.png')
+##y_pos = np.arange(len(screen_name))
+##p1 = [v[0] for k,v in classify_results.items()]
+##plt.bar(y_pos, p1, align='center', alpha=0.5)
+##plt.xticks(y_pos, screen_name)
+##plt.ylabel('Performance')
+##plt.savefig('viz/accuracy_overall.png')
 
-y_pos = np.arange(len(screen_name))
-p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
-plt.bar(y_pos, p2, align='center', alpha=0.5)
-plt.xticks(y_pos, screen_name)
-plt.ylabel('Performance')
-plt.savefig('viz/mse_overall_arima.png')
+##y_pos = np.arange(len(screen_name))
+##p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
+##plt.bar(y_pos, p2, align='center', alpha=0.5)
+##plt.xticks(y_pos, screen_name)
+##plt.ylabel('Performance')
+##plt.savefig('viz/mse_overall_arima.png')
 
-y_pos = np.arange(len(screen_name))
-p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
-plt.bar(y_pos, p3, align='center', alpha=0.5)
-plt.xticks(y_pos, screen_name)
-plt.ylabel('Performance')
-plt.savefig('viz/mse_overall_lstm.png')
+##y_pos = np.arange(len(screen_name))
+##p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
+##plt.bar(y_pos, p3, align='center', alpha=0.5)
+##plt.xticks(y_pos, screen_name)
+##plt.ylabel('Performance')
+##plt.savefig('viz/mse_overall_lstm.png')
 
 #
 # exploratory
