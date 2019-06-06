@@ -2,6 +2,7 @@
 
 import math
 import numpy as np
+import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -18,7 +19,14 @@ class Lstm():
 
     '''
 
-    def __init__(self, data, look_back=1, train=False, normalize_key=None):
+    def __init__(
+        self,
+        data,
+        look_back=1,
+        train=False,
+        normalize_key=None,
+        date_index='date'
+    ):
         '''
 
         define class variables.
@@ -35,20 +43,14 @@ class Lstm():
         self.row_length = len(self.data)
 
         # sort dataframe by date
-        self.data['date'] = pd.to_datetime(self.data.date)
-        self.data.sort_values(by=['date'], inplace=True)
-
-        # convert column to dataframe index
-        self.data.set_index('date', inplace=True)
-
-        # convert dataframe columns to integer
-        self.data.total = self.data.total.astype(int)
+        self.data.sort_index(inplace=True)
 
         # create train + test
         self.split_data()
 
+        self.normalize_key = normalize_key
+
         if normalize_key:
-            self.normalize_key = normalize_key
             train_x, self.trainY = self.normalize(self.df_train)
             test_x, self.testY = self.normalize(self.df_test)
 
@@ -59,13 +61,9 @@ class Lstm():
             self.trainX = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
             self.testX = np.reshape(test_x, (test_x.shape[0], 1, test_x.shape[1]))
 
-        else:
-            self.normalize_key = None
-
         # train
         if train:
             self.train()
-            self.predict_test()
 
     def split_data(self, test_size=0.2):
         '''
@@ -77,9 +75,11 @@ class Lstm():
         '''
 
         # split without shuffling timeseries
-        self.train, self.test = train_test_split(self.data, test_size=test_size, shuffle=False)
-        self.df_train = pd.DataFrame(self.train)
-        self.df_test = pd.DataFrame(self.test)
+        self.df_train, self.df_test = train_test_split(
+            self.data,
+            test_size=test_size,
+            shuffle=False
+        )
 
     def get_data(self, key=None, key_to_list=False):
         '''
@@ -99,7 +99,7 @@ class Lstm():
 
         given a vector [x], a matrix [x, y] is returned:
 
-            x     y
+            x           y
             112		118
             118		132
             132		129
@@ -202,7 +202,7 @@ class Lstm():
             self.scaler.inverse_transform([self.testY])
         )
 
-    def predict_test(self, timesteps=10):
+    def predict(self, timesteps=10):
         '''
 
         generate prediction using hold out sample.

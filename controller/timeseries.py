@@ -53,8 +53,7 @@ def timeseries(
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            df.index = pd.to_datetime(df.index)
-            dates = a.get_index()
+            dates = a.get_data()
 
             if diff > 1:
                 train_actual = a.get_difference(
@@ -71,7 +70,7 @@ def timeseries(
             predicted_df = pd.DataFrame({
                 'actual': test_actual,
                 'predicted': predicted,
-                'dates': dates[:len(test_actual)]
+                'dates': dates[1][date_index][:len(test_actual)]
             })
             predicted_df_long = pd.melt(
                 predicted_df,
@@ -80,7 +79,7 @@ def timeseries(
             )
             train_df=pd.DataFrame({
                 'values': train_actual,
-                'dates': dates[:len(train_actual)]
+                'dates': dates[0][date_index][:len(train_actual)]
             })
 
             # plot
@@ -89,7 +88,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train',
+                filename='ts_train_arima',
                 rotation=90
             )
 
@@ -99,7 +98,7 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test',
+                filename='ts_test_arima',
                 rotation=90
             )
 
@@ -129,22 +128,29 @@ def timeseries(
         )
 
         # predict
-        l.predict_test()
+        l.predict()
         model_scores['lstm'] = {
             'mse': l.get_mse(),
             'history': l.get_fit_history()
         }
 
         if plot:
+            #
+            # @dates, full date range
+            # @train_actual, entire train values
+            # @test_actual, entire train values
+            # @predicted, only predicted values
+            #
+            dates = l.get_data()
             train_actual = l.get_data(normalize_key, key_to_list='True')[0]
-            train_predicted = l.get_predict_test()[0]
+            train_predicted = [x[0] for x in l.get_predict_test()[0]]
             test_actual = l.get_data(normalize_key, key_to_list='True')[1]
-            test_predicted = l.get_predict_test()[1]
+            test_predicted = [x[0] for x in l.get_predict_test()[1]]
 
             test_predicted_df = pd.DataFrame({
-                'actual': test_actual,
+                'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': dates[:len(dates)]
+                'dates': dates[1][date_index][-len(test_predicted):]
             })
             test_predicted_df_long = pd.melt(
                 predicted_df,
@@ -156,22 +162,22 @@ def timeseries(
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
-                    'dates': dates[:len(train_actual)]
+                    'dates': dates[0][date_index][:len(train_actual)]
                 }),
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train',
+                filename='ts_train_lstm',
                 rotation=90
             )
 
             plot_ts(
-                data=test_predicted,
+                data=test_predicted_df_long,
                 xlab='dates',
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test',
+                filename='ts_test_lstm',
                 rotation=90
             )
 

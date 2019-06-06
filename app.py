@@ -63,7 +63,6 @@ if not os.path.exists('reports'):
     os.makedirs('reports')
 
 # instantiate api
-
 t = TwitterQuery(
     t_creds['CONSUMER_KEY'],
     t_creds['CONSUMER_SECRET']
@@ -234,8 +233,7 @@ for i,sn in enumerate(screen_name):
         df=data[sn],
         normalize_key='trend',
         date_index='created_at',
-        directory='viz/{sn}'.format(sn=sn),
-        flag_lstm=False
+        directory='viz/{sn}'.format(sn=sn)
     )
 
     with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:
@@ -244,26 +242,29 @@ for i,sn in enumerate(screen_name):
 #
 # ensembled scores
 #
-##y_pos = np.arange(len(screen_name))
-##p1 = [v[0] for k,v in classify_results.items()]
-##plt.bar(y_pos, p1, align='center', alpha=0.5)
-##plt.xticks(y_pos, screen_name)
-##plt.ylabel('Performance')
-##plt.savefig('viz/accuracy_overall.png')
+p1 = [v[0] for k,v in classify_results.items()]
+plot_bar(
+    labels=screen_name,
+    performance=p1,
+    filename='accuracy_overall.png',
+    rotation=90
+)
 
-##y_pos = np.arange(len(screen_name))
-##p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
-##plt.bar(y_pos, p2, align='center', alpha=0.5)
-##plt.xticks(y_pos, screen_name)
-##plt.ylabel('Performance')
-##plt.savefig('viz/mse_overall_arima.png')
+p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
+plot_bar(
+    labels=screen_name,
+    performance=p2,
+    filename='mse_overall_arima.png',
+    rotation=90
+)
 
-##y_pos = np.arange(len(screen_name))
-##p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
-##plt.bar(y_pos, p3, align='center', alpha=0.5)
-##plt.xticks(y_pos, screen_name)
-##plt.ylabel('Performance')
-##plt.savefig('viz/mse_overall_lstm.png')
+p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
+plot_bar(
+    labels=screen_name,
+    performance=p2,
+    filename='mse_overall_lstm.png',
+    rotation=90
+)
 
 #
 # exploratory

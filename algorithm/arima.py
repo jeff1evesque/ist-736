@@ -37,13 +37,8 @@ class Arima():
         self.normalize_key = normalize_key
         self.row_length = len(self.data)
 
-        # sort dataframe
-        if date_index == 'date':
-            self.data[date_index] = pd.to_datetime(self.data[date_index])
-        self.data.sort_values(by=[date_index], inplace=True)
-        
-        # convert column to dataframe index
-        self.data.set_index(date_index, inplace=True)
+        # sort dataframe by date
+        self.data.sort_index(inplace=True)
 
         # create train + test
         self.split_data()

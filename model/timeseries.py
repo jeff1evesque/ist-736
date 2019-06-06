@@ -34,8 +34,8 @@ def model(
         model = Lstm(
             data=df,
             normalize_key=normalize_key,
-            date_index=date_index
+            date_index=date_index,
+            train=True
         )
-        model.train()
 
     return(model)
