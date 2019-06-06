@@ -53,7 +53,6 @@ def timeseries(
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            df.index = pd.to_datetime(df.index)
             dates = a.get_index()
 
             if diff > 1:
@@ -89,7 +88,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train',
+                filename='ts_train_lstm',
                 rotation=90
             )
 
@@ -99,7 +98,7 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test',
+                filename='ts_test_lstm',
                 rotation=90
             )
 
@@ -129,13 +128,21 @@ def timeseries(
         )
 
         # predict
-        l.predict_test()
+        l.predict()
         model_scores['lstm'] = {
             'mse': l.get_mse(),
             'history': l.get_fit_history()
         }
 
         if plot:
+            #
+            # @dates, full date range
+            # @train_actual, entire train values
+            # @test_actual, entire train values
+            # @predicted, only predicted values
+            #
+            dates = a.get_index()
+
             train_actual = l.get_data(normalize_key, key_to_list='True')[0]
             train_predicted = l.get_predict_test()[0]
             test_actual = l.get_data(normalize_key, key_to_list='True')[1]
@@ -161,7 +168,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train',
+                filename='ts_train_arima',
                 rotation=90
             )
 
@@ -171,7 +178,7 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test',
+                filename='ts_test_arima',
                 rotation=90
             )
 
