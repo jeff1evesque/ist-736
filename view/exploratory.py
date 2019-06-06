@@ -7,7 +7,7 @@ from exploratory.sentiment import Sentiment
 from exploratory.word_cloud import word_cloud
 from utility.dataframe import cleanse
 
-def explore(df, sent_cases, stopwords='', target='full_text'):
+def explore(df, sent_cases, stopwords='', target='full_text', rotation=0):
     '''
 
     generate wordclouds and sentiment series plot.

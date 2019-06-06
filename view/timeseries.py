@@ -12,6 +12,7 @@ def plot_ts(
     filename='ts',
     hue=None,
     style=None,
+    rotation=0,
     show=False
 ):
     '''
@@ -22,20 +23,19 @@ def plot_ts(
 
     '''
 
-    if hue or style:
-        ax = sns.lineplot(
-            data=data,
-            x=xlab,
-            y=ylab,
-            hue=hue,
-            style=style
-        )
-        ax.set(xlabel=xlab, ylabel=ylab)
+    ax = sns.lineplot(
+        data=data,
+        x=xlab,
+        y=ylab,
+        hue=hue,
+        style=style
+    )
+    ax.set(xlabel=xlab, ylabel=ylab)
 
-    else:
-        plt.plot(data[xlab], data[ylab])
-
+    plt.xticks(rotation=rotation)
+    plt.tight_layout()
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))
+
     if show:
         plt.show()
     else:
