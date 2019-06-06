@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -14,7 +15,14 @@ class Arima():
 
     '''
 
-    def __init__(self, data, train=False, normalize_key=None):
+    def __init__(
+        self,
+        data,
+        train=False,
+        normalize_key=None,
+        date_index='date',
+        iterations=1
+    ):
         '''
 
         define class variables.
@@ -29,22 +37,20 @@ class Arima():
         self.normalize_key = normalize_key
         self.row_length = len(self.data)
 
-        # sort dataframe by date
-        self.data['date'] = pd.to_datetime(self.data.date)
-        self.data.sort_values(by=['date'], inplace=True)
+        # sort dataframe
+        if date_index == 'date':
+            self.data[date_index] = pd.to_datetime(self.data[date_index])
+        self.data.sort_values(by=[date_index], inplace=True)
         
         # convert column to dataframe index
-        self.data.set_index('date', inplace=True)
-
-        # convert dataframe columns to integer
-        self.data.total = self.data.total.astype(int)
+        self.data.set_index(date_index, inplace=True)
 
         # create train + test
         self.split_data()
 
         # train
         if train:
-            self.train()
+            self.train(iterations=iterations)
 
     def split_data(self, test_size=0.20):
         '''
@@ -56,9 +62,13 @@ class Arima():
         '''
 
         # split without shuffling timeseries
-        self.train, self.test = train_test_split(self.data, test_size=test_size, shuffle=False)
-        self.df_train = pd.DataFrame(self.train)
-        self.df_test = pd.DataFrame(self.test)
+        self.X_train, self.y_test = train_test_split(
+            self.data,
+            test_size=test_size,
+            shuffle=False
+        )
+        self.df_train = pd.DataFrame(self.X_train)
+        self.df_test = pd.DataFrame(self.y_test)
 
     def get_data(self, key=None, key_to_list=False):
         '''
@@ -74,7 +84,7 @@ class Arima():
         else:
             return(self.df_train, self.df_test)
 
-    def train_model(self, iterations, order=[1,0,0]):
+    def train(self, iterations=1, order=[1,0,0]):
         '''
 
         train arima model.
@@ -200,7 +210,13 @@ class Arima():
         elif not data and not self.normalize_key:
             data = 'Provide valid list'
 
-        return(adfuller(data))
+        try:
+            result = adfuller(data)
+        except Exception as e:
+            result = -999
+            print(e)
+
+        return(result)
 
     def get_differences(self):
         '''
@@ -249,4 +265,5 @@ class Arima():
             series = self.data[self.normalize_key]
 
         result = seasonal_decompose(series, model=model, freq=freq)
-        return(result.observed, result.trend, result.seasonal, result.resid)
+
+        return(result)

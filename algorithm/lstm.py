@@ -127,7 +127,7 @@ class Lstm():
 
         return(np.array(X_train), np.array(y_train))
 
-    def train_model(self, epochs=100, batch_size=32):
+    def train(self, epochs=100, batch_size=32):
         '''
 
         train lstm model.

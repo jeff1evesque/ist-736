@@ -80,7 +80,13 @@ class Sentiment():
         # return scores
         return(self.df_adjusted)
 
-    def plot_ts(self, title='Sentiment Analysis', filename='sentiment.png', show=False):
+    def plot_ts(
+        self,
+        title='Sentiment Analysis',
+        filename='sentiment.png',
+        show=False,
+        rotation=0
+    ):
         '''
 
         plot sentiment generated from 'vader_analysis'.
@@ -93,6 +99,7 @@ class Sentiment():
             self.df_adjusted.negative.plot(color='r', legend=True)
             self.df_adjusted.positive.plot(color='g', legend=True)
             self.df_adjusted.neutral.plot(color='b', legend=True)
+        plt.xticks(rotation=rotation)
         plt.title(title)
 
         # save plot
