@@ -82,7 +82,6 @@ def timeseries(
                 'values': train_actual,
                 'dates': dates[:len(train_actual)]
             })
-            print('train_df: {}'.format(train_df))
 
             # plot
             plot_ts(
@@ -95,8 +94,8 @@ def timeseries(
 
             plot_ts(
                 data=predicted_df_long,
-                xlab='value',
-                ylab='variable',
+                xlab='dates',
+                ylab='value',
                 hue='variable',
                 directory=directory,
                 filename='ts_test'
