@@ -67,24 +67,23 @@ def timeseries(
             test_actual = a.get_differences()[0]
             predicted = a.get_differences()[1]
 
-            predicted_df = pd.DataFrame({
+            test_predicted_df = pd.DataFrame({
                 'actual': test_actual,
                 'predicted': predicted,
                 'dates': dates[1][date_index][:len(test_actual)]
             })
-            predicted_df_long = pd.melt(
-                predicted_df,
+            test_predicted_df_long = pd.melt(
+                test_predicted_df,
                 id_vars=['dates'],
                 value_vars=['actual', 'predicted']
             )
-            train_df=pd.DataFrame({
-                'values': train_actual,
-                'dates': dates[0][date_index][:len(train_actual)]
-            })
 
             # plot
             plot_ts(
-                data=train_df,
+                data=pd.DataFrame({
+                    'values': train_actual,
+                    'dates': dates[0][date_index][:len(train_actual)]
+                }),
                 xlab='dates',
                 ylab='values',
                 directory=directory,
@@ -93,7 +92,7 @@ def timeseries(
             )
 
             plot_ts(
-                data=predicted_df_long,
+                data=test_predicted_df_long,
                 xlab='dates',
                 ylab='value',
                 hue='variable',
@@ -153,7 +152,7 @@ def timeseries(
                 'dates': dates[1][date_index][-len(test_predicted):]
             })
             test_predicted_df_long = pd.melt(
-                predicted_df,
+                test_predicted_df,
                 id_vars=['dates'],
                 value_vars=['actual', 'predicted']
             )
