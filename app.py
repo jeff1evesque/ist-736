@@ -30,6 +30,8 @@ import matplotlib.pyplot as plt
 # local variables
 #
 data = {}
+ts_index = 'Index Value'
+classify_index = 'full_text'
 classify_results = {}
 timeseries_results = {}
 screen_name = [
@@ -95,8 +97,8 @@ for i,sn in enumerate(screen_name):
                 params=[
                     {'user': ['screen_name']},
                     'created_at',
-                    'full_text',
-                    {'retweeted_status': ['full_text']},
+                    classify_index,
+                    {'retweeted_status': [classify_index]},
                     'retweet_count',
                     'favorite_count',
                     {'entities': ['user_mentions']}
@@ -106,7 +108,7 @@ for i,sn in enumerate(screen_name):
             )
 
             # sentiment analysis
-            s = Sentiment(data[sn], 'full_text')
+            s = Sentiment(data[sn], classify_index)
             data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
             data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
@@ -153,7 +155,7 @@ for i,sn in enumerate(screen_name):
 
     # convert to string
     data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-    data[sn]['full_text'] = data[sn]['full_text'].astype(str)
+    data[sn][classify_index] = data[sn][classify_index].astype(str)
 
     #
     # some screen_name text multiple times a day, yet quandl only provides
@@ -163,7 +165,7 @@ for i,sn in enumerate(screen_name):
         'created_at',
         'screen_name'
     ]).agg({
-        'full_text': lambda a: ''.join(a)
+        classify_index: lambda a: ''.join(a)
     }).reset_index()
 
     #
@@ -179,41 +181,41 @@ for i,sn in enumerate(screen_name):
     #
     drop_indices = []
     for i,row in data[sn].iterrows():
-        if (i == 0 and np.isnan(data[sn]['Index Value'][i])):
-            data[sn]['full_text'][i+1] = '{current} {next}'.format(
-                current=data[sn]['full_text'][i],
-                next=data[sn]['full_text'][i+1]
+        if (i == 0 and np.isnan(data[sn][ts_index][i])):
+            data[sn][classify_index][i+1] = '{current} {next}'.format(
+                current=data[sn][classify_index][i],
+                next=data[sn][classify_index][i+1]
             )
             drop_indices.append(i)
 
-        elif (i > 0 and not data[sn]['Index Value'][i-1]):
+        elif (i > 0 and not data[sn][ts_index][i-1]):
             continue
 
-        elif (i > 0 and np.isnan(data[sn]['Index Value'][i])):
-            if not np.isnan(data[sn]['Index Value'][i-1]):
-                data[sn]['Index Value'][i] = data[sn]['Index Value'][i-1]
+        elif (i > 0 and np.isnan(data[sn][ts_index][i])):
+            if not np.isnan(data[sn][ts_index][i-1]):
+                data[sn][ts_index][i] = data[sn][ts_index][i-1]
                 data[sn]['High'][i] = data[sn]['High'][i-1]
                 data[sn]['Low'][i] = data[sn]['Low'][i-1]
                 data[sn]['Total Market Value'][i] = data[sn]['Total Market Value'][i-1]
                 data[sn]['Dividend Market Value'][i] = data[sn]['Dividend Market Value'][i-1]
-                data[sn]['full_text'][i] = '{previous} {current}'.format(
-                    previous=data[sn]['full_text'][i-1],
-                    current=data[sn]['full_text'][i-1]
+                data[sn][classify_index][i] = '{previous} {current}'.format(
+                    previous=data[sn][classify_index][i-1],
+                    current=data[sn][classify_index][i-1]
                 )
                 drop_indices.append(i)
 
     #
-    # drop rows: rows with no tickers and empty 'full_text'.
+    # drop rows: rows with no tickers and empty classify_index.
     #
-    drop_indices.extend(data[sn][data[sn]['full_text'] == ''].index)
+    drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
     data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
     #
     # index data: relabel index as up (0) or down (1) based on previous time
     #
-    data[sn]['trend'] = [0 if data[sn]['Index Value'][i] > data[sn]['Index Value'].get(i-1, 0)
+    data[sn]['trend'] = [0 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
         else 1
-        for i,x in enumerate(data[sn]['Index Value'])]
+        for i,x in enumerate(data[sn][ts_index])]
 
     #
     # classify
@@ -221,7 +223,7 @@ for i,sn in enumerate(screen_name):
     classify_results[sn] = classify(
         data[sn],
         key_class='trend',
-        key_text='full_text',
+        key_text=classify_index,
         directory='viz/{sn}'.format(sn=sn),
         top_words=25
     )
@@ -231,7 +233,7 @@ for i,sn in enumerate(screen_name):
     #
     timeseries_results[sn] = timeseries(
         df=data[sn],
-        normalize_key='trend',
+        normalize_key=ts_index,
         date_index='created_at',
         directory='viz/{sn}'.format(sn=sn)
     )
