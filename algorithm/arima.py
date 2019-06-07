@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -33,6 +34,11 @@ class Arima():
             self.data = pd.DataFrame(data)
         else:
             self.data = data
+
+        # replace 'nan' with overall average
+        self.data[normalize_key] = [x if str(x) != 'nan'
+            else np.nanmean(self.data[normalize_key])
+                for x in self.data[normalize_key]]
 
         self.normalize_key = normalize_key
         self.row_length = len(self.data)
