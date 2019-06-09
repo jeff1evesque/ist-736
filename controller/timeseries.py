@@ -17,7 +17,8 @@ def timeseries(
     suffix=None,
     date_index='date',
     diff=1,
-    xticks=True
+    xticks=True,
+    lstm_epochs=100
 ):
     '''
 
@@ -126,7 +127,8 @@ def timeseries(
             df=df,
             normalize_key=normalize_key,
             model_type='lstm',
-            date_index=date_index
+            date_index=date_index,
+            epochs=lstm_epochs
         )
 
         # predict

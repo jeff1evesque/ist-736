@@ -167,7 +167,9 @@ for i,sn in enumerate(screen_name):
             normalize_key=sentiment,
             date_index='created_at',
             directory='viz/{sn}'.format(sn=sn),
-            suffix=sentiment
+            suffix=sentiment,
+            lstm_epochs=50,
+            flag_arima=False
         )
 
         with open('reports/adf_{sn}_{sent}.txt'.format(
@@ -184,7 +186,7 @@ plot_bar(
     rotation=90
 )
 
-s2 = [v['lstm']['mse'] for k,v in timeseries_results_sentiment.items()]
+s2 = [v['lstm']['mse'][1] for k,v in timeseries_results_sentiment.items()]
 plot_bar(
     labels=screen_name,
     performance=s2,
@@ -319,7 +321,7 @@ plot_bar(
 
 plot_bar(
     labels=screen_name,
-    performance=[v['lstm']['mse'] for k,v in timeseries_results.items()],
+    performance=[v['lstm']['mse'][1] for k,v in timeseries_results.items()],
     filename='mse_overall_lstm.png',
     rotation=90
 )
