@@ -168,15 +168,15 @@ for i,sn in enumerate(screen_name):
             date_index='created_at',
             directory='viz/{sn}'.format(sn=sn),
             suffix=sentiment,
-            lstm_epochs=50,
-            flag_arima=False
+            lstm_epochs=50
         )
 
-        with open('reports/adf_{sn}_{sent}.txt'.format(
-            sn=sn,
-            sent=sentiment
-        ), 'w') as fp:
-            print(timeseries_results_sentiment[sn]['arima']['adf'], file=fp)
+        if timeseries_results_sentiment[sn]['arima']['adf']:
+            with open('reports/adf_{sn}_{sent}.txt'.format(
+                sn=sn,
+                sent=sentiment
+            ), 'w') as fp:
+                print(timeseries_results_sentiment[sn]['adf'], file=fp)
 
 s1 = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
 plot_bar(
