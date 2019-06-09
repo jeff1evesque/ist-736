@@ -16,7 +16,9 @@ def timeseries(
     show=False,
     suffix=None,
     date_index='date',
-    diff=1
+    diff=1,
+    xticks=True,
+    lstm_epochs=100
 ):
     '''
 
@@ -87,8 +89,9 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train_arima',
-                rotation=90
+                filename='ts_train_arima{s}'.format(s=suffix),
+                rotation=90,
+                xticks=xticks
             )
 
             plot_ts(
@@ -97,8 +100,9 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test_arima',
-                rotation=90
+                filename='ts_test_arima{s}'.format(s=suffix),
+                rotation=90,
+                xticks=xticks
             )
 
             # trend analysis
@@ -123,7 +127,8 @@ def timeseries(
             df=df,
             normalize_key=normalize_key,
             model_type='lstm',
-            date_index=date_index
+            date_index=date_index,
+            epochs=lstm_epochs
         )
 
         # predict
@@ -166,8 +171,9 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train_lstm',
-                rotation=90
+                filename='ts_train_lstm{s}'.format(s=suffix),
+                rotation=90,
+                xticks=xticks
             )
 
             plot_ts(
@@ -176,8 +182,9 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test_lstm',
-                rotation=90
+                filename='ts_test_lstm{s}'.format(s=suffix),
+                rotation=90,
+                xticks=xticks
             )
 
     # return score

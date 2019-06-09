@@ -9,7 +9,8 @@ def model(
     df,
     normalize_key,
     model_type='arima',
-    date_index='date'
+    date_index='date',
+    epochs=100
 ):
     '''
 
@@ -35,7 +36,7 @@ def model(
             data=df,
             normalize_key=normalize_key,
             date_index=date_index,
-            train=True
         )
+        model.train(epochs=epochs)
 
     return(model)

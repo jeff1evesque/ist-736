@@ -34,6 +34,7 @@ ts_index = 'Index Value'
 classify_index = 'full_text'
 classify_results = {}
 timeseries_results = {}
+timeseries_results_sentiment = {}
 screen_name = [
     'jimcramer',
     'ReformedBroker',
@@ -132,6 +133,65 @@ for i,sn in enumerate(screen_name):
     temp_end = datetime.strptime(end.split()[0], '%Y-%m-%d')
     if temp_end > end_date:
         end_date = temp_end
+
+#
+# timeseries analysis: sentiment
+#
+for i,sn in enumerate(screen_name):
+    # merge with consistent date format
+    data[sn]['created_at'] = [datetime.strptime(
+        x.split()[0],
+        '%Y-%m-%d'
+    ) for x in data[sn]['created_at']]
+
+    # convert to string
+    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+
+    #
+    # some screen_name text multiple times a day, yet quandl only provides
+    #     daily prices.
+    #
+    data[sn] = data[sn].groupby([
+        'created_at',
+        'screen_name',
+        'positive',
+        'neutral',
+        'negative'
+    ]).agg({
+        classify_index: lambda a: ''.join(str(a))
+    }).reset_index()
+
+    for sentiment in ['negative', 'neutral', 'positive']:
+        timeseries_results_sentiment[sn] = timeseries(
+            df=data[sn],
+            normalize_key=sentiment,
+            date_index='created_at',
+            directory='viz/{sn}'.format(sn=sn),
+            suffix=sentiment,
+            lstm_epochs=50
+        )
+
+        with open('reports/adf_{sn}_{sent}.txt'.format(
+            sn=sn,
+            sent=sentiment
+        ), 'w') as fp:
+            print(timeseries_results_sentiment[sn]['arima']['adf'], file=fp)
+
+s1 = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
+plot_bar(
+    labels=screen_name,
+    performance=s1,
+    filename='mse_overall_arima_sentiment.png',
+    rotation=90
+)
+
+s2 = [v['lstm']['mse'][1] for k,v in timeseries_results_sentiment.items()]
+plot_bar(
+    labels=screen_name,
+    performance=s2,
+    filename='mse_overall_lstm_sentiment.png',
+    rotation=90
+)
 
 #
 # harvest quandl: using the maximum twitter date range
@@ -244,26 +304,23 @@ for i,sn in enumerate(screen_name):
 #
 # ensembled scores
 #
-p1 = [v[0] for k,v in classify_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p1,
+    performance=[v[0] for k,v in classify_results.items()],
     filename='accuracy_overall.png',
     rotation=90
 )
 
-p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p2,
+    performance=[v['arima']['mse'] for k,v in timeseries_results.items()],
     filename='mse_overall_arima.png',
     rotation=90
 )
 
-p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p2,
+    performance=[v['lstm']['mse'][1] for k,v in timeseries_results.items()],
     filename='mse_overall_lstm.png',
     rotation=90
 )

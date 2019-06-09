@@ -13,7 +13,8 @@ def plot_ts(
     hue=None,
     style=None,
     rotation=0,
-    show=False
+    show=False,
+    xticks=True
 ):
     '''
 
@@ -33,6 +34,10 @@ def plot_ts(
     ax.set(xlabel=xlab, ylabel=ylab)
 
     plt.xticks(rotation=rotation)
+
+    if not xticks:
+        plt.xticks([])
+
     plt.tight_layout()
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))
 
