@@ -174,7 +174,7 @@ for i,sn in enumerate(screen_name):
             sn=sn,
             sent=sentiment
         ), 'w') as fp:
-            print(timeseries_results[sn]['arima']['adf'], file=fp)
+            print(timeseries_results_sentiment[sn]['arima']['adf'], file=fp)
 
 sentiment = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
 plot_bar(
