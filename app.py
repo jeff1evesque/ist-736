@@ -25,6 +25,7 @@ from datetime import datetime
 from controller.classifier import classify
 from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
+from utility.stopwords import stopwords
 
 #
 # local variables
@@ -41,15 +42,6 @@ screen_name = [
     'TheStalwart',
     'LizAnnSonders',
     'SJosephBurns'
-]
-stopwords=[
-    'http',
-    'https',
-    'nhttps',
-    'RT',
-    'amp',
-    'co',
-    'TheStreet'
 ]
 stopwords.extend(screen_name)
 
@@ -123,6 +115,9 @@ for i,sn in enumerate(screen_name):
     # convert to string
     data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
+    # exploratory: wordcloud + sentiment
+    explore(data[sn], stopwords=stopwords)
+
     # largest time span
     start = data[screen_name[i]]['created_at'].iloc[0]
     temp_start = datetime.strptime(start.split()[0], '%Y-%m-%d')
@@ -133,6 +128,12 @@ for i,sn in enumerate(screen_name):
     temp_end = datetime.strptime(end.split()[0], '%Y-%m-%d')
     if temp_end > end_date:
         end_date = temp_end
+
+#
+# exploratory (overall): wordcloud + sentiment
+#
+df = pd.concat(data).reset_index()
+explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
 
 #
 # timeseries analysis: sentiment
@@ -324,9 +325,3 @@ plot_bar(
     filename='mse_overall_lstm.png',
     rotation=90
 )
-
-#
-# exploratory
-#
-df = pd.concat(data).reset_index()
-explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})

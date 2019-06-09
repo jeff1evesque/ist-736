@@ -21,7 +21,7 @@ class Sentiment():
 
     '''
 
-    def __init__(self, data, column_name):
+    def __init__(self, data, column_name=None):
         '''
 
         define class variables.
@@ -29,11 +29,16 @@ class Sentiment():
         '''
 
         # local variables
-        self.df = data
-        self.column_name = column_name
+        self.data = data
 
-        # clean text
-        self.df[self.column_name] = cleanse(self.df, self.column_name)
+        if column_name:
+            self.column_name = column_name
+            self.data = data[column_name]
+
+        else:
+            self.column_name = None
+
+        self.data = cleanse(self.data)
 
     def vader_analysis(self):
         '''
@@ -43,7 +48,6 @@ class Sentiment():
         '''
 
         analyser = SentimentIntensityAnalyzer()
-
         sid = SentimentIntensityAnalyzer()
         result = {
             'compound': [],
@@ -53,8 +57,8 @@ class Sentiment():
         }
 
         # sentiment analysis
-        for i,s in enumerate(self.df[self.column_name]):
-            ss = sid.polarity_scores(s)
+        for sent in self.data:
+            ss = sid.polarity_scores(sent)
 
             for k in sorted(ss):
                 if k == 'compound':
@@ -70,7 +74,7 @@ class Sentiment():
         # append results: duplicate dataframe resolves the panda
         #     'SettingWithCopyWarning' error.
         #
-        self.df_adjusted = pd.DataFrame({
+        self.data_adjusted = pd.DataFrame({
             'compound': result['compound'],
             'negative': result['negative'],
             'neutral': result['neutral'],
@@ -78,14 +82,14 @@ class Sentiment():
         })
 
         # return scores
-        return(self.df_adjusted)
+        return(self.data_adjusted)
 
     def plot_ts(
         self,
         title='Sentiment Analysis',
         filename='sentiment.png',
         show=False,
-        rotation=0
+        alpha=0.6
     ):
         '''
 
@@ -96,10 +100,9 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.df_adjusted.negative.plot(color='r', legend=True)
-            self.df_adjusted.positive.plot(color='g', legend=True)
-            self.df_adjusted.neutral.plot(color='b', legend=True)
-        plt.xticks(rotation=rotation)
+            self.data_adjusted.negative.plot(color='r', legend=True, alpha=alpha)
+            self.data_adjusted.positive.plot(color='g', legend=True, alpha=alpha)
+            self.data_adjusted.neutral.plot(color='b', legend=True, alpha=alpha)
         plt.title(title)
 
         # save plot
