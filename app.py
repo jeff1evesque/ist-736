@@ -25,6 +25,7 @@ from datetime import datetime
 from controller.classifier import classify
 from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
+from utility.stopwords import stopwords
 
 #
 # local variables
@@ -41,15 +42,6 @@ screen_name = [
     'TheStalwart',
     'LizAnnSonders',
     'SJosephBurns'
-]
-stopwords=[
-    'http',
-    'https',
-    'nhttps',
-    'RT',
-    'amp',
-    'co',
-    'TheStreet'
 ]
 stopwords.extend(screen_name)
 
