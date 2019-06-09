@@ -34,10 +34,11 @@ class Sentiment():
         if column_name:
             self.column_name = column_name
             self.data = data[column_name]
-            self.data[self.column_name] = cleanse(self.data, self.column_name)
+
         else:
             self.column_name = None
-            self.data = cleanse(self.data)
+
+        self.data = cleanse(self.data)
 
     def vader_analysis(self):
         '''
@@ -56,33 +57,18 @@ class Sentiment():
         }
 
         # sentiment analysis
-        if self.column_name:
-            for sent in self.data[[self.column_name]].iterrows():
-                ss = sid.polarity_scores(sent[1][0])
+        for sent in self.data:
+            ss = sid.polarity_scores(sent)
 
-                for k in sorted(ss):
-                    if k == 'compound':
-                        result['compound'].append(ss[k])
-                    elif k == 'neg':
-                        result['negative'].append(ss[k])
-                    elif k == 'neu':
-                        result['neutral'].append(ss[k])
-                    elif k == 'pos':
-                        result['positive'].append(ss[k])
-
-        else:
-            for sent in self.data:
-                ss = sid.polarity_scores(sent)
-
-                for k in sorted(ss):
-                    if k == 'compound':
-                        result['compound'].append(ss[k])
-                    elif k == 'neg':
-                        result['negative'].append(ss[k])
-                    elif k == 'neu':
-                        result['neutral'].append(ss[k])
-                    elif k == 'pos':
-                        result['positive'].append(ss[k])
+            for k in sorted(ss):
+                if k == 'compound':
+                    result['compound'].append(ss[k])
+                elif k == 'neg':
+                    result['negative'].append(ss[k])
+                elif k == 'neu':
+                    result['neutral'].append(ss[k])
+                elif k == 'pos':
+                    result['positive'].append(ss[k])
 
         #
         # append results: duplicate dataframe resolves the panda
@@ -102,7 +88,8 @@ class Sentiment():
         self,
         title='Sentiment Analysis',
         filename='sentiment.png',
-        show=False
+        show=False,
+        alpha=0.6
     ):
         '''
 
@@ -113,9 +100,9 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.data_adjusted.negative.plot(color='r', legend=True)
-            self.data_adjusted.positive.plot(color='g', legend=True)
-            self.data_adjusted.neutral.plot(color='b', legend=True)
+            self.data_adjusted.negative.plot(color='r', legend=True, alpha=alpha)
+            self.data_adjusted.positive.plot(color='g', legend=True, alpha=alpha)
+            self.data_adjusted.neutral.plot(color='b', legend=True, alpha=alpha)
         plt.title(title)
 
         # save plot

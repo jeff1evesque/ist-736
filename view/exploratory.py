@@ -45,6 +45,7 @@ def explore(
     if sent_cases:
         for k,val in sent_cases.items():
             for v in val:
+                wc_temp = df.loc[df[k] == v]
                 if not os.path.exists('{d}/{value}'.format(
                     d=directory,
                     value=v
@@ -55,11 +56,10 @@ def explore(
                     ))
 
                 if plot_wc:
-                    wc_temp = df.loc[df[k] == v]
-
+                    print(wc_temp[target])
                     # create wordcloud
                     word_cloud(
-                        wc_temp.values,
+                        wc_temp[target],
                         filename='{d}/{value}/wc{suffix}.png'.format(
                             d=directory,
                             value=v,
@@ -106,14 +106,10 @@ def explore(
 
     else:
         # clean text
-        wc_temp = df
-        wc_temp = [x.split() for x in wc_temp]
-        print(wc_temp)
-
         if plot_wc:
             # create wordcloud
             word_cloud(
-                wc_temp,
+                df[target],
                 filename='{d}/wc{suffix}.png'.format(
                     d=directory,
                     suffix=suffix
@@ -124,7 +120,7 @@ def explore(
 
         if plot_sentiment:
             # create sentiment plot
-            sent_temp = Sentiment(wc_temp)
+            sent_temp = Sentiment(df[target])
             sent_temp.vader_analysis()
             sent_temp.plot_ts(
                 title='Sentiment Analysis',
