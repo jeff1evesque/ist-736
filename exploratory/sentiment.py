@@ -21,7 +21,7 @@ class Sentiment():
 
     '''
 
-    def __init__(self, data, column_name):
+    def __init__(self, data, column_name=None):
         '''
 
         define class variables.
@@ -29,11 +29,15 @@ class Sentiment():
         '''
 
         # local variables
-        self.df = data
-        self.column_name = column_name
+        self.data = data
 
-        # clean text
-        self.df[self.column_name] = cleanse(self.df, self.column_name)
+        if column_name:
+            self.column_name = column_name
+            self.data = data[column_name]
+            self.data[self.column_name] = cleanse(self.data, self.column_name)
+        else:
+            self.column_name = None
+            self.data = cleanse(self.data)
 
     def vader_analysis(self):
         '''
@@ -43,7 +47,6 @@ class Sentiment():
         '''
 
         analyser = SentimentIntensityAnalyzer()
-
         sid = SentimentIntensityAnalyzer()
         result = {
             'compound': [],
@@ -53,24 +56,39 @@ class Sentiment():
         }
 
         # sentiment analysis
-        for sent in self.df[[self.column_name]].iterrows():
-            ss = sid.polarity_scores(sent[1][0])
+        if self.column_name:
+            for sent in self.data[[self.column_name]].iterrows():
+                ss = sid.polarity_scores(sent[1][0])
 
-            for k in sorted(ss):
-                if k == 'compound':
-                    result['compound'].append(ss[k])
-                elif k == 'neg':
-                    result['negative'].append(ss[k])
-                elif k == 'neu':
-                    result['neutral'].append(ss[k])
-                elif k == 'pos':
-                    result['positive'].append(ss[k])
+                for k in sorted(ss):
+                    if k == 'compound':
+                        result['compound'].append(ss[k])
+                    elif k == 'neg':
+                        result['negative'].append(ss[k])
+                    elif k == 'neu':
+                        result['neutral'].append(ss[k])
+                    elif k == 'pos':
+                        result['positive'].append(ss[k])
+
+        else:
+            for sent in self.data:
+                ss = sid.polarity_scores(sent)
+
+                for k in sorted(ss):
+                    if k == 'compound':
+                        result['compound'].append(ss[k])
+                    elif k == 'neg':
+                        result['negative'].append(ss[k])
+                    elif k == 'neu':
+                        result['neutral'].append(ss[k])
+                    elif k == 'pos':
+                        result['positive'].append(ss[k])
 
         #
         # append results: duplicate dataframe resolves the panda
         #     'SettingWithCopyWarning' error.
         #
-        self.df_adjusted = pd.DataFrame({
+        self.data_adjusted = pd.DataFrame({
             'compound': result['compound'],
             'negative': result['negative'],
             'neutral': result['neutral'],
@@ -78,7 +96,7 @@ class Sentiment():
         })
 
         # return scores
-        return(self.df_adjusted)
+        return(self.data_adjusted)
 
     def plot_ts(
         self,
@@ -95,9 +113,9 @@ class Sentiment():
         # generate plot
         plt.figure()
         with pd.plotting.plot_params.use('x_compat', True):
-            self.df_adjusted.negative.plot(color='r', legend=True)
-            self.df_adjusted.positive.plot(color='g', legend=True)
-            self.df_adjusted.neutral.plot(color='b', legend=True)
+            self.data_adjusted.negative.plot(color='r', legend=True)
+            self.data_adjusted.positive.plot(color='g', legend=True)
+            self.data_adjusted.neutral.plot(color='b', legend=True)
         plt.title(title)
 
         # save plot

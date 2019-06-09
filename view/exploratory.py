@@ -20,7 +20,7 @@ def explore(
     plot_sentiment=True,
     plot_wc_overall=True,
     plot_sentiment_overall=True,
-    cleanse=True
+    clean=True
 ):
     '''
 
@@ -32,7 +32,8 @@ def explore(
 
     '''
 
-    if cleanse:
+    if clean:
+        df[target] = [str(w).lower() for w in df[target] if w]
         df[target] = cleanse(df, target, ascii=True)
     else:
         df[target] = [re.sub(
@@ -51,14 +52,14 @@ def explore(
                     os.makedirs('{d}/{value}'.format(
                         d=directory,
                         value=v
-                    )
+                    ))
 
                 if plot_wc:
                     wc_temp = df.loc[df[k] == v]
 
                     # create wordcloud
                     word_cloud(
-                        wc_temp,
+                        wc_temp.values,
                         filename='{d}/{value}/wc{suffix}.png'.format(
                             d=directory,
                             value=v,
@@ -70,7 +71,7 @@ def explore(
 
                 if plot_sentiment:
                     # create sentiment plot
-                    sent_temp = Sentiment(wc_temp, target)
+                    sent_temp = Sentiment(wc_temp, column_name=target)
                     sent_temp.vader_analysis()
                     sent_temp.plot_ts(
                         title='{value}'.format(value=v),
@@ -93,7 +94,7 @@ def explore(
             )
 
         if plot_sentiment_overall:
-            sent_overall = Sentiment(df, target)
+            sent_overall = Sentiment(df, column_name=target)
             sent_overall.vader_analysis()
             sent_overall.plot_ts(
                 title='Overall Sentiment',
@@ -104,12 +105,12 @@ def explore(
             )
 
     else:
-        if plot_wc:
-            # clean text
-            wc_temp = df
-            wc_temp[target] = [' '.join(x) for x in wc_temp[target]]
-            wc_temp[target] = cleanse(df, target, ascii=True)
+        # clean text
+        wc_temp = df
+        wc_temp = [x.split() for x in wc_temp]
+        print(wc_temp)
 
+        if plot_wc:
             # create wordcloud
             word_cloud(
                 wc_temp,
@@ -123,7 +124,7 @@ def explore(
 
         if plot_sentiment:
             # create sentiment plot
-            sent_temp = Sentiment(wc_temp, target)
+            sent_temp = Sentiment(wc_temp)
             sent_temp.vader_analysis()
             sent_temp.plot_ts(
                 title='Sentiment Analysis',

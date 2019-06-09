@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def word_cloud(
-    df,
+    text,
     filename='plot.png',
     width=2000,
     height=1250,
@@ -25,7 +25,6 @@ def word_cloud(
     stopwords.extend(stopwords_english)
 
     # generate wordcloud
-    text = df.values
     wordcloud = WordCloud(
         width = width,
         height = height,
