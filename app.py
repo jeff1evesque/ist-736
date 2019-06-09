@@ -176,11 +176,19 @@ for i,sn in enumerate(screen_name):
         ), 'w') as fp:
             print(timeseries_results_sentiment[sn]['arima']['adf'], file=fp)
 
-sentiment = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
+s1 = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
 plot_bar(
     labels=screen_name,
-    performance=sentiment,
+    performance=s1,
     filename='mse_overall_arima_sentiment.png',
+    rotation=90
+)
+
+s2 = [v['lstm']['mse'] for k,v in timeseries_results_sentiment.items()]
+plot_bar(
+    labels=screen_name,
+    performance=s2,
+    filename='mse_overall_lstm_sentiment.png',
     rotation=90
 )
 
