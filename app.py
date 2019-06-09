@@ -134,6 +134,48 @@ for i,sn in enumerate(screen_name):
         end_date = temp_end
 
 #
+# timeseries analysis: sentiment
+#
+for i,sn in enumerate(screen_name):
+    # merge with consistent date format
+    data[sn]['created_at'] = [datetime.strptime(
+        x.split()[0],
+        '%Y-%m-%d'
+    ) for x in data[sn]['created_at']]
+
+    # convert to string
+    data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+
+    #
+    # some screen_name text multiple times a day, yet quandl only provides
+    #     daily prices.
+    #
+    data[sn] = data[sn].groupby([
+        'created_at',
+        'screen_name',
+        'positive',
+        'neutral',
+        'negative'
+    ]).agg({
+        classify_index: lambda a: ''.join(a)
+    }).reset_index()
+
+    for sentiment in ['negative', 'neutral', 'positive']:
+        timeseries_results[sn] = timeseries(
+            df=data[sn],
+            normalize_key=sentiment,
+            date_index='created_at',
+            directory='viz/{sn}'.format(sn=sn),
+            suffix=sentiment
+        )
+
+    with open('reports/adf_{sn}_{sent}.txt'.format(
+        sn=sn,
+        sent=sentiment
+    ), 'w') as fp:
+        print(timeseries_results[sn]['arima']['adf'], file=fp)
+
+#
 # harvest quandl: using the maximum twitter date range
 #
 if Path('data/quandl/nasdaq.csv').is_file():
