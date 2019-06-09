@@ -88,7 +88,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train_arima_{s}'.format(s=suffix),
+                filename='ts_train_arima{s}'.format(s=suffix),
                 rotation=90,
                 xticks=xticks
             )
@@ -99,7 +99,7 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test_arima_{s}'.format(s=suffix),
+                filename='ts_test_arima{s}'.format(s=suffix),
                 rotation=90,
                 xticks=xticks
             )
@@ -169,7 +169,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train_lstm_{s}'.format(s=suffix),
+                filename='ts_train_lstm{s}'.format(s=suffix),
                 rotation=90,
                 xticks=xticks
             )
@@ -180,7 +180,7 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test_lstm_{s}'.format(s=suffix),
+                filename='ts_test_lstm{s}'.format(s=suffix),
                 rotation=90,
                 xticks=xticks
             )

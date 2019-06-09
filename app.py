@@ -303,26 +303,23 @@ for i,sn in enumerate(screen_name):
 #
 # ensembled scores
 #
-p1 = [v[0] for k,v in classify_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p1,
+    performance=[v[0] for k,v in classify_results.items()],
     filename='accuracy_overall.png',
     rotation=90
 )
 
-p2 = [v['arima']['mse'] for k,v in timeseries_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p2,
+    performance=[v['arima']['mse'] for k,v in timeseries_results.items()],
     filename='mse_overall_arima.png',
     rotation=90
 )
 
-p3 = [v['lstm']['mse'] for k,v in timeseries_results.items()]
 plot_bar(
     labels=screen_name,
-    performance=p2,
+    performance=[v['lstm']['mse'] for k,v in timeseries_results.items()],
     filename='mse_overall_lstm.png',
     rotation=90
 )
