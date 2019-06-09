@@ -171,7 +171,7 @@ for i,sn in enumerate(screen_name):
             lstm_epochs=50
         )
 
-        if timeseries_results_sentiment[sn]['arima']['adf']:
+        if timeseries_results_sentiment[sn]['arima']:
             with open('reports/adf_{sn}_{sent}.txt'.format(
                 sn=sn,
                 sent=sentiment
