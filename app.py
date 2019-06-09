@@ -171,12 +171,11 @@ for i,sn in enumerate(screen_name):
             lstm_epochs=50
         )
 
-        if timeseries_results_sentiment[sn]['arima']:
-            with open('reports/adf_{sn}_{sent}.txt'.format(
-                sn=sn,
-                sent=sentiment
-            ), 'w') as fp:
-                print(timeseries_results_sentiment[sn]['adf'], file=fp)
+        with open('reports/adf_{sn}_{sent}.txt'.format(
+            sn=sn,
+            sent=sentiment
+        ), 'w') as fp:
+            print(timeseries_results_sentiment[sn]['arima']['adf'], file=fp)
 
 s1 = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
 plot_bar(
