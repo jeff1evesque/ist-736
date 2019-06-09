@@ -34,6 +34,7 @@ ts_index = 'Index Value'
 classify_index = 'full_text'
 classify_results = {}
 timeseries_results = {}
+timeseries_results_sentiment = {}
 screen_name = [
     'jimcramer',
     'ReformedBroker',
@@ -157,11 +158,11 @@ for i,sn in enumerate(screen_name):
         'neutral',
         'negative'
     ]).agg({
-        classify_index: lambda a: ''.join(a)
+        classify_index: lambda a: ''.join(str(a))
     }).reset_index()
 
     for sentiment in ['negative', 'neutral', 'positive']:
-        timeseries_results[sn] = timeseries(
+        timeseries_results_sentiment[sn] = timeseries(
             df=data[sn],
             normalize_key=sentiment,
             date_index='created_at',
@@ -169,11 +170,19 @@ for i,sn in enumerate(screen_name):
             suffix=sentiment
         )
 
-    with open('reports/adf_{sn}_{sent}.txt'.format(
-        sn=sn,
-        sent=sentiment
-    ), 'w') as fp:
-        print(timeseries_results[sn]['arima']['adf'], file=fp)
+        with open('reports/adf_{sn}_{sent}.txt'.format(
+            sn=sn,
+            sent=sentiment
+        ), 'w') as fp:
+            print(timeseries_results[sn]['arima']['adf'], file=fp)
+
+sentiment = [v['arima']['mse'] for k,v in timeseries_results_sentiment.items()]
+plot_bar(
+    labels=screen_name,
+    performance=sentiment,
+    filename='mse_overall_arima_sentiment.png',
+    rotation=90
+)
 
 #
 # harvest quandl: using the maximum twitter date range
