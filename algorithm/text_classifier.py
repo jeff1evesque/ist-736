@@ -10,15 +10,17 @@
 
 import time
 import csv
+from operator import itemgetter
 import numpy as np
 from pathlib import Path
 import pandas as pd
 from scipy.stats import itemfreq
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords as stp
 from nltk import tokenize, download, pos_tag
 from nltk.stem.porter import PorterStemmer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
+from sklearn.metrics import precision_recall_fscore_support
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
@@ -27,9 +29,8 @@ import matplotlib.pyplot as plt
 import scikitplot as skplt
 from algorithm.penn_treebank import penn_scale
 from utility.dataframe import cleanse
-stop_words = set(stopwords.words('english'))
+stop_english = stp.words('english')
 download('vader_lexicon')
-
 
 class Model():
     '''
@@ -41,6 +42,7 @@ class Model():
     def __init__(
         self,
         df=None,
+        split_size=0.2,
         vectorize=True,
         key_text='SentimentText',
         key_class='Sentiment',
@@ -48,6 +50,7 @@ class Model():
         lowercase=True,
         cleanse_data=True,
         ngram=(1,1),
+        stopwords=[],
         fp='{}/data/sample-sentiment.csv'.format(
             Path(__file__).resolve().parents[1]
         )
@@ -61,8 +64,11 @@ class Model():
         # class variables
         self.key_text = key_text
         self.key_class = key_class
+        self.split_size = split_size
         self.actual = None
         self.predicted = None
+        stopwords.extend(stop_english)
+        self.stopwords = stopwords
 
         if df is not None:
             self.df = df
@@ -79,13 +85,22 @@ class Model():
         if stem:
             p = PorterStemmer()
             self.df[self.key_text] = self.df[self.key_text].apply(
-                lambda x: [' '.join([p.stem(w) for w in x.split(' ')])][0]
+                lambda x: [' '.join(
+                    [p.stem(w) for w in x.split(' ') if w not in self.stopwords]
+                )][0]
+            )
+
+        else:
+            self.df[self.key_text] = self.df[self.key_text].apply(
+                lambda x: [' '.join(
+                    [w for w in x.split(' ') if w not in self.stopwords]
+                )][0]
             )
 
         # vectorize data
         if vectorize:
             self.vectorize(ngram=ngram)
-            self.split()
+            self.split(size=split_size)
 
     def set_df(self, df):
         '''
@@ -105,18 +120,33 @@ class Model():
 
         self.key_text = key_text
 
-    def split(self, size=0.20):
+    def split(self, size=None):
         '''
 
         split data into train and test.
 
         '''
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.tfidf,
-            self.df[self.key_class],
-            test_size=size
-        )
+        if not size:
+            size = self.split_size
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+                self.tfidf,
+                self.df[self.key_class],
+                test_size=size
+            )
+
+        elif size == 1.0:
+            self.X_train = self.tfidf
+            self.y_train = self.df[self.key_class]
+            self.X_test = 0
+            self.y_test = 0
+
+        else:
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+                self.tfidf,
+                self.df[self.key_class],
+                test_size=size
+            )
 
     def get_split(self):
         '''
@@ -164,7 +194,7 @@ class Model():
     def vectorize(
         self,
         data=None,
-        stop_words='english',
+        stopwords='english',
         ngram=(1,1),
         topn=25
     ):
@@ -174,20 +204,23 @@ class Model():
 
         '''
 
+        if stopwords:
+            self.stopwords.extend(stopwords)
+
         #
         # pos case: implemented internally by 'split' when 'pos_split=True'.
         #
         if data is not None:
             # bag of words: with 'english' stopwords
             count_vect = CountVectorizer(
-                stop_words=stop_words,
+                stop_words=stopwords,
                 ngram_range=ngram
             )
             bow = count_vect.fit_transform(data)
 
             # tfidf weighting
             tfidf_vectorizer = TfidfVectorizer(
-                stop_words=stop_words,
+                stop_words=stopwords,
                 ngram_range=ngram
             )
             tfidf = tfidf_vectorizer.fit_transform(data)
@@ -200,14 +233,14 @@ class Model():
         else:
             # bag of words: with 'english' stopwords
             self.count_vect = CountVectorizer(
-                stop_words=stop_words,
+                stop_words=stopwords,
                 ngram_range=ngram
             )
             self.bow = self.count_vect.fit_transform(self.df[self.key_text])
 
             # tfidf weighting
             self.tfidf_vectorizer = TfidfVectorizer(
-                stop_words=stop_words,
+                stop_words=stopwords,
                 ngram_range=ngram
             )
             self.tfidf = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
@@ -230,6 +263,15 @@ class Model():
 
         tuples = zip(coo_matrix.col, coo_matrix.data)
         return(sorted(tuples, key=lambda x: (x[1], x[0]), reverse=True))
+
+    def get_clf(self):
+        '''
+
+        return current model.
+
+        '''
+
+        return(self.clf)
 
     def get_top_features(self, feature_names, sorted_items, topn):
         '''
@@ -276,6 +318,15 @@ class Model():
 
         return(self.tfidf)
 
+    def get_count_vect(self):
+        '''
+
+        get current vectorized count.
+
+        '''
+
+        return(self.count_vect)
+
     def get_df(self):
         '''
 
@@ -312,11 +363,15 @@ class Model():
         # conditionally select model
         if (model_type == 'svm'):
             if multiclass:
-                clf = svm.SVC(gamma='scale', kernel='linear', decision_function_shape='ovo')
+                self.clf = svm.SVC(
+                    gamma='scale',
+                    kernel='linear',
+                    decision_function_shape='ovo'
+                )
             else:
-                clf = svm.SVC(gamma='scale', kernel='linear')
+                self.clf = svm.SVC(gamma='scale', kernel='linear')
 
-            clf.fit(X, y)
+            self.clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -324,20 +379,20 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        clf.predict(item)
+                        self.clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': clf,
+                    'model': self.clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': clf,
+                'model': self.clf,
                 'actual': None,
                 'predicted': None
             })
@@ -346,8 +401,8 @@ class Model():
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
-            clf = BernoulliNB()
-            clf.fit(X, y)
+            self.clf = BernoulliNB()
+            self.clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -355,27 +410,27 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        clf.predict(item)
+                        self.clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': clf,
+                    'model': self.clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': clf,
+                'model': self.clf,
                 'actual': None,
                 'predicted': None
             })
 
         else:
-            clf = MultinomialNB()
-            clf.fit(X, y)
+            self.clf = MultinomialNB()
+            self.clf.fit(X, y)
 
             # validate
             if validate and len(validate) == 2:
@@ -383,20 +438,20 @@ class Model():
 
                 for item in list(validate[0]):
                     predictions.append(
-                        clf.predict(item)
+                        self.clf.predict(item)
                     )
 
                 self.actual = validate[1]
                 self.predicted = predictions
 
                 return({
-                    'model': clf,
+                    'model': self.clf,
                     'actual': validate[1],
                     'predicted': predictions
                 })
 
             return({
-                'model': clf,
+                'model': self.clf,
                 'actual': None,
                 'predicted': None
             })
@@ -427,6 +482,7 @@ class Model():
             predicted,
             x_tick_rotation=rotation
         )
+        plt.tight_layout()
 
         # save plot
         plt.savefig(filename)
@@ -435,6 +491,34 @@ class Model():
             plt.show()
         else:
             plt.close()
+
+    def get_word_scores(self, mnb, top_words=10):
+        '''
+
+        return top words (i.e. negative, positive).
+
+        @mnb, must be mnb trained classifier.
+
+        '''
+
+        # local variables
+        positive_probs = mnb.feature_log_prob_[0,:]
+        negative_probs = mnb.feature_log_prob_[1,:]
+        logodds = positive_probs - negative_probs
+        positive_index = np.argsort(logodds)[:top_words]
+        negative_index = np.argsort(-logodds)[:top_words]
+
+        # top words
+        return({
+            'positive': {
+                'index': positive_index,
+                'value': [logodds[x] for x in positive_index]
+            },
+            'negative': {
+                'index': negative_index,
+                'value': [logodds[x] for x in negative_index]
+            }
+        })
 
     def get_accuracy(self, actual=None, predicted=None):
         '''
@@ -450,6 +534,30 @@ class Model():
 
         return(accuracy_score(actual, predicted))
 
+    def get_precision_recall_fscore(
+        self,
+        actual=None,
+        predicted=None,
+        average='weighted'
+    ):
+        '''
+
+        return precision, recall, and fscore.
+
+        '''
+
+        if not actual:
+            actual = self.actual
+        if not predicted:
+            predicted = self.predicted
+
+        return(
+            precision_recall_fscore_support(
+                actual,
+                predicted,
+                average=average
+            )
+        )
 
     def get_kfold_scores(
         self,

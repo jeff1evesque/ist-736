@@ -53,8 +53,8 @@ class Sentiment():
         }
 
         # sentiment analysis
-        for i,s in enumerate(self.df[self.column_name]):
-            ss = sid.polarity_scores(s)
+        for sent in self.df[[self.column_name]].iterrows():
+            ss = sid.polarity_scores(sent[1][0])
 
             for k in sorted(ss):
                 if k == 'compound':
@@ -84,8 +84,7 @@ class Sentiment():
         self,
         title='Sentiment Analysis',
         filename='sentiment.png',
-        show=False,
-        rotation=0
+        show=False
     ):
         '''
 
@@ -99,7 +98,6 @@ class Sentiment():
             self.df_adjusted.negative.plot(color='r', legend=True)
             self.df_adjusted.positive.plot(color='g', legend=True)
             self.df_adjusted.neutral.plot(color='b', legend=True)
-        plt.xticks(rotation=rotation)
         plt.title(title)
 
         # save plot
