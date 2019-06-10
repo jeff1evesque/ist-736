@@ -26,6 +26,7 @@ def topic_model(
     plot=True,
     plot_sentiment_overall=True,
     vectorize_stopwords='english',
+    key_text='full_text',
     stopwords=[],
     auto=False,
     ngram=1
@@ -44,7 +45,7 @@ def topic_model(
     if flag_lda:
         lda = model_lda(
             df,
-            key_text='text',
+            key_text='full_text',
             max_df=max_df,
             min_df=min_df,
             num_topics=num_topics,
@@ -74,13 +75,14 @@ def topic_model(
                 sent_cases={'topics': [x[0] for x in lda_words]},
                 plot_sentiment=False,
                 plot_sentiment_overall=plot_sentiment_overall,
-                cleanse=False
+                clean=False,
+                directory=directory
             )
 
     if flag_nmf:
         nmf = model_nmf(
             df,
-            key_text='text',
+            key_text='full_text',
             max_df=max_df,
             min_df=min_df,
             num_topics=num_topics,
@@ -110,5 +112,6 @@ def topic_model(
                 sent_cases={'topics': [x[0] for x in nmf_words]},
                 plot_sentiment=False,
                 plot_sentiment_overall=plot_sentiment_overall,
-                cleanse=False
+                cleanse=False,
+                directory=directory
             )
