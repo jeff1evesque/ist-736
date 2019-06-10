@@ -25,6 +25,7 @@ from datetime import datetime
 from controller.classifier import classify
 from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
+from controller.topic_model import topic_model
 from utility.stopwords import stopwords
 
 #
@@ -43,7 +44,7 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
-stopwords.extend(screen_name)
+stopwords.extend([x.lower() for x in screen_name])
 
 #
 # create directories
@@ -115,8 +116,23 @@ for i,sn in enumerate(screen_name):
     # convert to string
     data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
+    #
     # exploratory: wordcloud + sentiment
+    #
     explore(data[sn], stopwords=stopwords)
+
+    #
+    # topic modeling
+    #
+    topic_model(
+        data[sn][classify_index],
+        rotation=0,
+        stopwords=list(set(stopwords)),
+        num_topics=num_topics,
+        random_state=1,
+        flag_nmf=False,
+        directory='viz/{sn}'.format(sn=sn)
+    )
 
     # largest time span
     start = data[screen_name[i]]['created_at'].iloc[0]
@@ -286,7 +302,8 @@ for i,sn in enumerate(screen_name):
         key_class='trend',
         key_text=classify_index,
         directory='viz/{sn}'.format(sn=sn),
-        top_words=25
+        top_words=25,
+        stopwords=stopwords
     )
 
     #
