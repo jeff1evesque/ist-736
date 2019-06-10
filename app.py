@@ -125,10 +125,10 @@ for i,sn in enumerate(screen_name):
     # topic modeling
     #
     topic_model(
-        data[sn][classify_index],
+        data[sn],
         rotation=0,
         stopwords=list(set(stopwords)),
-        num_topics=num_topics,
+        num_topics=10,
         random_state=1,
         flag_nmf=False,
         directory='viz/{sn}'.format(sn=sn)
