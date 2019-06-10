@@ -45,7 +45,7 @@ def topic_model(
     if flag_lda:
         lda = model_lda(
             df,
-            key_text='full_text',
+            key_text=key_text,
             max_df=max_df,
             min_df=min_df,
             num_topics=num_topics,
@@ -82,7 +82,7 @@ def topic_model(
     if flag_nmf:
         nmf = model_nmf(
             df,
-            key_text='full_text',
+            key_text=key_text,
             max_df=max_df,
             min_df=min_df,
             num_topics=num_topics,

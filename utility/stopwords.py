@@ -4,8 +4,16 @@ stopwords=[
     'http',
     'https',
     'nhttps',
-    'RT',
+    'rt',
     'amp',
     'co',
-    'TheStreet'
+    'thestreet',
+    'dtype',
+    'dont',
+    'think',
+    'thank',
+    'love',
+    'dtype',
+    'good',
+    'object'
 ]
