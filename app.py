@@ -25,7 +25,8 @@ from datetime import datetime
 from controller.classifier import classify
 from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
-from utility.stopwords import stopwords
+from controller.topic_model import topic_model
+from utility.stopwords import stopwords, stopwords_topics
 
 #
 # local variables
@@ -43,7 +44,8 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
-stopwords.extend(screen_name)
+stopwords.extend([x.lower() for x in screen_name])
+stopwords_topics.extend(stopwords)
 
 #
 # create directories
@@ -115,8 +117,23 @@ for i,sn in enumerate(screen_name):
     # convert to string
     data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
+    #
     # exploratory: wordcloud + sentiment
+    #
     explore(data[sn], stopwords=stopwords)
+
+    #
+    # topic modeling
+    #
+    topic_model(
+        data[sn],
+        rotation=0,
+        stopwords=list(set(stopwords_topics)),
+        num_topics=10,
+        random_state=1,
+        flag_nmf=False,
+        directory='viz/{sn}'.format(sn=sn)
+    )
 
     # largest time span
     start = data[screen_name[i]]['created_at'].iloc[0]
@@ -133,7 +150,7 @@ for i,sn in enumerate(screen_name):
 # exploratory (overall): wordcloud + sentiment
 #
 df = pd.concat(data).reset_index()
-explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
+explore(df, stopwords=stopwords_topics, sent_cases={'screen_name': screen_name})
 
 #
 # timeseries analysis: sentiment
@@ -286,7 +303,8 @@ for i,sn in enumerate(screen_name):
         key_class='trend',
         key_text=classify_index,
         directory='viz/{sn}'.format(sn=sn),
-        top_words=25
+        top_words=25,
+        stopwords=stopwords
     )
 
     #

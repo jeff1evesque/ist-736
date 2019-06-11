@@ -35,6 +35,7 @@ def explore(
     if clean:
         df[target] = [str(w).lower() for w in df[target] if w]
         df[target] = cleanse(df, target, ascii=True)
+
     else:
         df[target] = [re.sub(
             "'",
@@ -46,6 +47,7 @@ def explore(
         for k,val in sent_cases.items():
             for v in val:
                 wc_temp = df.loc[df[k] == v]
+
                 if not os.path.exists('{d}/{value}'.format(
                     d=directory,
                     value=v
@@ -56,10 +58,9 @@ def explore(
                     ))
 
                 if plot_wc:
-                    print(wc_temp[target])
                     # create wordcloud
-                    word_cloud(
-                        wc_temp[target],
+                    [word_cloud(
+                        x,
                         filename='{d}/{value}/wc{suffix}.png'.format(
                             d=directory,
                             value=v,
@@ -67,7 +68,7 @@ def explore(
                         ),
                         stopwords=stopwords,
                         background_color=background_color
-                    )
+                    ) for x in wc_temp[target]]
 
                 if plot_sentiment:
                     # create sentiment plot
