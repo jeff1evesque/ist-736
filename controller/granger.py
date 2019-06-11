@@ -4,7 +4,7 @@ from algorithm.controller import granger as gr
 from view.plot import plot_bar
 
 
-def granger(df, maxlag=1, directory='viz', , suffix='', plot=True):
+def granger(df, maxlag=1, directory='viz', suffix='', plot=True):
     '''
 
     implement granger test for causality.
