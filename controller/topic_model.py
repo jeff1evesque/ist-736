@@ -65,11 +65,15 @@ def topic_model(
         )
 
         if plot:
+            # sublist of words to list of sentences
+            df=pd.DataFrame(
+                lda_words,
+                columns=['topics', 'words']
+            )
+            df['words'] = [' '.join(x) for x in df['words']]
+
             explore(
-                df=pd.DataFrame(
-                    lda_words,
-                    columns=['topics', 'words']
-                ),
+                df=df,
                 target='words',
                 suffix='_lda{suffix}'.format(suffix=suffix),
                 sent_cases={'topics': [x[0] for x in lda_words]},
@@ -102,6 +106,13 @@ def topic_model(
         )
 
         if plot:
+            # sublist of words to list of sentences
+            df=pd.DataFrame(
+                lda_words,
+                columns=['topics', 'words']
+            )
+            df['words'] = [' '.join(x) for x in df['words']]
+
             explore(
                 df=pd.DataFrame(
                     nmf_words,
