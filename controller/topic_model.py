@@ -114,10 +114,7 @@ def topic_model(
             df['words'] = [' '.join(x) for x in df['words']]
 
             explore(
-                df=pd.DataFrame(
-                    nmf_words,
-                    columns=['topics', 'words']
-                ),
+                df=df,
                 target='words',
                 suffix='_nmf{suffix}'.format(suffix=suffix),
                 sent_cases={'topics': [x[0] for x in nmf_words]},
