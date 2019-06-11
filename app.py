@@ -11,9 +11,11 @@
 
 import os
 import re
-from pathlib import Path
 import pandas as pd
 import numpy as np
+from pathlib import Path
+from datetime import datetime
+import matplotlib.pyplot as plt
 from config import twitter_api as t_creds
 from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
@@ -21,11 +23,10 @@ from consumer.quandl_query import QuandlQuery
 from view.exploratory import explore
 from view.plot import plot_bar
 from exploratory.sentiment import Sentiment
-from datetime import datetime
 from controller.classifier import classify
 from controller.timeseries import timeseries
-import matplotlib.pyplot as plt
 from controller.topic_model import topic_model
+from controller.granger import granger
 from utility.stopwords import stopwords, stopwords_topics
 
 #
@@ -44,6 +45,7 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
+sentiments = ['negative', 'neutral', 'positive']
 stopwords.extend([x.lower() for x in screen_name])
 stopwords_topics.extend(stopwords)
 
@@ -150,7 +152,11 @@ for i,sn in enumerate(screen_name):
 # exploratory (overall): wordcloud + sentiment
 #
 df = pd.concat(data).reset_index()
-explore(df, stopwords=stopwords_topics, sent_cases={'screen_name': screen_name})
+explore(
+    df,
+    stopwords=stopwords_topics,
+    sent_cases={'screen_name': screen_name}
+)
 
 #
 # timeseries analysis: sentiment
@@ -179,7 +185,7 @@ for i,sn in enumerate(screen_name):
         classify_index: lambda a: ''.join(str(a))
     }).reset_index()
 
-    for sentiment in ['negative', 'neutral', 'positive']:
+    for sentiment in sentiments:
         timeseries_results_sentiment[sn] = timeseries(
             df=data[sn],
             normalize_key=sentiment,
@@ -294,6 +300,12 @@ for i,sn in enumerate(screen_name):
     data[sn]['trend'] = [0 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
         else 1
         for i,x in enumerate(data[sn][ts_index])]
+
+    #
+    # granger causality
+    #
+    for sentiment in sentiments:
+        granger(df[[ts_index, sentiment]], maxlag=3)
 
     #
     # classify
