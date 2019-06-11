@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from algorithm.controller import granger as gr
+from algorithm.granger import granger as gr
 from view.plot import plot_bar
 
 
