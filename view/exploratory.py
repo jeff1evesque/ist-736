@@ -58,17 +58,31 @@ def explore(
                     ))
 
                 if plot_wc:
-                    # create wordcloud
-                    [word_cloud(
-                        x,
-                        filename='{d}/{value}/wc{suffix}.png'.format(
-                            d=directory,
-                            value=v,
-                            suffix=suffix
-                        ),
-                        stopwords=stopwords,
-                        background_color=background_color
-                    ) for x in wc_temp[target]]
+                    # wordcloud: using series like dictionary input
+                    if (wc_temp[target].size > 1):
+                        word_cloud(
+                            wc_temp.values,
+                            filename='{d}/{value}/wc{suffix}.png'.format(
+                                d=directory,
+                                value=v,
+                                suffix=suffix
+                            ),
+                            stopwords=stopwords,
+                            background_color=background_color
+                        )
+
+                    # wordcloud: using list of sentences input
+                    else:
+                        [word_cloud(
+                            x,
+                            filename='{d}/{value}/wc{suffix}.png'.format(
+                                d=directory,
+                                value=v,
+                                suffix=suffix
+                            ),
+                            stopwords=stopwords,
+                            background_color=background_color
+                        ) for x in wc_temp[target]]
 
                 if plot_sentiment:
                     # create sentiment plot
