@@ -26,7 +26,7 @@ from controller.classifier import classify
 from controller.timeseries import timeseries
 import matplotlib.pyplot as plt
 from controller.topic_model import topic_model
-from utility.stopwords import stopwords
+from utility.stopwords import stopwords, stopwords_topics
 
 #
 # local variables
@@ -45,6 +45,7 @@ screen_name = [
     'SJosephBurns'
 ]
 stopwords.extend([x.lower() for x in screen_name])
+stopwords_topics.extend(stopwords)
 
 #
 # create directories
@@ -127,7 +128,7 @@ for i,sn in enumerate(screen_name):
     topic_model(
         data[sn],
         rotation=0,
-        stopwords=list(set(stopwords)),
+        stopwords=list(set(stopwords_topics)),
         num_topics=10,
         random_state=1,
         flag_nmf=False,
@@ -149,7 +150,7 @@ for i,sn in enumerate(screen_name):
 # exploratory (overall): wordcloud + sentiment
 #
 df = pd.concat(data).reset_index()
-explore(df, stopwords=stopwords, sent_cases={'screen_name': screen_name})
+explore(df, stopwords=stopwords_topics, sent_cases={'screen_name': screen_name})
 
 #
 # timeseries analysis: sentiment
