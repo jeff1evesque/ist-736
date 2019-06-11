@@ -61,15 +61,14 @@ def explore(
                     # create wordcloud
                     [word_cloud(
                         x,
-                        filename='{d}/{value}/wc_{i}{suffix}.png'.format(
+                        filename='{d}/{value}/wc{suffix}.png'.format(
                             d=directory,
                             value=v,
-                            i=topic_index,
                             suffix=suffix
                         ),
                         stopwords=stopwords,
                         background_color=background_color
-                    ) for topic_index,x in enumerate(wc_temp[target])]
+                    ) for x in wc_temp[target]]
 
                 if plot_sentiment:
                     # create sentiment plot
