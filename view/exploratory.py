@@ -35,19 +35,13 @@ def explore(
     if clean:
         df[target] = [str(w).lower() for w in df[target] if w]
         df[target] = cleanse(df, target, ascii=True)
-        print('000000000000000000000000000000')
-        print(df[target])
+
     else:
         df[target] = [re.sub(
             "'",
             '',
             str(s)
         ) for s in df[target]]
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-
-        for i,sent in enumerate(df[target]):
-            print(type(sent))
-            print('jeff: {}'.format(''.join(sent)))
 
     if sent_cases:
         for k,val in sent_cases.items():
@@ -64,20 +58,18 @@ def explore(
                     ))
 
                 if plot_wc:
-                    print('1111111111111111111111111111111')
-#                    [print(' '.join(wc_temp[target]))
-                    print('2222222222222222222222222222222')
                     # create wordcloud
-                    word_cloud(
-                        wc_temp[target],
-                        filename='{d}/{value}/wc{suffix}.png'.format(
+                    [word_cloud(
+                        x,
+                        filename='{d}/{value}/wc_{i}{suffix}.png'.format(
                             d=directory,
                             value=v,
+                            i=topic_index,
                             suffix=suffix
                         ),
                         stopwords=stopwords,
                         background_color=background_color
-                    )
+                    ) for topic_index,x in enumerate(wc_temp[target])]
 
                 if plot_sentiment:
                     # create sentiment plot
