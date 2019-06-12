@@ -9,7 +9,7 @@
 from nltk import download
 import pandas as pd
 import matplotlib.pyplot as plt
-from utility.dataframe import cleanse
+from brain.utility.dataframe import cleanse
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 download('vader_lexicon')
 

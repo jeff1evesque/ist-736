@@ -2,8 +2,8 @@
 
 import re
 from pathlib import Path
-from algorithm.arima import Arima
-from algorithm.lstm import Lstm
+from brain.algorithm.arima import Arima
+from brain.algorithm.lstm import Lstm
 
 def model(
     df,

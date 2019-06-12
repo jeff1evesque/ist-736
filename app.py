@@ -20,14 +20,14 @@ from config import twitter_api as t_creds
 from config import quandl_api as q_creds
 from consumer.twitter_query import TwitterQuery
 from consumer.quandl_query import QuandlQuery
-from view.exploratory import explore
-from view.plot import plot_bar
-from exploratory.sentiment import Sentiment
-from controller.classifier import classify
-from controller.timeseries import timeseries
-from controller.topic_model import topic_model
-from controller.granger import granger
-from utility.stopwords import stopwords, stopwords_topics
+from brain.view.exploratory import explore
+from brain.view.plot import plot_bar
+from brain.exploratory.sentiment import Sentiment
+from brain.controller.classifier import classify
+from brain.controller.timeseries import timeseries
+from brain.controller.topic_model import topic_model
+from brain.controller.granger import granger
+from brain.utility.stopwords import stopwords, stopwords_topics
 
 #
 # local variables

@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from algorithm.text_classifier import Model as alg
+from brain.algorithm.text_classifier import Model as alg
 
 def model(
     df=None,

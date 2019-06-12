@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import numpy as np
-from algorithm.granger import granger as gr
-from view.plot import plot_bar
+from brain.algorithm.granger import granger as gr
+from brain.view.plot import plot_bar
 
 
 def granger(df, maxlag=1, directory='viz', suffix='', plot=True):

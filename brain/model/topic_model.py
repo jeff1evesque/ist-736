@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from algorithm.topic_model import Model as alg
+from brain.algorithm.topic_model import Model as alg
 
 def model_lda(
     df,

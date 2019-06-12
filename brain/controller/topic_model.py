@@ -2,8 +2,8 @@
 
 import numpy as np
 import pandas as pd
-from model.topic_model import model_lda, model_nmf
-from view.exploratory import explore
+from brain.model.topic_model import model_lda, model_nmf
+from brain.view.exploratory import explore
 
 def topic_model(
     df,

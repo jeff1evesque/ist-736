@@ -2,8 +2,8 @@
 
 import math
 import pandas as pd
-from model.timeseries import model
-from view.timeseries import plot_ts
+from brain.model.timeseries import model
+from brain.view.timeseries import plot_ts
 import matplotlib.pyplot as plt
 
 def timeseries(

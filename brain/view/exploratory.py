@@ -4,9 +4,9 @@ import os
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-from exploratory.sentiment import Sentiment
-from exploratory.word_cloud import word_cloud
-from utility.dataframe import cleanse
+from brain.exploratory.sentiment import Sentiment
+from brain.exploratory.word_cloud import word_cloud
+from brain.utility.dataframe import cleanse
 
 def explore(
     df,
