@@ -78,8 +78,8 @@ for i,sn in enumerate(screen_name):
     #
     # create directories
     #
-    if not os.path.exists('viz/{sn}'.format(sn=sn)):
-        os.makedirs('viz/{sn}'.format(sn=sn))
+    if not os.path.exists('viz/{sn}/granger'.format(sn=sn)):
+        os.makedirs('viz/{sn}/granger'.format(sn=sn))
 
     #
     # harvest tweets
@@ -301,11 +301,21 @@ for i,sn in enumerate(screen_name):
         else 1
         for i,x in enumerate(data[sn][ts_index])]
 
+    # sentiment analysis
+    s = Sentiment(data[sn], classify_index)
+    data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
+    data[sn].replace('\s+', ' ', regex=True, inplace=True)
+
     #
     # granger causality
     #
     for sentiment in sentiments:
-        granger(df[[ts_index, sentiment]], maxlag=3)
+        granger(
+            data[sn][[ts_index, sentiment]],
+            maxlag=3,
+            directory='viz/{sn}/granger'.format(sn=sn),
+            suffix=sentiment
+        )
 
     #
     # classify
