@@ -61,7 +61,7 @@ def explore(
                     # wordcloud: using series like dictionary input
                     if (wc_temp[target].size > 1):
                         word_cloud(
-                            wc_temp.values,
+                            wc_temp[target].values,
                             filename='{d}/{value}/wc{suffix}.png'.format(
                                 d=directory,
                                 value=v,

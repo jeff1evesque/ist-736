@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 from pathlib import Path
+from datetime import datetime
 from config import twitter_api as t_creds
 from brain.exploratory.sentiment import Sentiment
 from consumer.twitter_api.twitter_query import TwitterQuery
@@ -64,6 +65,9 @@ def tweet_sn(
             except Exception as e:
                 print('Error: did not finish \'{sn}\'.'.format(sn=sn))
                 print(e)
+
+        # convert to string
+        data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
         # largest time span
         start = data[screen_name[i]]['created_at'].iloc[0]
