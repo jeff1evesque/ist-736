@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import NMF
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 from nltk.corpus import stopwords as stp
-from utility.dataframe import cleanse
+from brain.utility.dataframe import cleanse
 stop_english = stp.words('english')
 
 class Model():

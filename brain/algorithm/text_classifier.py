@@ -27,8 +27,8 @@ from sklearn.naive_bayes import BernoulliNB, MultinomialNB
 from sklearn.model_selection import cross_val_score, train_test_split
 import matplotlib.pyplot as plt
 import scikitplot as skplt
-from algorithm.penn_treebank import penn_scale
-from utility.dataframe import cleanse
+from brain.algorithm.penn_treebank import penn_scale
+from brain.utility.dataframe import cleanse
 stop_english = stp.words('english')
 download('vader_lexicon')
 
