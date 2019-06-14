@@ -55,10 +55,7 @@ explore(
 )
 
 #
-# harvest quandl + analyze
-#
-# @COMP-NASDAQ, was chosen as part of a baseline exploration.
-# @QQQ, was chosen as a result of the above topic model exploration.
+# harvest quandl
 #
 df_quandl = quandl(
     codes=codes,
@@ -66,6 +63,9 @@ df_quandl = quandl(
     end_date=end_date.strftime('%Y-%m-%d')
 )
 
+#
+# analysis
+#
 for x in df_quandl:
     analyze(
         data=data,
