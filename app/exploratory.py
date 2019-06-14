@@ -31,7 +31,11 @@ def explore(
         # exploratory: wordcloud + sentiment
         #
         if explore_sn:
-            expl(data[sn], stopwords=stopwords)
+            expl(
+                data[sn],
+                stopwords=stopwords,
+                directory='{d}/{sn}'.format(d=directory, sn=sn)
+            )
 
         #
         # topic modeling

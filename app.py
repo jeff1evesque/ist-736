@@ -29,6 +29,7 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
+codes = [('CBOE', 'VIX'), ('NASDAQOMX', 'COMP-NASDAQ'), ('NASDAQOMX', 'QQQ')]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
 stopwords.extend([x.lower() for x in screen_name])
@@ -46,24 +47,31 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-explore(
-    data,
-    screen_name,
-    stopwords=stopwords,
-    stopwords_topics=stopwords_topics,
-    start_date=start_date,
-    end_date=end_date
-)
+#explore(
+#    data,
+#    screen_name,
+#    stopwords=stopwords
+#    stopwords_topics=stopwords_topics
+#)
 
 #
 # harvest quandl + analyze
 #
-for x in ['COMP-NASDAQ', 'QQQ']:
-    df_quandl = quandl(dataset_code=x, start_date, end_date)
-    analyze(
-        data,
-        x,
-        directory='viz/{x}'.format(x),
-        screen_name,
-        stopwords
-    )
+# @COMP-NASDAQ, was chosen as part of a baseline exploration.
+# @QQQ, was chosen as a result of the above topic model exploration.
+#
+df_quandl = quandl(
+    codes=codes,
+    start_date=start_date.strftime('%Y-%m-%d'),
+    end_date=end_date.strftime('%Y-%m-%d')
+)
+
+#for x in df_quandl:
+#    analyze(
+#        data=data,
+#        df_quandl=df_quandl,
+#        directory='viz/{x}'.format(x=x[1]),
+#        directory_report='reports/{x}'.format(x=x[0]),
+#        screen_name=screen_name,
+#        stopwords=stopwords
+#    )

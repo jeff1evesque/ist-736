@@ -9,45 +9,42 @@ from consumer.quandl_api.quandl_query import QuandlQuery
 
 
 def quandl(
-    database_code='NASDAQOMX',
-    dataset_code='COMP-NASDAQ',
+    codes=[('NASDAQOMX', 'COMP-NASDAQ')],
     start_date=None,
     end_date=None,
     collapse='daily',
-    filepath='data/quandl/nasdaq.csv'):
+    directory='data/quandl'
+):
     '''
 
     harvest quandl data.
 
     '''
 
-    directory = os.path.dirname(filepath)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     # instantiate api
     q = QuandlQuery(q_creds['API_KEY'])
 
-    # default: maximum twitter date range
-    if not start_date:
-        start_date = datetime(3000, 12, 25)
-    if not end_date:
-        end_date = datetime(1000, 12, 25)
-
     #
     # harvest quandl
     #
-    if Path(filepath).is_file():
-        df = pd.read_csv(filepath)
+    data = []
+    for x in codes:
+        if Path('{d}/{f}'.format(d=directory, f=x[1])).is_file():
+            df = pd.read_csv('{d}/{f}'.format(d=directory, f=x[1]))
 
-    else:
-        df = q.get_ts(
-            database_code=database_code,
-            dataset_code=dataset_code,
-            start_date=start_date,
-            end_date=end_date,
-            collapse=collapse
-        )
-        df.to_csv(filepath)
+        else:
+            df = q.get_ts(
+                database_code=x[0],
+                dataset_code=x[1],
+                start_date=start_date,
+                end_date=end_date,
+                collapse=collapse
+            )
+            df.to_csv('{d}/{f}.csv'.format(d=directory, f=x[1]))
 
-    return(df)
+        data.append(df)
+
+    return(data)

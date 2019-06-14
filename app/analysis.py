@@ -17,6 +17,7 @@ def analyze(
     screen_name,
     stopwords=[],
     directory='viz',
+    directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='Index Value',
@@ -35,14 +36,11 @@ def analyze(
     ts_results = {}
     ts_results_sentiment = {}
 
-    if suffix:
-        suffix = '_{s}/'.format(s=suffix)
-
     #
     # create directories
     #
-    if not os.path.exists('reports'):
-        os.makedirs('reports')
+    if not os.path.exists(directory_report):
+        os.makedirs(directory_report)
 
     for i,sn in enumerate(screen_name):
         if not os.path.exists('{directory}/{sn}/granger'.format(
@@ -52,7 +50,7 @@ def analyze(
             os.makedirs('{directory}/{sn}/granger'.format(
                 directory=directory,
                 sn=sn
-            )
+            ))
 
     #
     # timeseries analysis: sentiment
@@ -87,12 +85,16 @@ def analyze(
                     df=data[sn],
                     normalize_key=sentiment,
                     date_index='created_at',
-                    directory='{directory}/{sn}'.format(directory=directory, sn=sn),
+                    directory='{directory}/{sn}'.format(
+                        directory=directory,
+                        sn=sn
+                    ),
                     suffix=sentiment,
                     lstm_epochs=50
                 )
 
-                with open('reports/{directory}/adf_{sn}_{sent}.txt'.format(
+                with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                    directory=directory_report,
                     sn=sn,
                     sent=sentiment
                 ), 'w') as fp:
@@ -222,7 +224,7 @@ def analyze(
                 data[sn],
                 key_class='trend',
                 key_text=classify_index,
-                directory='{directory}/{sn}/granger'.format(
+                directory='{directory}/{sn}'.format(
                     directory=directory,
                     sn=sn
                 ),
@@ -241,8 +243,8 @@ def analyze(
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn)
             )
 
-            with open('reports/{directory}/adf_{sn}.txt'.format(
-                directory=directory,
+            with open('{directory}/adf_{sn}.txt'.format(
+                directory=directory_report,
                 sn=sn
             ), 'w') as fp:
                 print(ts_results[sn]['arima']['adf'], file=fp)
