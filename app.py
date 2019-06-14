@@ -29,7 +29,7 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
-codes = [('CBOE', 'VIX'), ('NASDAQOMX', 'COMP-NASDAQ'), ('NASDAQOMX', 'QQQ')]
+codes = [('CHRIS', 'CBOE_VX1'), ('NASDAQOMX', 'COMP-NASDAQ'), ('FINRA', 'FNYX_QQQ')]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
 stopwords.extend([x.lower() for x in screen_name])
