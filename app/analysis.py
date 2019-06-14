@@ -35,6 +35,9 @@ def analyze(
     ts_results = {}
     ts_results_sentiment = {}
 
+    if suffix:
+        suffix = '_{s}/'.format(s=suffix)
+
     #
     # create directories
     #
@@ -42,8 +45,14 @@ def analyze(
         os.makedirs('reports')
 
     for i,sn in enumerate(screen_name):
-        if not os.path.exists('viz/{sn}/granger'.format(sn=sn)):
-            os.makedirs('viz/{sn}/granger'.format(sn=sn))
+        if not os.path.exists('{directory}/{sn}/granger'.format(
+            directory=directory,
+            sn=sn
+        )):
+            os.makedirs('{directory}/{sn}/granger'.format(
+                directory=directory,
+                sn=sn
+            )
 
     #
     # timeseries analysis: sentiment
@@ -78,12 +87,12 @@ def analyze(
                     df=data[sn],
                     normalize_key=sentiment,
                     date_index='created_at',
-                    directory='viz/{sn}'.format(sn=sn),
+                    directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                     suffix=sentiment,
                     lstm_epochs=50
                 )
 
-                with open('reports/adf_{sn}_{sent}.txt'.format(
+                with open('reports/{directory}/adf_{sn}_{sent}.txt'.format(
                     sn=sn,
                     sent=sentiment
                 ), 'w') as fp:
@@ -97,6 +106,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=s1,
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_arima_sentiment.png',
             rotation=90
         )
@@ -105,6 +115,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=s2,
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_lstm_sentiment.png',
             rotation=90
         )
@@ -196,7 +207,10 @@ def analyze(
                 granger(
                     data[sn][[ts_index, sentiment]],
                     maxlag=3,
-                    directory='viz/{sn}/granger'.format(sn=sn),
+                    directory='{directory}/{sn}/granger'.format(
+                        directory=directory,
+                        sn=sn
+                    ),
                     suffix=sentiment
                 )
 
@@ -208,7 +222,10 @@ def analyze(
                 data[sn],
                 key_class='trend',
                 key_text=classify_index,
-                directory='viz/{sn}'.format(sn=sn),
+                directory='{directory}/{sn}/granger'.format(
+                    directory=directory,
+                    sn=sn
+                ),
                 top_words=25,
                 stopwords=stopwords
             )
@@ -221,10 +238,13 @@ def analyze(
                 df=data[sn],
                 normalize_key=ts_index,
                 date_index='created_at',
-                directory='viz/{sn}'.format(sn=sn)
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
             )
 
-            with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:
+            with open('reports/{directory}/adf_{sn}.txt'.format(
+                directory=directory,
+                sn=sn
+            ), 'w') as fp:
                 print(ts_results[sn]['arima']['adf'], file=fp)
 
     #
@@ -234,6 +254,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v[0] for k,v in classify_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='accuracy_overall.png',
             rotation=90
         )
@@ -242,6 +263,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v['arima']['mse'] for k,v in ts_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_arima.png',
             rotation=90
         )
@@ -249,6 +271,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_lstm.png',
             rotation=90
         )

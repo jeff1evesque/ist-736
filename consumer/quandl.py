@@ -41,7 +41,13 @@ def quandl(
         df = pd.read_csv(filepath)
 
     else:
-        df = q.get_ts(start_date=start_date, end_date=end_date)
+        df = q.get_ts(
+            database_code=database_code,
+            dataset_code=dataset_code,
+            start_date=start_date,
+            end_date=end_date,
+            collapse=collapse
+        )
         df.to_csv(filepath)
 
     return(df)

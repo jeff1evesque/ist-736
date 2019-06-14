@@ -44,11 +44,6 @@ data, start_date, end_date = tweet_sn(
 )
 
 #
-# harvest quandl
-#
-df_quandl = quandl(start_date, end_date)
-
-#
 # exploration: specific and overall tweets
 #
 explore(
@@ -61,6 +56,14 @@ explore(
 )
 
 #
-# analysis
+# harvest quandl + analyze
 #
-analyze(data, df_quandl, screen_name, stopwords)
+for x in ['COMP-NASDAQ', 'QQQ']:
+    df_quandl = quandl(dataset_code=x, start_date, end_date)
+    analyze(
+        data,
+        x,
+        directory='viz/{x}'.format(x),
+        screen_name,
+        stopwords
+    )
