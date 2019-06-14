@@ -47,12 +47,12 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-#explore(
-#    data,
-#    screen_name,
-#    stopwords=stopwords
-#    stopwords_topics=stopwords_topics
-#)
+explore(
+    data,
+    screen_name,
+    stopwords=stopwords,
+    stopwords_topics=stopwords_topics
+)
 
 #
 # harvest quandl + analyze
@@ -66,12 +66,12 @@ df_quandl = quandl(
     end_date=end_date.strftime('%Y-%m-%d')
 )
 
-#for x in df_quandl:
-#    analyze(
-#        data=data,
-#        df_quandl=df_quandl,
-#        directory='viz/{x}'.format(x=x[1]),
-#        directory_report='reports/{x}'.format(x=x[0]),
-#        screen_name=screen_name,
-#        stopwords=stopwords
-#    )
+for x in df_quandl:
+    analyze(
+        data=data,
+        df_quandl=x['data'],
+        directory='viz/{x}'.format(x=x['database']),
+        directory_report='reports/{x}'.format(x=x['dataset']),
+        screen_name=screen_name,
+        stopwords=stopwords
+    )

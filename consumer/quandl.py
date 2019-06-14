@@ -45,6 +45,6 @@ def quandl(
             )
             df.to_csv('{d}/{f}.csv'.format(d=directory, f=x[1]))
 
-        data.append(df)
+        data.append({'data': df, 'database': x[0], 'dataset': x[1]})
 
     return(data)
