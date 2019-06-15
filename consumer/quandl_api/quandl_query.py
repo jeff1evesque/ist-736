@@ -47,7 +47,6 @@ class QuandlQuery():
 
         '''
 
-        print(database_code, dataset_code)
         if start_date and end_date:
             self.query = self.quandl.get(
                 '{s}/{t}'.format(s=database_code, t=dataset_code),

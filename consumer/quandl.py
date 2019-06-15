@@ -45,6 +45,29 @@ def quandl(
             )
             df.to_csv('{d}/{f}.csv'.format(d=directory, f=x[1]))
 
+        #
+        # consistent column label
+        #
+        # Note: some quandl datasets provide different column names.
+        #
+        if 'Trade Date' in df:
+            df.rename(index=str, columns={'Trade Date': 'date'}, inplace=True)
+
+        if 'Index Value' in df:
+            df.rename(index=str, columns={'Index Value': 'value'}, inplace=True)
+
+        if 'Total Volume' in df:
+            df.rename(index=str, columns={'Total Volume': 'value'}, inplace=True)
+
+        if 'TotalVolume' in df:
+            df.rename(index=str, columns={'TotalVolume': 'value'}, inplace=True)
+
+        #
+        # consistent date: remove time component
+        #
+        df.index = [x.split(' ')[0]
+            for x in df.index.values.tolist()]
+
         data.append({'data': df, 'database': x[0], 'dataset': x[1]})
 
     return(data)

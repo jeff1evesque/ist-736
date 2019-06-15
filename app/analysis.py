@@ -20,7 +20,7 @@ def analyze(
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
-    ts_index='Index Value',
+    ts_index='value',
     analysis_ts=True,
     analysis_ts_sentiment=True,
     analysis_granger=True,
@@ -134,7 +134,6 @@ def analyze(
 
         # convert to string
         data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-        data[sn][classify_index] = data[sn][classify_index].astype(str)
 
         #
         # some screen_name text multiple times a day, yet quandl only provides
@@ -147,19 +146,20 @@ def analyze(
             classify_index: lambda a: ''.join(a)
         }).reset_index()
 
-        #
-        # merge tweets with quandl
-        #
-        data[sn] = data[sn].join(
-            df_quandl.set_index(['Trade Date']),
-            how='left', on=['created_at']
+        data[sn] = data[sn].set_index('created_at').join(
+            df_quandl,
+            how='left',
+            on='created_at'
         )
+
+        # column names: used below
+        col_names = data[sn].columns.tolist()
 
         #
         # merge days (weekend, holidays) with no ticker value to previous day.
         #
         drop_indices = []
-        for i,row in data[sn].iterrows():
+        for i,(idx,row) in enumerate(data[sn].iterrows()):
             if (i == 0 and np.isnan(data[sn][ts_index][i])):
                 data[sn][classify_index][i+1] = '{current} {next}'.format(
                     current=data[sn][classify_index][i],
@@ -172,15 +172,15 @@ def analyze(
 
             elif (i > 0 and np.isnan(data[sn][ts_index][i])):
                 if not np.isnan(data[sn][ts_index][i-1]):
-                    data[sn][ts_index][i] = data[sn][ts_index][i-1]
-                    data[sn]['High'][i] = data[sn]['High'][i-1]
-                    data[sn]['Low'][i] = data[sn]['Low'][i-1]
-                    data[sn]['Total Market Value'][i] = data[sn]['Total Market Value'][i-1]
-                    data[sn]['Dividend Market Value'][i] = data[sn]['Dividend Market Value'][i-1]
-                    data[sn][classify_index][i] = '{previous} {current}'.format(
-                        previous=data[sn][classify_index][i-1],
-                        current=data[sn][classify_index][i-1]
-                    )
+                    for x in col_names:
+                        if x == classify_index:
+                            data[sn][classify_index][i] = '{previous} {current}'.format(
+                                previous=data[sn][classify_index][i-1],
+                                current=data[sn][classify_index][i-1]
+                            )
+                        else:
+                            data[sn][x][i] = data[sn][x][i-1]
+
                     drop_indices.append(i)
 
         #
@@ -204,6 +204,7 @@ def analyze(
         #
         # granger causality
         #
+        print(data[sn])
         if analysis_granger:
             for sentiment in sentiments:
                 granger(

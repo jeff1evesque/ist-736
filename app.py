@@ -23,12 +23,13 @@ from brain.utility.stopwords import stopwords, stopwords_topics
 # local variables
 #
 screen_name = [
-    'jimcramer',
-    'ReformedBroker',
-    'TheStalwart',
-    'LizAnnSonders',
-    'SJosephBurns'
+    'jimcramer'
 ]
+#    'ReformedBroker',
+#    'TheStalwart',
+#    'LizAnnSonders',
+#    'SJosephBurns'
+#]
 codes = [('CHRIS', 'CBOE_VX1'), ('NASDAQOMX', 'COMP-NASDAQ'), ('FINRA', 'FNYX_QQQ')]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
@@ -47,12 +48,12 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-explore(
-    data,
-    screen_name,
-    stopwords=stopwords,
-    stopwords_topics=stopwords_topics
-)
+#explore(
+#    data,
+#    screen_name,
+#    stopwords=stopwords,
+#    stopwords_topics=stopwords_topics
+#)
 
 #
 # harvest quandl
