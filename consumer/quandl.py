@@ -32,8 +32,8 @@ def quandl(
     #
     data = []
     for x in codes:
-        if Path('{d}/{f}'.format(d=directory, f=x[1])).is_file():
-            df = pd.read_csv('{d}/{f}'.format(d=directory, f=x[1]))
+        if Path('{d}/{f}.csv'.format(d=directory, f=x[1])).is_file():
+            df = pd.read_csv('{d}/{f}.csv'.format(d=directory, f=x[1]))
 
         else:
             df = q.get_ts(
