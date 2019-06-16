@@ -29,6 +29,11 @@ screen_name = [
     'LizAnnSonders',
     'SJosephBurns'
 ]
+codes = [
+    ('CHRIS', 'CBOE_VX1'),
+    ('NASDAQOMX', 'COMP-NASDAQ'),
+    ('FINRA', 'FNYX_QQQ')
+]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
 stopwords.extend([x.lower() for x in screen_name])
@@ -44,23 +49,33 @@ data, start_date, end_date = tweet_sn(
 )
 
 #
-# harvest quandl
-#
-df_quandl = quandl(start_date, end_date)
-
-#
 # exploration: specific and overall tweets
 #
 explore(
     data,
     screen_name,
     stopwords=stopwords,
-    stopwords_topics=stopwords_topics,
-    start_date=start_date,
-    end_date=end_date
+    stopwords_topics=stopwords_topics
+)
+
+#
+# harvest quandl
+#
+df_quandl = quandl(
+    codes=codes,
+    start_date=start_date.strftime('%Y-%m-%d'),
+    end_date=end_date.strftime('%Y-%m-%d')
 )
 
 #
 # analysis
 #
-analyze(data, df_quandl, screen_name, stopwords)
+for x in df_quandl:
+    analyze(
+        data=data,
+        df_quandl=x['data'],
+        directory='viz/{x}'.format(x=x['database']),
+        directory_report='reports/{x}'.format(x=x['dataset']),
+        screen_name=screen_name,
+        stopwords=stopwords
+    )

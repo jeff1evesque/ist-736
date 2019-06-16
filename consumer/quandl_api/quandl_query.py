@@ -56,7 +56,7 @@ class QuandlQuery():
             )
 
         elif start_date:
-            self.query = result = self.quandl.get(
+            self.query = self.quandl.get(
                 '{s}/{t}'.format(s=database_code, t=dataset_code),
                 collapse=collapse,
                 start_date=start_date

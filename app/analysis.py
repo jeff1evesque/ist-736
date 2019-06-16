@@ -17,9 +17,10 @@ def analyze(
     screen_name,
     stopwords=[],
     directory='viz',
+    directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
-    ts_index='Index Value',
+    ts_index='value',
     analysis_ts=True,
     analysis_ts_sentiment=True,
     analysis_granger=True,
@@ -38,12 +39,18 @@ def analyze(
     #
     # create directories
     #
-    if not os.path.exists('reports'):
-        os.makedirs('reports')
+    if not os.path.exists(directory_report):
+        os.makedirs(directory_report)
 
     for i,sn in enumerate(screen_name):
-        if not os.path.exists('viz/{sn}/granger'.format(sn=sn)):
-            os.makedirs('viz/{sn}/granger'.format(sn=sn))
+        if not os.path.exists('{directory}/{sn}/granger'.format(
+            directory=directory,
+            sn=sn
+        )):
+            os.makedirs('{directory}/{sn}/granger'.format(
+                directory=directory,
+                sn=sn
+            ))
 
     #
     # timeseries analysis: sentiment
@@ -78,12 +85,16 @@ def analyze(
                     df=data[sn],
                     normalize_key=sentiment,
                     date_index='created_at',
-                    directory='viz/{sn}'.format(sn=sn),
+                    directory='{directory}/{sn}'.format(
+                        directory=directory,
+                        sn=sn
+                    ),
                     suffix=sentiment,
                     lstm_epochs=50
                 )
 
-                with open('reports/adf_{sn}_{sent}.txt'.format(
+                with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                    directory=directory_report,
                     sn=sn,
                     sent=sentiment
                 ), 'w') as fp:
@@ -97,6 +108,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=s1,
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_arima_sentiment.png',
             rotation=90
         )
@@ -105,6 +117,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=s2,
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_lstm_sentiment.png',
             rotation=90
         )
@@ -121,7 +134,6 @@ def analyze(
 
         # convert to string
         data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-        data[sn][classify_index] = data[sn][classify_index].astype(str)
 
         #
         # some screen_name text multiple times a day, yet quandl only provides
@@ -134,19 +146,20 @@ def analyze(
             classify_index: lambda a: ''.join(a)
         }).reset_index()
 
-        #
-        # merge tweets with quandl
-        #
-        data[sn] = data[sn].join(
-            df_quandl.set_index(['Trade Date']),
-            how='left', on=['created_at']
+        data[sn] = data[sn].set_index('created_at').join(
+            df_quandl,
+            how='left',
+            on='created_at'
         )
+
+        # column names: used below
+        col_names = data[sn].columns.tolist()
 
         #
         # merge days (weekend, holidays) with no ticker value to previous day.
         #
         drop_indices = []
-        for i,row in data[sn].iterrows():
+        for i,(idx,row) in enumerate(data[sn].iterrows()):
             if (i == 0 and np.isnan(data[sn][ts_index][i])):
                 data[sn][classify_index][i+1] = '{current} {next}'.format(
                     current=data[sn][classify_index][i],
@@ -159,15 +172,15 @@ def analyze(
 
             elif (i > 0 and np.isnan(data[sn][ts_index][i])):
                 if not np.isnan(data[sn][ts_index][i-1]):
-                    data[sn][ts_index][i] = data[sn][ts_index][i-1]
-                    data[sn]['High'][i] = data[sn]['High'][i-1]
-                    data[sn]['Low'][i] = data[sn]['Low'][i-1]
-                    data[sn]['Total Market Value'][i] = data[sn]['Total Market Value'][i-1]
-                    data[sn]['Dividend Market Value'][i] = data[sn]['Dividend Market Value'][i-1]
-                    data[sn][classify_index][i] = '{previous} {current}'.format(
-                        previous=data[sn][classify_index][i-1],
-                        current=data[sn][classify_index][i-1]
-                    )
+                    for x in col_names:
+                        if x == classify_index:
+                            data[sn][classify_index][i] = '{previous} {current}'.format(
+                                previous=data[sn][classify_index][i-1],
+                                current=data[sn][classify_index][i-1]
+                            )
+                        else:
+                            data[sn][x][i] = data[sn][x][i-1]
+
                     drop_indices.append(i)
 
         #
@@ -191,12 +204,16 @@ def analyze(
         #
         # granger causality
         #
+        print(data[sn])
         if analysis_granger:
             for sentiment in sentiments:
                 granger(
                     data[sn][[ts_index, sentiment]],
                     maxlag=3,
-                    directory='viz/{sn}/granger'.format(sn=sn),
+                    directory='{directory}/{sn}/granger'.format(
+                        directory=directory,
+                        sn=sn
+                    ),
                     suffix=sentiment
                 )
 
@@ -208,7 +225,10 @@ def analyze(
                 data[sn],
                 key_class='trend',
                 key_text=classify_index,
-                directory='viz/{sn}'.format(sn=sn),
+                directory='{directory}/{sn}'.format(
+                    directory=directory,
+                    sn=sn
+                ),
                 top_words=25,
                 stopwords=stopwords
             )
@@ -221,10 +241,13 @@ def analyze(
                 df=data[sn],
                 normalize_key=ts_index,
                 date_index='created_at',
-                directory='viz/{sn}'.format(sn=sn)
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
             )
 
-            with open('reports/adf_{sn}.txt'.format(sn=sn), 'w') as fp:
+            with open('{directory}/adf_{sn}.txt'.format(
+                directory=directory_report,
+                sn=sn
+            ), 'w') as fp:
                 print(ts_results[sn]['arima']['adf'], file=fp)
 
     #
@@ -234,6 +257,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v[0] for k,v in classify_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='accuracy_overall.png',
             rotation=90
         )
@@ -242,6 +266,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v['arima']['mse'] for k,v in ts_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_arima.png',
             rotation=90
         )
@@ -249,6 +274,7 @@ def analyze(
         plot_bar(
             labels=screen_name,
             performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
+            directory='{directory}'.format(directory=directory),
             filename='mse_overall_lstm.png',
             rotation=90
         )

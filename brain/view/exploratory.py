@@ -100,7 +100,7 @@ def explore(
         if plot_wc_overall:
             word_cloud(
                 df[target],
-                filename='{d}/wc_overall{suffix}.png'.format(
+                filename='{d}/sentiment_overall{suffix}.png'.format(
                     d=directory,
                     suffix=suffix
                 ),
