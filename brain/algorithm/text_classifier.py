@@ -25,6 +25,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
 from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.feature_selection import SelectKBest, chi2
 import matplotlib.pyplot as plt
 import scikitplot as skplt
 from brain.algorithm.penn_treebank import penn_scale
@@ -298,6 +299,11 @@ class Model():
         for idx in range(len(feature_vals)):
             results[feature_vals[idx]]=score_vals[idx]
 
+        if self.chi2:
+            feature_names = self.tfidf.get_feature_names()
+            results['chi2'] = [feature_names[i]
+                for i in self.chi2.get_support(indices=True)]
+
         return(results)
 
     def get_feature_names(self):
@@ -343,7 +349,8 @@ class Model():
         validate=False,
         max_length=280,
         model_type=None,
-        multiclass=False
+        multiclass=False,
+        k=None
     ):
         '''
 
@@ -359,6 +366,10 @@ class Model():
         @multiclass, svm indicator of greater than binary classification.
 
         '''
+
+        if k:
+            self.ch2 = SelectKBest(chi2, k=k)
+            X = self.ch2.fit_transform(X, y)
 
         # conditionally select model
         if (model_type == 'svm'):
@@ -378,6 +389,9 @@ class Model():
                 predictions = []
 
                 for item in list(validate[0]):
+                    if self.chi2:
+                        item = self.chi2.transform(item)
+
                     predictions.append(
                         self.clf.predict(item)
                     )
@@ -409,6 +423,9 @@ class Model():
                 predictions = []
 
                 for item in list(validate[0]):
+                    if self.chi2:
+                        item = self.chi2.transform(item)
+
                     predictions.append(
                         self.clf.predict(item)
                     )
@@ -437,6 +454,9 @@ class Model():
                 predictions = []
 
                 for item in list(validate[0]):
+                    if self.chi2:
+                        item = self.chi2.transform(item)
+
                     predictions.append(
                         self.clf.predict(item)
                     )
@@ -567,7 +587,8 @@ class Model():
         shuffle=True,
         model_type=None,
         multiclass=False,
-        ngram=(1,1)
+        ngram=(1,1),
+        k=None
     ):
         '''
 
@@ -608,14 +629,24 @@ class Model():
                 stop_words=stop_words,
                 ngram_range=ngram
             )
-            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         elif (
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
             clf = BernoulliNB()
-            data = bow
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = bow
 
         else:
             clf = MultinomialNB()
@@ -623,7 +654,12 @@ class Model():
                 stop_words=stop_words,
                 ngram_range=ngram
             )
-            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         # random kfolds
         return(
