@@ -26,7 +26,7 @@ def classify(
     plot=True,
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
     k=10000
 ):
     '''
@@ -176,7 +176,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_mnb{suffix}'.format
+                filename='top{t}_chi2_{key_class}_mnb{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
@@ -312,7 +312,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_mnb_pos{suffix}'.format
+                filename='top{t}_chi2_{key_class}_mnb_pos{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
@@ -413,7 +413,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_bnb{suffix}'.format
+                filename='top{t}_chi2_{key_class}_bnb{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
@@ -503,7 +503,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_bnb_pos{suffix}'.format
+                filename='top{t}_chi2_{key_class}_bnb_pos{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
@@ -603,7 +603,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_svm{suffix}'.format
+                filename='top{t}_chi2_{key_class}_svm{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
@@ -691,7 +691,7 @@ def classify(
                 top_chi2[0],
                 top_chi2[1],
                 directory=directory,
-                filename='top{t}_chi2_{key_class}_svm_pos{suffix}'.format
+                filename='top{t}_chi2_{key_class}_svm_pos{suffix}'.format(
                     t=top_words,
                     key_class=key_class,
                     suffix=suffix
