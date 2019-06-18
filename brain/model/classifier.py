@@ -13,7 +13,7 @@ def model(
     ngram=(1,1),
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
     k=10000
 ):
     '''
