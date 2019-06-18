@@ -27,7 +27,8 @@ def plot_bar(
     directory='viz',
     filename='text',
     rotation=0,
-    show=False
+    show=False,
+    horizontal=False
 ):
     '''
 
@@ -36,7 +37,12 @@ def plot_bar(
     '''
 
     y_pos = np.arange(len(labels))
-    plt.bar(y_pos, performance, align='center', alpha=0.5)
+
+    if horizontal:
+        plt.barh(y_pos, performance, align='center', alpha=0.5)
+    else:
+        plt.bar(y_pos, performance, align='center', alpha=0.5)
+
     plt.xticks(y_pos, labels, rotation=rotation)
     plt.ylabel('Performance')
     plt.tight_layout()

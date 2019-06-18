@@ -27,6 +27,7 @@ def classify(
     split_size=0.2,
     validate=True,
     stopwords=None
+    k=10000
 ):
     '''
 
@@ -55,11 +56,14 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['mnb'] = mnb.get_accuracy()
 
-        # most indicative words
+        #
+        # indicative words: top tfidf words
+        #
         log_prob = mnb.get_word_scores(
             mnb.get_clf(),
             top_words=top_words
@@ -163,6 +167,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = mnb.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_mnb{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['mnb'] = mnb.get_kfold_scores(
                 model_type='multinomial',
@@ -181,11 +202,14 @@ def classify(
             max_length=math.inf,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['mnb_pos'] = mnb_pos.get_accuracy()
 
-        # most indicative words
+        #
+        # indicative words: top tfidf words
+        #
         log_prob = mnb_pos.get_word_scores(
             mnb_pos.get_clf(),
             top_words=top_words
@@ -279,6 +303,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = mnb_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_mnb_pos{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['mnb_pos'] = mnb_pos.get_kfold_scores(
                 model_type='multinomial',
@@ -299,7 +340,8 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['bnb'] = bnb.get_accuracy()
 
@@ -362,6 +404,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = bnb.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_bnb{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['bnb'] = bnb.get_kfold_scores(
                 model_type='bernoulli',
@@ -381,7 +440,8 @@ def classify(
             max_length=0,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['bnb_pos'] = bnb_pos.get_accuracy()
 
@@ -434,6 +494,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = bnb_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_bnb_pos{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['bnb_pos'] = bnb_pos.get_kfold_scores(
                 model_type='bernoulli',
@@ -453,7 +530,8 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['svm'] = svm.get_accuracy()
 
@@ -516,6 +594,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = svm.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_svm{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['svm'] = svm.get_kfold_scores(
                 model_type='svm',
@@ -534,7 +629,8 @@ def classify(
             key_text=key_text,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
 
         if plot:
@@ -584,6 +680,23 @@ def classify(
                 directory=directory,
                 filename='test_distribution_svm_pos',
                 rotation=rotation
+            )
+
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = svm_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_svm_pos{suffix}'.format
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
             )
 
         if kfold:

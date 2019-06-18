@@ -68,6 +68,7 @@ class Model():
         self.split_size = split_size
         self.actual = None
         self.predicted = None
+        self.wscores = None
         stopwords.extend(stop_english)
         self.stopwords = stopwords
 
@@ -370,9 +371,13 @@ class Model():
         if k:
             self.ch2 = SelectKBest(chi2, k=k)
             X = self.ch2.fit_transform(X, y)
+            chi2score = chi2(X, y)[0]
 
         # conditionally select model
         if (model_type == 'svm'):
+            if k:
+                self.wscores = zip(self.tfidff.get_feature_names(), chi2score)
+
             if multiclass:
                 self.clf = svm.SVC(
                     gamma='scale',
@@ -408,13 +413,18 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
         elif (
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
+            wscores = None
+            if k:
+                self.wscores = zip(self.bow.get_feature_names(), chi2score)
+
             self.clf = BernoulliNB()
             self.clf.fit(X, y)
 
@@ -442,10 +452,15 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
         else:
+            wscores = None
+            if k:
+                self.wscores = zip(self.tfidff.get_feature_names(), chi2score)
+
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
 
@@ -454,9 +469,6 @@ class Model():
                 predictions = []
 
                 for item in list(validate[0]):
-                    if self.chi2:
-                        item = self.chi2.transform(item)
-
                     predictions.append(
                         self.clf.predict(item)
                     )
@@ -473,7 +485,8 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
     def plot_cm(
@@ -578,6 +591,22 @@ class Model():
                 average=average
             )
         )
+
+    def get_top_chi2(self, top_words=20):
+        '''
+
+        get top chi-squared words
+
+        '''
+
+        if self.wscores:
+            wchi2 = sorted(self.wscores, key=lambda x:x[1])
+            topchi2 = zip(*wchi2[-top_words:])
+            labels = topchi2[0]
+
+            return(topchi2)
+
+        return(None)
 
     def get_kfold_scores(
         self,
