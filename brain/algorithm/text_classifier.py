@@ -460,7 +460,7 @@ class Model():
         else:
             wscores = None
             if k:
-                self.wscores = zip(self.tfidf.get_feature_names(), chi2score)
+                self.wscores = zip(self.get_feature_names(), chi2score)
 
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
