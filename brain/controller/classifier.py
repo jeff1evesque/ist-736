@@ -27,7 +27,7 @@ def classify(
     split_size=0.2,
     validate=True,
     stopwords=None,
-    k=10000
+    k=1000
 ):
     '''
 

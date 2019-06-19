@@ -68,6 +68,7 @@ class Model():
         self.split_size = split_size
         self.actual = None
         self.predicted = None
+        self.chi2 = None
         self.wscores = None
         stopwords.extend(stop_english)
         self.stopwords = stopwords
@@ -351,7 +352,7 @@ class Model():
         max_length=280,
         model_type=None,
         multiclass=False,
-        k=None
+        k=1000
     ):
         '''
 
@@ -459,7 +460,7 @@ class Model():
         else:
             wscores = None
             if k:
-                self.wscores = zip(self.tfidff.get_feature_names(), chi2score)
+                self.wscores = zip(self.tfidf.get_feature_names(), chi2score)
 
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
