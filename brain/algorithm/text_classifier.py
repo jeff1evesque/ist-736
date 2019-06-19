@@ -302,7 +302,7 @@ class Model():
             results[feature_vals[idx]]=score_vals[idx]
 
         if self.chi2:
-            feature_names = self.tfidf.get_feature_names()
+            feature_names = self.get_feature_names()
             results['chi2'] = [feature_names[i]
                 for i in self.chi2.get_support(indices=True)]
 
@@ -370,14 +370,14 @@ class Model():
         '''
 
         if k:
-            self.ch2 = SelectKBest(chi2, k=k)
-            X = self.ch2.fit_transform(X, y)
+            self.chi2 = SelectKBest(chi2, k=k)
+            X = self.chi2.fit_transform(X, y)
             chi2score = chi2(X, y)[0]
 
         # conditionally select model
         if (model_type == 'svm'):
             if k:
-                self.wscores = zip(self.tfidff.get_feature_names(), chi2score)
+                self.wscores = zip(self.get_feature_names(), chi2score)
 
             if multiclass:
                 self.clf = svm.SVC(
@@ -470,6 +470,8 @@ class Model():
                 predictions = []
 
                 for item in list(validate[0]):
+                    if self.chi2:
+                        item = self.chi2.transform(item)
                     predictions.append(
                         self.clf.predict(item)
                     )
