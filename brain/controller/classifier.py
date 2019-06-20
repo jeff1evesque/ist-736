@@ -258,13 +258,14 @@ def classify(
             )
 
             # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+            if not k or k < 1:
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = mnb_pos.get_feature_distribution()['y_train']
@@ -470,13 +471,14 @@ def classify(
             )
 
             # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+            if not k or k < 1:
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = bnb_pos.get_feature_distribution()['y_train']
@@ -658,13 +660,14 @@ def classify(
             )
 
             # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+            if not k or k < 1:
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = svm_pos.get_feature_distribution()['y_train']
