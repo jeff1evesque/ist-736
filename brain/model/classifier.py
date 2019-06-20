@@ -76,7 +76,8 @@ def model_pos(
     stem=False,
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
+    k=1000
 ):
     '''
 

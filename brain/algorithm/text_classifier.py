@@ -308,14 +308,17 @@ class Model():
 
         return(results)
 
-    def get_feature_names(self):
+    def get_feature_names(self, type='countvec'):
         '''
 
         get feature names for current dataframe.
 
         '''
 
-        return(self.count_vect.get_feature_names())
+        if type == 'bow':
+            return(self.count_vect.get_feature_names())
+
+        return(self.tfidf_vectorizer.get_feature_names())
 
     def get_tfidf(self):
         '''
@@ -424,7 +427,7 @@ class Model():
         ):
             wscores = None
             if k:
-                self.wscores = zip(self.bow.get_feature_names(), chi2score)
+                self.wscores = zip(self.bow.get_feature_names(type='bow'), chi2score)
 
             self.clf = BernoulliNB()
             self.clf.fit(X, y)
@@ -460,7 +463,7 @@ class Model():
         else:
             wscores = None
             if k:
-                self.wscores = zip(self.get_feature_names(), chi2score)
+                self.wscores = zip(self.get_feature_names(type='bow'), chi2score)
 
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
@@ -603,11 +606,18 @@ class Model():
         '''
 
         if self.wscores:
+            if type == 'bow':
+                x = self.bow
+            else:
+                x = self.tfidf
+
             wchi2 = sorted(self.wscores, key=lambda x:x[1])
             topchi2 = zip(*wchi2[-top_words:])
-            labels = topchi2[0]
 
-            return(topchi2)
+            return(
+                [x[0] for x in wchi2],
+                [x[1] for x in wchi2]
+            )
 
         return(None)
 

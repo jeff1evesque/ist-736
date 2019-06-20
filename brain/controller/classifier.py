@@ -69,7 +69,7 @@ def classify(
             top_words=top_words
         )
 
-        terms = mnb.get_count_vect().get_feature_names()
+        terms = mnb.get_feature_names()
         indicative_words['positive'] = [(
             log_prob['positive']['value'][i],
             terms[x]
@@ -113,16 +113,17 @@ def classify(
             )
 
             # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
-                    suffix=suffix
-                ),
-                rotation=rotation
-            )
+            if not k or k < 1:
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf{suffix}'.format(
+                        count=top_words,
+                        suffix=suffix
+                    ),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = mnb.get_feature_distribution()['y_train']
@@ -171,6 +172,7 @@ def classify(
         # indicative words: top chi-squared words
         #
         top_chi2 = mnb.get_top_chi2(top_words)
+        print('top_chi2: {}'.format(top_chi2))
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -215,7 +217,7 @@ def classify(
             top_words=top_words
         )
 
-        terms = mnb.get_count_vect().get_feature_names()
+        terms = mnb.get_feature_names()
         indicative_words['positive'] = [(
             log_prob['positive']['value'][i],
             terms[x]
@@ -359,7 +361,7 @@ def classify(
             # extract top n words
             tfidf = bnb.get_tfidf()
             keywords = bnb.get_top_features(
-                bnb.get_feature_names(),
+                bnb.get_feature_names(type='bow'),
                 bnb.sort_coo(tfidf.tocoo()),
                 top_words
             )
@@ -456,7 +458,7 @@ def classify(
             # extract top n words
             tfidf = bnb_pos.get_tfidf()
             keywords = bnb_pos.get_top_features(
-                bnb_pos.get_feature_names(),
+                bnb_pos.get_feature_names(type='bow'),
                 bnb_pos.sort_coo(tfidf.tocoo()),
                 top_words
             )
