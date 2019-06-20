@@ -427,7 +427,7 @@ class Model():
         ):
             wscores = None
             if k:
-                self.wscores = zip(self.bow.get_feature_names(type='bow'), chi2score)
+                self.wscores = zip(self.get_feature_names(), chi2score)
 
             self.clf = BernoulliNB()
             self.clf.fit(X, y)
