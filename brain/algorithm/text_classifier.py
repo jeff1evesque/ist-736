@@ -397,13 +397,14 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    if self.chi2:
-                        item = self.chi2.transform(item)
+                if self.chi2:
+                    predictions = self.chi2.transform(validate[0])
 
-                    predictions.append(
-                        self.clf.predict(item)
-                    )
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
@@ -436,13 +437,14 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    if self.chi2:
-                        item = self.chi2.transform(item)
+                if self.chi2:
+                    predictions = self.chi2.transform(validate[0])
 
-                    predictions.append(
-                        self.clf.predict(item)
-                    )
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
@@ -472,12 +474,14 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    if self.chi2:
-                        item = self.chi2.transform(item)
-                    predictions.append(
-                        self.clf.predict(item)
-                    )
+                if self.chi2:
+                    predictions = self.chi2.transform(validate[0])
+
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
