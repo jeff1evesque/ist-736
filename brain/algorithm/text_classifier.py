@@ -373,8 +373,6 @@ class Model():
         '''
 
         if k:
-            self.chi2 = SelectKBest(chi2, k=k)
-            X = self.chi2.fit_transform(X, y)
             chi2score = chi2(X, y)[0]
 
         # conditionally select model
@@ -398,7 +396,9 @@ class Model():
                 predictions = []
 
                 if self.chi2:
-                    predictions = self.chi2.transform(validate[0])
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
+                    )
 
                 else:
                     for item in list(validate[0]):
@@ -438,7 +438,9 @@ class Model():
                 predictions = []
 
                 if self.chi2:
-                    predictions = self.chi2.transform(validate[0])
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
+                    )
 
                 else:
                     for item in list(validate[0]):
@@ -475,7 +477,9 @@ class Model():
                 predictions = []
 
                 if self.chi2:
-                    predictions = self.chi2.transform(validate[0])
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
+                    )
 
                 else:
                     for item in list(validate[0]):
@@ -572,6 +576,8 @@ class Model():
 
         if not actual:
             actual = self.actual
+            if self.chi2:
+                actual.tolist()
         if not predicted:
             predicted = self.predicted
 
