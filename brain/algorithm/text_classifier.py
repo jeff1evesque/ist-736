@@ -616,12 +616,11 @@ class Model():
         '''
 
         if self.wscores:
-            if type == 'bow':
-                x = self.bow
-            else:
-                x = self.tfidf
+            # remove nan
+            result = [x for x in self.wscores if not np.isnan(x[1])]
 
-            wchi2 = sorted(self.wscores, key=lambda x:x[1])
+            # generate labels and scores
+            wchi2 = sorted(result, key=lambda x:x[1])
             labels, scores = zip(*wchi2[-top_words:])
 
             return(labels, scores)
