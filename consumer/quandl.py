@@ -50,6 +50,9 @@ def quandl(
         #
         # Note: some quandl datasets provide different column names.
         #
+        if 'Date' in df:
+            df.rename(index=str, columns={'Date': 'date'}, inplace=True)
+
         if 'Trade Date' in df:
             df.rename(index=str, columns={'Trade Date': 'date'}, inplace=True)
 
