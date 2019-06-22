@@ -26,7 +26,8 @@ def classify(
     plot=True,
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
+    k=1000
 ):
     '''
 
@@ -55,17 +56,20 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['mnb'] = mnb.get_accuracy()
 
-        # most indicative words
+        #
+        # indicative words: top tfidf words
+        #
         log_prob = mnb.get_word_scores(
             mnb.get_clf(),
             top_words=top_words
         )
 
-        terms = mnb.get_count_vect().get_feature_names()
+        terms = mnb.get_feature_names()
         indicative_words['positive'] = [(
             log_prob['positive']['value'][i],
             terms[x]
@@ -95,30 +99,30 @@ def classify(
             )
 
             # extract top n words
-            tfidf = mnb.get_tfidf()
-            keywords = mnb.get_top_features(
-                mnb.get_feature_names(),
-                mnb.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = mnb.get_tfidf()
+                keywords = mnb.get_top_features(
+                    mnb.get_feature_names(),
+                    mnb.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                # sort values: largest to smallest
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
-                    suffix=suffix
-                ),
-                rotation=rotation
-            )
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf{suffix}'.format(
+                        count=top_words,
+                        suffix=suffix
+                    ),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = mnb.get_feature_distribution()['y_train']
@@ -163,6 +167,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = mnb.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_mnb{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['mnb'] = mnb.get_kfold_scores(
                 model_type='multinomial',
@@ -181,17 +202,20 @@ def classify(
             max_length=math.inf,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['mnb_pos'] = mnb_pos.get_accuracy()
 
-        # most indicative words
+        #
+        # indicative words: top tfidf words
+        #
         log_prob = mnb_pos.get_word_scores(
             mnb_pos.get_clf(),
             top_words=top_words
         )
 
-        terms = mnb.get_count_vect().get_feature_names()
+        terms = mnb.get_feature_names()
         indicative_words['positive'] = [(
             log_prob['positive']['value'][i],
             terms[x]
@@ -218,27 +242,26 @@ def classify(
             )
 
             # extract top n words
-            tfidf = mnb_pos.get_tfidf()
-            keywords = mnb_pos.get_top_features(
-                mnb_pos.get_feature_names(),
-                mnb_pos.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = mnb_pos.get_tfidf()
+                keywords = mnb_pos.get_top_features(
+                    mnb_pos.get_feature_names(),
+                    mnb_pos.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = mnb_pos.get_feature_distribution()['y_train']
@@ -279,6 +302,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = mnb_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_mnb_pos{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['mnb_pos'] = mnb_pos.get_kfold_scores(
                 model_type='multinomial',
@@ -299,7 +339,8 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['bnb'] = bnb.get_accuracy()
 
@@ -315,30 +356,31 @@ def classify(
             )
 
             # extract top n words
-            tfidf = bnb.get_tfidf()
-            keywords = bnb.get_top_features(
-                bnb.get_feature_names(),
-                bnb.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = bnb.get_tfidf()
+                keywords = bnb.get_top_features(
+                    bnb.get_feature_names(type='bow'),
+                    bnb.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                # sort values: largest to smallest
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
-                    suffix=suffix
-                ),
-                rotation=rotation
-            )
+                # plot top n words
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf{suffix}'.format(
+                        count=top_words,
+                        suffix=suffix
+                    ),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = bnb.get_feature_distribution()['y_train']
@@ -362,6 +404,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = bnb.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_bnb{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['bnb'] = bnb.get_kfold_scores(
                 model_type='bernoulli',
@@ -381,7 +440,8 @@ def classify(
             max_length=0,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['bnb_pos'] = bnb_pos.get_accuracy()
 
@@ -394,27 +454,27 @@ def classify(
             )
 
             # extract top n words
-            tfidf = bnb_pos.get_tfidf()
-            keywords = bnb_pos.get_top_features(
-                bnb_pos.get_feature_names(),
-                bnb_pos.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = bnb_pos.get_tfidf()
+                keywords = bnb_pos.get_top_features(
+                    bnb_pos.get_feature_names(type='bow'),
+                    bnb_pos.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                # sort values: largest to smallest
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = bnb_pos.get_feature_distribution()['y_train']
@@ -432,6 +492,23 @@ def classify(
                 directory=directory,
                 filename='test_distribution_bnb_pos',
                 rotation=rotation
+            )
+
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = bnb_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_bnb_pos{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
             )
 
         if kfold:
@@ -453,7 +530,8 @@ def classify(
             ngram=ngram,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
         model_scores['svm'] = svm.get_accuracy()
 
@@ -469,30 +547,31 @@ def classify(
             )
 
             # extract top n words
-            tfidf = svm.get_tfidf()
-            keywords = svm.get_top_features(
-                svm.get_feature_names(),
-                svm.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = svm.get_tfidf()
+                keywords = svm.get_top_features(
+                    svm.get_feature_names(),
+                    svm.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                # sort values: largest to smallest
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
-                    suffix=suffix
-                ),
-                rotation=rotation
-            )
+                # plot top n words
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf{suffix}'.format(
+                        count=top_words,
+                        suffix=suffix
+                    ),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = svm.get_feature_distribution()['y_train']
@@ -516,6 +595,23 @@ def classify(
                 rotation=rotation
             )
 
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = svm.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_svm{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
+            )
+
         if kfold:
             kfold_scores['svm'] = svm.get_kfold_scores(
                 model_type='svm',
@@ -534,7 +630,8 @@ def classify(
             key_text=key_text,
             split_size=split_size,
             validate=validate,
-            stopwords=stopwords
+            stopwords=stopwords,
+            k=k
         )
 
         if plot:
@@ -546,27 +643,28 @@ def classify(
             )
 
             # extract top n words
-            tfidf = svm_pos.get_tfidf()
-            keywords = svm_pos.get_top_features(
-                svm_pos.get_feature_names(),
-                svm_pos.sort_coo(tfidf.tocoo()),
-                top_words
-            )
+            if not(k or k > 1):
+                tfidf = svm_pos.get_tfidf()
+                keywords = svm_pos.get_top_features(
+                    svm_pos.get_feature_names(),
+                    svm_pos.sort_coo(tfidf.tocoo()),
+                    top_words
+                )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[0])
-            )
+                # sort values: largest to smallest
+                keywords = OrderedDict(
+                    sorted(keywords.items(),
+                    key=lambda x: x[0])
+                )
 
-            # plot top n words
-            plot_bar(
-                labels=[*keywords],
-                performance=[*keywords.values()],
-                directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
-                rotation=rotation
-            )
+                # plot top n words
+                plot_bar(
+                    labels=[*keywords],
+                    performance=[*keywords.values()],
+                    directory=directory,
+                    filename='top_{count}_tfidf'.format(count=top_words),
+                    rotation=rotation
+                )
 
             # feature distribution
             train = svm_pos.get_feature_distribution()['y_train']
@@ -584,6 +682,23 @@ def classify(
                 directory=directory,
                 filename='test_distribution_svm_pos',
                 rotation=rotation
+            )
+
+        #
+        # indicative words: top chi-squared words
+        #
+        top_chi2 = svm_pos.get_top_chi2(top_words)
+        if top_chi2:
+            plot_bar(
+                top_chi2[0],
+                top_chi2[1],
+                directory=directory,
+                filename='top{t}_chi2_{key_class}_svm_pos{suffix}'.format(
+                    t=top_words,
+                    key_class=key_class,
+                    suffix=suffix
+                ),
+                horizontal=True
             )
 
         if kfold:

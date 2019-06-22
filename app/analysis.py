@@ -147,9 +147,8 @@ def analyze(
         }).reset_index()
 
         data[sn] = data[sn].set_index('created_at').join(
-            df_quandl,
-            how='left',
-            on='created_at'
+            df_quandl.set_index('date'),
+            how='left'
         )
 
         # column names: used below
@@ -204,7 +203,6 @@ def analyze(
         #
         # granger causality
         #
-        print(data[sn])
         if analysis_granger:
             for sentiment in sentiments:
                 granger(

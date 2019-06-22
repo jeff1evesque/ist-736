@@ -25,6 +25,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
 from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.feature_selection import SelectKBest, chi2
 import matplotlib.pyplot as plt
 import scikitplot as skplt
 from brain.algorithm.penn_treebank import penn_scale
@@ -67,6 +68,8 @@ class Model():
         self.split_size = split_size
         self.actual = None
         self.predicted = None
+        self.chi2 = None
+        self.wscores = None
         stopwords.extend(stop_english)
         self.stopwords = stopwords
 
@@ -298,16 +301,24 @@ class Model():
         for idx in range(len(feature_vals)):
             results[feature_vals[idx]]=score_vals[idx]
 
+        if self.chi2:
+            feature_names = self.get_feature_names()
+            results['chi2'] = [feature_names[i]
+                for i in self.chi2.get_support(indices=True)]
+
         return(results)
 
-    def get_feature_names(self):
+    def get_feature_names(self, type='countvec'):
         '''
 
         get feature names for current dataframe.
 
         '''
 
-        return(self.count_vect.get_feature_names())
+        if type == 'bow':
+            return(self.count_vect.get_feature_names())
+
+        return(self.tfidf_vectorizer.get_feature_names())
 
     def get_tfidf(self):
         '''
@@ -343,7 +354,8 @@ class Model():
         validate=False,
         max_length=280,
         model_type=None,
-        multiclass=False
+        multiclass=False,
+        k=1000
     ):
         '''
 
@@ -360,8 +372,14 @@ class Model():
 
         '''
 
+        if k:
+            chi2score = chi2(X, y)[0]
+
         # conditionally select model
         if (model_type == 'svm'):
+            if k:
+                self.wscores = zip(self.get_feature_names(), chi2score)
+
             if multiclass:
                 self.clf = svm.SVC(
                     gamma='scale',
@@ -377,10 +395,16 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    predictions.append(
-                        self.clf.predict(item)
+                if self.chi2:
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
                     )
+
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
@@ -394,13 +418,18 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
         elif (
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
+            wscores = None
+            if k:
+                self.wscores = zip(self.get_feature_names(), chi2score)
+
             self.clf = BernoulliNB()
             self.clf.fit(X, y)
 
@@ -408,10 +437,16 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    predictions.append(
-                        self.clf.predict(item)
+                if self.chi2:
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
                     )
+
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
@@ -425,10 +460,15 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
         else:
+            wscores = None
+            if k:
+                self.wscores = zip(self.get_feature_names(type='bow'), chi2score)
+
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
 
@@ -436,10 +476,16 @@ class Model():
             if validate and len(validate) == 2:
                 predictions = []
 
-                for item in list(validate[0]):
-                    predictions.append(
-                        self.clf.predict(item)
+                if self.chi2:
+                    predictions = self.clf.predict(
+                        self.chi2.transform(validate[0])
                     )
+
+                else:
+                    for item in list(validate[0]):
+                        predictions.append(
+                            self.clf.predict(item)
+                        )
 
                 self.actual = validate[1]
                 self.predicted = predictions
@@ -453,7 +499,8 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None
+                'predicted': None,
+                'wscores': wscores
             })
 
     def plot_cm(
@@ -529,6 +576,8 @@ class Model():
 
         if not actual:
             actual = self.actual
+            if self.chi2:
+                actual.tolist()
         if not predicted:
             predicted = self.predicted
 
@@ -559,6 +608,29 @@ class Model():
             )
         )
 
+    def get_top_chi2(self, top_words=20):
+        '''
+
+        get top chi-squared words
+
+        '''
+
+        if self.wscores:
+            if type == 'bow':
+                x = self.bow
+            else:
+                x = self.tfidf
+
+            wchi2 = sorted(self.wscores, key=lambda x:x[1])
+            topchi2 = zip(*wchi2[-top_words:])
+
+            return(
+                [x[0] for x in wchi2],
+                [x[1] for x in wchi2]
+            )
+
+        return(None)
+
     def get_kfold_scores(
         self,
         n_splits=2,
@@ -567,7 +639,8 @@ class Model():
         shuffle=True,
         model_type=None,
         multiclass=False,
-        ngram=(1,1)
+        ngram=(1,1),
+        k=None
     ):
         '''
 
@@ -608,14 +681,24 @@ class Model():
                 stop_words=stop_words,
                 ngram_range=ngram
             )
-            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         elif (
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
             clf = BernoulliNB()
-            data = bow
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = bow
 
         else:
             clf = MultinomialNB()
@@ -623,7 +706,12 @@ class Model():
                 stop_words=stop_words,
                 ngram_range=ngram
             )
-            data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
+
+            if k:
+                ch2 = SelectKBest(chi2, k=k)
+                data = ch2.fit_transform(self.df[self.key_text])
+            else:
+                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         # random kfolds
         return(

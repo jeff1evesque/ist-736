@@ -13,7 +13,8 @@ def model(
     ngram=(1,1),
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
+    k=1000
 ):
     '''
 
@@ -60,7 +61,8 @@ def model(
         params['y_train'],
         model_type=model_type,
         validate=validate,
-        max_length=max_length
+        max_length=max_length,
+        k=k
     )
 
     return(model)
@@ -74,7 +76,8 @@ def model_pos(
     stem=False,
     split_size=0.2,
     validate=True,
-    stopwords=None
+    stopwords=None,
+    k=1000
 ):
     '''
 
@@ -133,7 +136,8 @@ def model_pos(
         params['y_train'],
         model_type=model_type,
         validate=validate,
-        max_length=max_length
+        max_length=max_length,
+        k=k
     )
 
     return(model)
