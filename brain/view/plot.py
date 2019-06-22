@@ -36,14 +36,16 @@ def plot_bar(
 
     '''
 
-    y_pos = np.arange(len(labels))
+    y_pos = range(len(labels))
 
     if horizontal:
         plt.barh(y_pos, performance, align='center', alpha=0.5)
+        plt.yticks(y_pos, labels, rotation=rotation)
+
     else:
         plt.bar(y_pos, performance, align='center', alpha=0.5)
+        plt.xticks(y_pos, labels, rotation=rotation)
 
-    plt.xticks(y_pos, labels, rotation=rotation)
     plt.ylabel('Performance')
     plt.tight_layout()
     plt.savefig('{d}/{f}'.format(d=directory, f=filename))

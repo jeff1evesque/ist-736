@@ -622,12 +622,9 @@ class Model():
                 x = self.tfidf
 
             wchi2 = sorted(self.wscores, key=lambda x:x[1])
-            topchi2 = zip(*wchi2[-top_words:])
+            labels, scores = zip(*wchi2[-top_words:])
 
-            return(
-                [x[0] for x in wchi2],
-                [x[1] for x in wchi2]
-            )
+            return(labels, scores)
 
         return(None)
 
