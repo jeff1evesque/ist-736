@@ -99,7 +99,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = mnb.get_tfidf()
                 keywords = mnb.get_top_features(
                     mnb.get_feature_names(),
@@ -242,7 +242,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = mnb_pos.get_tfidf()
                 keywords = mnb_pos.get_top_features(
                     mnb_pos.get_feature_names(),
@@ -356,7 +356,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = bnb.get_tfidf()
                 keywords = bnb.get_top_features(
                     bnb.get_feature_names(type='bow'),
@@ -454,7 +454,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = bnb_pos.get_tfidf()
                 keywords = bnb_pos.get_top_features(
                     bnb_pos.get_feature_names(type='bow'),
@@ -547,7 +547,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = svm.get_tfidf()
                 keywords = svm.get_top_features(
                     svm.get_feature_names(),
@@ -643,7 +643,7 @@ def classify(
             )
 
             # extract top n words
-            if not(k and k > 1):
+            if not(k or k > 1):
                 tfidf = svm_pos.get_tfidf()
                 keywords = svm_pos.get_top_features(
                     svm_pos.get_feature_names(),
