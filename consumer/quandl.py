@@ -56,13 +56,16 @@ def quandl(
         if 'Trade Date' in df:
             df.rename(index=str, columns={'Trade Date': 'date'}, inplace=True)
 
-        if 'Index Value' in df:
+        if 'Close' in df:
+            df.rename(index=str, columns={'Close': 'value'}, inplace=True)
+
+        elif 'Index Value' in df:
             df.rename(index=str, columns={'Index Value': 'value'}, inplace=True)
 
-        if 'Total Volume' in df:
+        elif 'Total Volume' in df:
             df.rename(index=str, columns={'Total Volume': 'value'}, inplace=True)
 
-        if 'TotalVolume' in df:
+        elif 'TotalVolume' in df:
             df.rename(index=str, columns={'TotalVolume': 'value'}, inplace=True)
 
         #
