@@ -71,7 +71,7 @@ def quandl(
         #
         # consistent date: remove time component
         #
-        df.index = [x.split(' ')[0]
+        df.index = [str(x).split(' ')[0]
             for x in df.index.values.tolist()]
 
         data.append({'data': df, 'database': x[0], 'dataset': x[1]})
