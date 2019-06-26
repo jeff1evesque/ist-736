@@ -64,6 +64,7 @@ explore(
     screen_name,
     stopwords=stopwords,
     stopwords_topics=stopwords_topics
+    directory='viz/exploratory'
 )
 
 #
@@ -82,7 +83,10 @@ for x in df_quandl:
     analyze(
         data=data,
         df_quandl=x['data'],
-        directory='viz/{a}--{b}'.format(a=x['database'], b=x['dataset']),
+        directory='viz/analysis/{a}--{b}'.format(
+            a=x['database'].lower(),
+            b=x['dataset'].lower()
+        ),
         directory_report='reports/{x}'.format(x=x['dataset']),
         screen_name=screen_name,
         stopwords=stopwords
