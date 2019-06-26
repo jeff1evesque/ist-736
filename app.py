@@ -38,9 +38,12 @@ codes = [
     ('BATS', 'BATS_GOOGL'),
     ('BATS', 'BATS_AAPL'),
     ('BATS', 'BATS_NFLX'),
-    ('FRED', 'GDPPOT'),
-    ('FRED', 'NROU'),
-    ('FRED', 'NROUST')
+    ('BATS', 'BATS_MMT'),
+    ('FINRA', 'FNRA_MMM'),
+    ('EIA', 'PET_RWTC_D'),
+    ('WFC', 'PR_CON_15YFIXED_IR'),
+    ('WFC', 'PR_GOV_30YFIXEDVA_IR'),
+    ('WFC', 'PR_GOV_30YFIXEDFHA_IR')
 ]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
