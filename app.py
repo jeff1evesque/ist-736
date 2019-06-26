@@ -39,10 +39,9 @@ codes = [
     ('BATS', 'BATS_AAPL'),
     ('BATS', 'BATS_NFLX'),
     ('BATS', 'BATS_MMT'),
-    ('FINRA', 'FNRA_MMM'),
+    ('FINRA', 'FNYX_MMM'),
     ('EIA', 'PET_RWTC_D'),
     ('WFC', 'PR_CON_15YFIXED_IR'),
-    ('WFC', 'PR_GOV_30YFIXEDVA_IR'),
     ('WFC', 'PR_GOV_30YFIXEDFHA_IR')
 ]
 start_date = datetime(3000, 12, 25)
