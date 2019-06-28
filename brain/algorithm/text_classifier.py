@@ -373,7 +373,8 @@ class Model():
         '''
 
         if k:
-            chi2score = chi2(X, y)[0]
+            kbest = SelectKBest(chi2, k=k)
+            chi2score = kbest.fit_transform(X, y)
 
         # conditionally select model
         if (model_type == 'svm'):
@@ -617,10 +618,15 @@ class Model():
 
         if self.wscores:
             # remove nan
-            result = [x for x in self.wscores if not np.isnan(x[1])]
+            result = [x for x in self.wscores if len(x) == 2 and sum(x[1].toarray()[0]) > 0]
+
+            print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+            [print('first: {}, second: {}'.format(x[0], x[1])) for x in result]
+            print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
 
             # generate labels and scores
             wchi2 = sorted(result, key=lambda x:x[1])
+
             labels, scores = zip(*wchi2[-top_words:])
 
             return(labels, scores)
@@ -636,7 +642,7 @@ class Model():
         model_type=None,
         multiclass=False,
         ngram=(1,1),
-        k=None
+        k=1000
     ):
         '''
 
@@ -680,7 +686,7 @@ class Model():
 
             if k:
                 ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
+                data = ch2.fit_transform(self.df[self.key_text], self.df[self.key_class])
             else:
                 data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
@@ -692,7 +698,7 @@ class Model():
 
             if k:
                 ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
+                data = ch2.fit_transform(self.df[self.key_text], self.df[self.key_class])
             else:
                 data = bow
 
@@ -705,7 +711,7 @@ class Model():
 
             if k:
                 ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
+                data = ch2.fit_transform(self.df[self.key_text], self.df[self.key_class])
             else:
                 data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
