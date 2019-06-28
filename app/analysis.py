@@ -228,7 +228,8 @@ def analyze(
                     sn=sn
                 ),
                 top_words=25,
-                stopwords=stopwords
+                stopwords=stopwords,
+                k=25
             )
 
         #
