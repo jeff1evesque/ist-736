@@ -611,7 +611,7 @@ class Model():
             )
         )
 
-    def get_top_chi2(self):
+    def get_top_chi2(self, top_words=20, sort_col='score'):
         '''
 
         get top chi-squared words
@@ -627,6 +627,11 @@ class Model():
                 )),
                 columns=['feature', 'score', 'pval']
             )
+
+            self.wscores = self.wscores.sort_values(
+                by=sort_col,
+                ascending=False
+            ).head(top_words)
 
         if (
             self.wscores is not None and
