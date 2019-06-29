@@ -65,7 +65,7 @@ explore(
     data,
     screen_name,
     stopwords=stopwords,
-    stopwords_topics=stopwords_topics
+    stopwords_topics=stopwords_topics,
     directory='viz/exploratory'
 )
 
