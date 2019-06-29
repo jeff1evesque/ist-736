@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 stopwords = [
+    'fulltext',
     'http',
     'https',
     'nhttps',
