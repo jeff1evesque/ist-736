@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 from scipy.stats import itemfreq
 from nltk.corpus import stopwords as stp
-from nltk import tokenize, download, pos_tag
+from nltk import tokenize, download, pos_tag, sent_tokenize
 from nltk.stem.porter import PorterStemmer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
@@ -249,15 +249,6 @@ class Model():
             )
             self.tfidf = self.tfidf_vectorizer.fit_transform(
                 self.df[self.key_text]
-            )
-
-            # top n tfidf words
-            feature_names = self.count_vect.get_feature_names()
-            sorted_items = self.sort_coo(self.tfidf.tocoo())
-            self.keywords = self.get_top_features(
-                feature_names,
-                sorted_items,
-                topn
             )
 
     def sort_coo(self, coo_matrix):
@@ -557,6 +548,13 @@ class Model():
         logodds = positive_probs - negative_probs
         positive_index = np.argsort(logodds)[:top_words]
         negative_index = np.argsort(-logodds)[:top_words]
+
+        vectorizer = self.tfidf_vectorizer
+        terms = vectorizer.get_feature_names()
+
+        print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh')
+        print(terms)
+        print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh')
 
         # top words
         return({
