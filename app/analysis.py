@@ -159,28 +159,27 @@ def analyze(
         #
         drop_indices = []
         for i,(idx,row) in enumerate(data[sn].iterrows()):
-            if (i == 0 and np.isnan(data[sn][ts_index][i])):
-                data[sn][classify_index][i+1] = '{current} {next}'.format(
-                    current=data[sn][classify_index][i],
-                    next=data[sn][classify_index][i+1]
-                )
+            if (i == 0 and pd.isnull(data[sn][ts_index][i])):
                 drop_indices.append(i)
 
-            elif (i > 0 and not data[sn][ts_index][i-1]):
-                continue
-
-            elif (i > 0 and np.isnan(data[sn][ts_index][i])):
-                if not np.isnan(data[sn][ts_index][i-1]):
+            elif (i > 0 and pd.isnull(data[sn][ts_index][i])):
+                if not pd.isnull(data[sn][ts_index][i-1]):
                     for x in col_names:
                         if x == classify_index:
                             data[sn][classify_index][i] = '{previous} {current}'.format(
                                 previous=data[sn][classify_index][i-1],
-                                current=data[sn][classify_index][i-1]
+                                current=data[sn][classify_index][i]
                             )
                         else:
                             data[sn][x][i] = data[sn][x][i-1]
 
-                    drop_indices.append(i)
+                    drop_indices.append(i-1)
+
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+            print(data[sn][classify_index].shape)
+            print(data[sn][classify_index].tolist())
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+        exit(999)
 
         #
         # drop rows: rows with no tickers and empty classify_index.
@@ -229,7 +228,7 @@ def analyze(
                 ),
                 top_words=25,
                 stopwords=stopwords,
-                k=25
+                k=500
             )
 
         #
