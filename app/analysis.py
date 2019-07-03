@@ -76,7 +76,7 @@ def analyze(
             'neutral',
             'negative'
         ]).agg({
-            classify_index: lambda a: ''.join(str(a))
+            classify_index: lambda a: ''.join(a)
         }).reset_index()
 
         if analysis_ts_sentiment:
@@ -154,15 +154,6 @@ def analyze(
         # column names: used below
         col_names = data[sn].columns.tolist()
 
-        for i,(idx,row) in enumerate(data[sn].iterrows()):
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-            print('i: {}'.format(i))
-            print('idx: {}'.format(idx))
-            print('row: {}'.format(row[classify_index]))
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-
-        exit(999)
-
         #
         # merge days (weekend, holidays) with no ticker value to previous day.
         #
@@ -189,6 +180,14 @@ def analyze(
         #
         drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
+
+        for i,(idx,row) in enumerate(data[sn].iterrows()):
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+            print('i: {}'.format(i))
+            print('idx: {}'.format(idx))
+            print('row: {}'.format(row[classify_index]))
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+        exit(999)
 
         #
         # index data: relabel index as up (0) or down (1) based on previous time
