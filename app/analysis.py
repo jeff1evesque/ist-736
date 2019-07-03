@@ -159,19 +159,19 @@ def analyze(
         #
         drop_indices = []
         for i,(idx,row) in enumerate(data[sn].iterrows()):
-            if (i == 0 and pd.isnull(row[ts_index][i])):
+            if (i == 0 and pd.isnull(data[sn][ts_index][i])):
                 drop_indices.append(i)
 
-            elif (i > 0 and pd.isnull(row[ts_index][i])):
-                if not pd.isnull(row[ts_index][i-1]):
+            elif (i > 0 and pd.isnull(data[sn][ts_index][i])):
+                if not pd.isnull(data[sn][ts_index][i-1]):
                     for x in col_names:
                         if x == classify_index:
                             data[sn][classify_index][i] = '{previous} {current}'.format(
-                                previous=row[classify_index][i-1],
-                                current=row[classify_index][i]
+                                previous=data[sn][classify_index][i-1],
+                                current=data[sn][classify_index][i]
                             )
                         else:
-                            row[x][i] = data[sn][x][i-1]
+                            data[sn][x][i] = data[sn][x][i-1]
 
                     drop_indices.append(i-1)
 
@@ -180,14 +180,6 @@ def analyze(
         #
         drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
-
-        for i,(idx,row) in enumerate(data[sn].iterrows()):
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-            print('i: {}'.format(i))
-            print('idx: {}'.format(idx))
-            print('row: {}'.format(row[classify_index]))
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-        exit(999)
 
         #
         # index data: relabel index as up (0) or down (1) based on previous time
