@@ -149,37 +149,40 @@ def analyze(
         data[sn] = data[sn].set_index('created_at').join(
             df_quandl.set_index('date'),
             how='left'
-        )
+        ).reset_index()
 
         # column names: used below
         col_names = data[sn].columns.tolist()
+
+        for i,(idx,row) in enumerate(data[sn].iterrows()):
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+            print('i: {}'.format(i))
+            print('idx: {}'.format(idx))
+            print('row: {}'.format(row[classify_index]))
+            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+
+        exit(999)
 
         #
         # merge days (weekend, holidays) with no ticker value to previous day.
         #
         drop_indices = []
         for i,(idx,row) in enumerate(data[sn].iterrows()):
-            if (i == 0 and pd.isnull(data[sn][ts_index][i])):
+            if (i == 0 and pd.isnull(row[ts_index][i])):
                 drop_indices.append(i)
 
-            elif (i > 0 and pd.isnull(data[sn][ts_index][i])):
-                if not pd.isnull(data[sn][ts_index][i-1]):
+            elif (i > 0 and pd.isnull(row[ts_index][i])):
+                if not pd.isnull(row[ts_index][i-1]):
                     for x in col_names:
                         if x == classify_index:
                             data[sn][classify_index][i] = '{previous} {current}'.format(
-                                previous=data[sn][classify_index][i-1],
-                                current=data[sn][classify_index][i]
+                                previous=row[classify_index][i-1],
+                                current=row[classify_index][i]
                             )
                         else:
-                            data[sn][x][i] = data[sn][x][i-1]
+                            row[x][i] = data[sn][x][i-1]
 
                     drop_indices.append(i-1)
-
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-            print(data[sn][classify_index].shape)
-            print(data[sn][classify_index].tolist())
-            print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-        exit(999)
 
         #
         # drop rows: rows with no tickers and empty classify_index.
