@@ -76,7 +76,7 @@ def analyze(
             'neutral',
             'negative'
         ]).agg({
-            classify_index: lambda a: ''.join(a)
+            classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
         if analysis_ts_sentiment:
@@ -143,7 +143,7 @@ def analyze(
             'created_at',
             'screen_name'
         ]).agg({
-            classify_index: lambda a: ''.join(a)
+            classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
         data[sn] = data[sn].set_index('created_at').join(
