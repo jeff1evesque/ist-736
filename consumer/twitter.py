@@ -13,7 +13,6 @@ def tweet_sn(
     screen_name,
     start_date,
     end_date,
-    'full_text'='full_text',
     directory='data/twitter',
     count=600,
     rate_limit=900
