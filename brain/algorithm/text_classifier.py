@@ -77,7 +77,7 @@ class Model():
         if df is not None:
             self.df = df
         else:
-            self.df = pd.read_csv(fp)
+            self.df = pd.read_csv(fp, index_col=False)
 
         # clean text
         if cleanse_data:
@@ -551,10 +551,6 @@ class Model():
 
         vectorizer = self.tfidf_vectorizer
         terms = vectorizer.get_feature_names()
-
-        print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh')
-        print(terms)
-        print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh')
 
         # top words
         return({
