@@ -32,7 +32,17 @@ screen_name = [
 codes = [
     ('CHRIS', 'CBOE_VX1'),
     ('NASDAQOMX', 'COMP-NASDAQ'),
-    ('FINRA', 'FNYX_QQQ')
+    ('FINRA', 'FNYX_QQQ'),
+    ('FINRA', 'FNSQ_SPY'),
+    ('BATS', 'BATS_AMZN'),
+    ('BATS', 'BATS_GOOGL'),
+    ('BATS', 'BATS_AAPL'),
+    ('BATS', 'BATS_NFLX'),
+    ('BATS', 'BATS_MMT'),
+    ('FINRA', 'FNYX_MMM'),
+    ('EIA', 'PET_RWTC_D'),
+    ('WFC', 'PR_CON_15YFIXED_IR'),
+    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
@@ -55,7 +65,8 @@ explore(
     data,
     screen_name,
     stopwords=stopwords,
-    stopwords_topics=stopwords_topics
+    stopwords_topics=stopwords_topics,
+    directory='viz/exploratory'
 )
 
 #
@@ -74,7 +85,10 @@ for x in df_quandl:
     analyze(
         data=data,
         df_quandl=x['data'],
-        directory='viz/{x}'.format(x=x['database']),
+        directory='viz/analysis/{a}--{b}'.format(
+            a=x['database'].lower(),
+            b=x['dataset'].lower()
+        ),
         directory_report='reports/{x}'.format(x=x['dataset']),
         screen_name=screen_name,
         stopwords=stopwords

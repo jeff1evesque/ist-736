@@ -106,12 +106,6 @@ def classify(
                 top_words
             )
 
-            # sort values: largest to smallest
-            keywords = OrderedDict(
-                sorted(keywords.items(),
-                key=lambda x: x[1])
-            )
-
             plot_bar(
                 labels=[*keywords],
                 performance=[*keywords.values()],
@@ -169,7 +163,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = mnb.get_top_chi2(top_words)
+        top_chi2 = mnb.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -187,7 +181,8 @@ def classify(
             kfold_scores['mnb'] = mnb.get_kfold_scores(
                 model_type='multinomial',
                 n_splits=n_splits,
-                ngram=ngram
+                ngram=ngram,
+                k=k
             )
 
         if prf:
@@ -303,7 +298,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = mnb_pos.get_top_chi2(top_words)
+        top_chi2 = mnb_pos.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -320,7 +315,8 @@ def classify(
         if kfold:
             kfold_scores['mnb_pos'] = mnb_pos.get_kfold_scores(
                 model_type='multinomial',
-                n_splits=n_splits
+                n_splits=n_splits,
+                k=k
             )
 
         if prf:
@@ -404,7 +400,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = bnb.get_top_chi2(top_words)
+        top_chi2 = bnb.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -422,7 +418,8 @@ def classify(
             kfold_scores['bnb'] = bnb.get_kfold_scores(
                 model_type='bernoulli',
                 n_splits=n_splits,
-                ngram=ngram
+                ngram=ngram,
+                k=k
             )
 
         if prf:
@@ -493,7 +490,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = bnb_pos.get_top_chi2(top_words)
+        top_chi2 = bnb_pos.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -510,7 +507,8 @@ def classify(
         if kfold:
             kfold_scores['bnb_pos'] = bnb_pos.get_kfold_scores(
                 model_type='bernoulli',
-                n_splits=n_splits
+                n_splits=n_splits,
+                k=k
             )
 
         if prf:
@@ -593,7 +591,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = svm.get_top_chi2(top_words)
+        top_chi2 = svm.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -611,7 +609,8 @@ def classify(
             kfold_scores['svm'] = svm.get_kfold_scores(
                 model_type='svm',
                 n_splits=n_splits,
-                ngram=ngram
+                ngram=ngram,
+                k=k
             )
 
         if prf:
@@ -681,7 +680,7 @@ def classify(
         #
         # indicative words: top chi-squared words
         #
-        top_chi2 = svm_pos.get_top_chi2(top_words)
+        top_chi2 = svm_pos.get_top_chi2()
         if top_chi2:
             plot_bar(
                 top_chi2[0],
@@ -698,7 +697,8 @@ def classify(
         if kfold:
             kfold_scores['svm_pos'] = svm_pos.get_kfold_scores(
                 model_type='svm',
-                n_splits=n_splits
+                n_splits=n_splits,
+                k=k
             )
 
         if prf:

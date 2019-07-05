@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 from scipy.stats import itemfreq
 from nltk.corpus import stopwords as stp
-from nltk import tokenize, download, pos_tag
+from nltk import tokenize, download, pos_tag, sent_tokenize
 from nltk.stem.porter import PorterStemmer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
@@ -26,6 +26,7 @@ from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 import scikitplot as skplt
 from brain.algorithm.penn_treebank import penn_scale
@@ -76,7 +77,7 @@ class Model():
         if df is not None:
             self.df = df
         else:
-            self.df = pd.read_csv(fp)
+            self.df = pd.read_csv(fp, index_col=False)
 
         # clean text
         if cleanse_data:
@@ -246,15 +247,8 @@ class Model():
                 stop_words=stopwords,
                 ngram_range=ngram
             )
-            self.tfidf = self.tfidf_vectorizer.fit_transform(self.df[self.key_text])
-
-            # top n tfidf words
-            feature_names = self.count_vect.get_feature_names()
-            sorted_items = self.sort_coo(self.tfidf.tocoo())
-            self.keywords = self.get_top_features(
-                feature_names,
-                sorted_items,
-                topn
+            self.tfidf = self.tfidf_vectorizer.fit_transform(
+                self.df[self.key_text]
             )
 
     def sort_coo(self, coo_matrix):
@@ -299,12 +293,7 @@ class Model():
         # create a tuples of feature,score
         results = {}
         for idx in range(len(feature_vals)):
-            results[feature_vals[idx]]=score_vals[idx]
-
-        if self.chi2:
-            feature_names = self.get_feature_names()
-            results['chi2'] = [feature_names[i]
-                for i in self.chi2.get_support(indices=True)]
+            results[feature_vals[idx]] = score_vals[idx]
 
         return(results)
 
@@ -372,14 +361,29 @@ class Model():
 
         '''
 
-        if k:
-            chi2score = chi2(X, y)[0]
+        if k and k > 0:
+            self.chi2 = SelectKBest(chi2, k=k)
+            self.chi2.fit(X, y)
+            names = self.chi2.get_support(indices=True)
+
+            # transform current data
+            X = self.chi2.transform(X)
+            scores = self.chi2.scores_[self.chi2.get_support()]
+            names_scores = list(zip(names, scores))
+            self.df_top_features = pd.DataFrame(
+                data=names_scores,
+                columns=['feature', 'fscore']
+            )
+            self.df_top_features.sort_values(
+                ['fscore', 'feature'],
+                ascending=[False, True]
+            )
+
+        else:
+            self.df_top_features = None
 
         # conditionally select model
         if (model_type == 'svm'):
-            if k:
-                self.wscores = zip(self.get_feature_names(), chi2score)
-
             if multiclass:
                 self.clf = svm.SVC(
                     gamma='scale',
@@ -418,8 +422,7 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None,
-                'wscores': wscores
+                'predicted': None
             })
 
         elif (
@@ -427,9 +430,6 @@ class Model():
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
             wscores = None
-            if k:
-                self.wscores = zip(self.get_feature_names(), chi2score)
-
             self.clf = BernoulliNB()
             self.clf.fit(X, y)
 
@@ -460,15 +460,10 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None,
-                'wscores': wscores
+                'predicted': None
             })
 
         else:
-            wscores = None
-            if k:
-                self.wscores = zip(self.get_feature_names(type='bow'), chi2score)
-
             self.clf = MultinomialNB()
             self.clf.fit(X, y)
 
@@ -499,8 +494,7 @@ class Model():
             return({
                 'model': self.clf,
                 'actual': None,
-                'predicted': None,
-                'wscores': wscores
+                'predicted': None
             })
 
     def plot_cm(
@@ -555,6 +549,9 @@ class Model():
         positive_index = np.argsort(logodds)[:top_words]
         negative_index = np.argsort(-logodds)[:top_words]
 
+        vectorizer = self.tfidf_vectorizer
+        terms = vectorizer.get_feature_names()
+
         # top words
         return({
             'positive': {
@@ -608,22 +605,39 @@ class Model():
             )
         )
 
-    def get_top_chi2(self, top_words=20):
+    def get_top_chi2(self, top_words=20, sort_col='score'):
         '''
 
         get top chi-squared words
 
         '''
 
-        if self.wscores:
-            # remove nan
-            result = [x for x in self.wscores if not np.isnan(x[1])]
+        if self.chi2:
+            self.wscores = pd.DataFrame(
+                list(zip(
+                    self.get_feature_names(),
+                    self.chi2.scores_,
+                    self.chi2.pvalues_
+                )),
+                columns=['feature', 'score', 'pval']
+            )
 
-            # generate labels and scores
-            wchi2 = sorted(result, key=lambda x:x[1])
-            labels, scores = zip(*wchi2[-top_words:])
+            self.wscores = self.wscores.sort_values(
+                by=sort_col,
+                ascending=False
+            ).head(top_words)
 
-            return(labels, scores)
+        if (
+            self.wscores is not None and
+            'feature' in self.wscores.columns and
+            'score' in self.wscores.columns and
+            'pval' in self.wscores.columns
+        ):
+            return(
+                self.wscores['feature'],
+                self.wscores['score'],
+                self.wscores['pval']
+            )
 
         return(None)
 
@@ -636,7 +650,7 @@ class Model():
         model_type=None,
         multiclass=False,
         ngram=(1,1),
-        k=None
+        k=1000
     ):
         '''
 
@@ -654,13 +668,6 @@ class Model():
 
         '''
 
-        # bag of words: with 'english' stopwords
-        count_vect = CountVectorizer(
-            stop_words=stop_words,
-            ngram_range=ngram
-        )
-        bow = self.count_vect.fit_transform(self.df[self.key_text])
-
         # conditionally select model
         if (model_type == 'svm'):
             if multiclass:
@@ -673,47 +680,40 @@ class Model():
                 clf = svm.SVC(gamma='scale', kernel='linear')
 
             # tfidf weighting
-            tfidf_vectorizer = TfidfVectorizer(
+            vectorizer = TfidfVectorizer(
                 stop_words=stop_words,
                 ngram_range=ngram
             )
-
-            if k:
-                ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
-            else:
-                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
 
         elif (
             (model_type == 'bernoulli') or
             (not model_type and all(len(sent) <= max_length for sent in self.X_train))
         ):
             clf = BernoulliNB()
-
-            if k:
-                ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
-            else:
-                data = bow
-
-        else:
-            clf = MultinomialNB()
-            tfidf_vectorizer = TfidfVectorizer(
+            vectorizer = CountVectorizer(
                 stop_words=stop_words,
                 ngram_range=ngram
             )
 
-            if k:
-                ch2 = SelectKBest(chi2, k=k)
-                data = ch2.fit_transform(self.df[self.key_text])
-            else:
-                data = tfidf_vectorizer.fit_transform(self.df[self.key_text])
+        else:
+            clf = MultinomialNB()
+            vectorizer = TfidfVectorizer(
+                stop_words=stop_words,
+                ngram_range=ngram
+            )
+
+        # create feature union
+        p = Pipeline([
+            ('vect', CountVectorizer()),
+            ('chi2', SelectKBest(chi2, k=k)),
+            ('classifier', clf)]
+        )
 
         # random kfolds
         return(
             cross_val_score(
-                clf,
-                data,
+                p,
+                self.df[self.key_text],
                 y=self.df[self.key_class],
                 cv=KFold(n_splits, shuffle=True)
             )

@@ -44,8 +44,8 @@ def tweet_sn(
                     params=[
                         {'user': ['screen_name']},
                         'created_at',
-                        classify_index,
-                        {'retweeted_status': [classify_index]},
+                        'full_text',
+                        {'retweeted_status': ['full_text']},
                         'retweet_count',
                         'favorite_count',
                         {'entities': ['user_mentions']}
@@ -55,7 +55,7 @@ def tweet_sn(
                 )
 
                 # sentiment analysis
-                s = Sentiment(data[sn], classify_index)
+                s = Sentiment(data[sn], 'full_text')
                 data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
                 data[sn].replace('\s+', ' ', regex=True, inplace=True)
 

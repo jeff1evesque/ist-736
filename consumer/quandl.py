@@ -56,7 +56,13 @@ def quandl(
         if 'Trade Date' in df:
             df.rename(index=str, columns={'Trade Date': 'date'}, inplace=True)
 
-        if 'Close' in df:
+        if 'value' in df:
+            continue
+
+        elif 'Value' in df:
+            df.rename(index=str, columns={'Value': 'value'}, inplace=True)
+
+        elif 'Close' in df:
             df.rename(index=str, columns={'Close': 'value'}, inplace=True)
 
         elif 'Index Value' in df:
@@ -71,7 +77,7 @@ def quandl(
         #
         # consistent date: remove time component
         #
-        df.index = [x.split(' ')[0]
+        df.index = [str(x).split(' ')[0]
             for x in df.index.values.tolist()]
 
         data.append({'data': df, 'database': x[0], 'dataset': x[1]})
