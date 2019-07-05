@@ -42,7 +42,7 @@ codes = [
     ('FINRA', 'FNYX_MMM'),
     ('EIA', 'PET_RWTC_D'),
     ('WFC', 'PR_CON_15YFIXED_IR'),
-    ('WFC', 'PR_GOV_30YFIXEDFHA_IR')
+    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 start_date = datetime(3000, 12, 25)
 end_date = datetime(1000, 12, 25)
