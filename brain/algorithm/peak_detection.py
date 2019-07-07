@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class PeakDetection():
     '''
 
@@ -57,13 +58,16 @@ class PeakDetection():
         self.avgFilter += [0]
         self.stdFilter += [0]
 
-        if abs(self.y[i] - self.avgFilter[i - 1]) > self.threshold * self.stdFilter[i - 1]:
+        current_val = abs(self.y[i] - self.avgFilter[i - 1])
+        threshold = self.threshold * self.stdFilter[i - 1]
+        if current_val > threshold:
             if self.y[i] > self.avgFilter[i - 1]:
                 self.signals[i] = 1
             else:
                 self.signals[i] = -1
 
-            self.filteredY[i] = self.influence * self.y[i] + (1 - self.influence) * self.filteredY[i - 1]
+            self.filteredY[i] = self.influence * self.y[i] + \
+                (1 - self.influence) * self.filteredY[i - 1]
             self.avgFilter[i] = np.mean(self.filteredY[(i - self.lag):i])
             self.stdFilter[i] = np.std(self.filteredY[(i - self.lag):i])
         else:
