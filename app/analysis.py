@@ -9,6 +9,7 @@ from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import timeseries
 from brain.controller.granger import granger
+from brain.controller.peak_detection import peak_detection as signals
 
 
 def analyze(
@@ -184,9 +185,12 @@ def analyze(
         #
         # index data: relabel index as up (0) or down (1) based on previous time
         #
-        data[sn]['trend'] = [0 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
-            else 1
-            for i,x in enumerate(data[sn][ts_index])]
+        signals = peak_detection(
+            data=data[sn][ts_index],
+            directory=directory,
+            suffix=sn
+        )
+        data[sn]['trend'] = [x for x in signals]
 
         # sentiment analysis
         s = Sentiment(data[sn], classify_index)
