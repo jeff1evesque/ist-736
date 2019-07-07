@@ -105,7 +105,7 @@ class PeakDetection():
 
         return(self.avgFilter)
 
-    def get_avgfilter(self):
+    def get_stdfilter(self):
         '''
 
         get current standard deviation filter.
