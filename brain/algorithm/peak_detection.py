@@ -12,10 +12,19 @@ class PeakDetection():
 
     '''
 
-    def __init__(self, data, lag, threshold, influence):
+    def __init__(self, data, lag=3, threshold=1, influence=0.5):
         '''
 
         instantiate series and threshold.
+
+        @data, univariate list.
+        @lag, moving windows.
+        @threshold, z-score (standard deviation) threshold, when exceeded
+            the corresponding value is considered signal.
+        @influence, weighting factor [0,1] for signal values, relative to
+            original datapoints. If 'influence=0.5', then signal values have
+            0.5 influence relative to original datapoints when recaculating
+            the new threshold.
 
         '''
 
