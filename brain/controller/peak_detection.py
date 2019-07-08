@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import math
 import numpy as np
 from brain.algorithm.peak_detection import PeakDetection
 import matplotlib.pyplot as plt
@@ -10,18 +11,30 @@ def peak_detection(
     directory='viz',
     suffix='',
     plot=True,
-    show=False
+    show=False,
+    threshold=None
 ):
     '''
 
-    implement granger test for causality.
+    implement z-score peak detection.
 
     '''
 
     if suffix:
         suffix = '_{a}'.format(a=suffix)
 
-    peaks = PeakDetection()
+    if not threshold:
+        th = math.ceil(len(data) / 100)
+
+        #
+        # terminate: do not run if not enough data
+        #
+        if th > 0:
+            threshold = [x for x in range(th)]
+        else:
+            return(False)
+
+    peaks = PeakDetection(threshold=threshold)
     signals = peaks.get_signals()
     stdFilter = peaks.get_stdfilter()
     avgFilter = peaks.get_avgFilter()
