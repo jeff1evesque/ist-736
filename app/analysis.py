@@ -190,7 +190,19 @@ def analyze(
             directory=directory,
             suffix=sn
         )
-        data[sn]['trend'] = [x for x in signals]
+
+        if signals:
+            for x in range(len(signals)):
+
+###
+### ADD CODE HERE
+###
+
+        else:
+            data[sn]['trend'] = [0
+                if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
+                else 1
+                for i,x in enumerate(data[sn][ts_index])]
 
         # sentiment analysis
         s = Sentiment(data[sn], classify_index)
