@@ -9,7 +9,7 @@ from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import timeseries
 from brain.controller.granger import granger
-from brain.controller.peak_detection import peak_detection as signals
+from brain.controller.peak_detection import peak_detection
 
 
 def analyze(
