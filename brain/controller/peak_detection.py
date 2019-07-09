@@ -30,7 +30,7 @@ def peak_detection(
     if not threshold and auto:
         th = math.ceil(len(data) / 100)
         if th > 0:
-            threshold = [2**x for x in range(th) if range(th) < 3]
+            threshold = [2**x for x in range(th) if th < 3]
         else:
             return(False)
 
