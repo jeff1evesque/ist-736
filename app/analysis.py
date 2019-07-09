@@ -194,12 +194,10 @@ def analyze(
         # case 1: z-score index threshold determines trend
         if signals:
             signal_range = range(1, len(signals) + 1)
-            signal_stream = {x: signals[x] for x in signal_range}
-
             data[sn]['trend'] = [-z
-                if any([False if a < 0 else True for a in signal_stream[z]])
+                if any([False if a < 0 else True for a in signals[z-1]])
                 else z
-                for y in signal_stream[z] for z in signal_range]
+                for y in signals[z-1] for z in signal_range]
 
         # case 2: relabel up (0) or down (1) based on previous index value
         else:
