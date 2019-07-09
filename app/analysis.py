@@ -183,7 +183,7 @@ def analyze(
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
         #
-        # index data: conditionally apply z-score threshold.
+        # index data: conditionally use z-score threshold to relabel index.
         #
         signals = peak_detection(
             data=data[sn][ts_index],
@@ -208,7 +208,9 @@ def analyze(
                 else 1
                 for i,x in enumerate(data[sn][ts_index])]
 
-        # sentiment analysis
+        #
+        # sentiment scores
+        #
         s = Sentiment(data[sn], classify_index)
         data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
         data[sn].replace('\s+', ' ', regex=True, inplace=True)
