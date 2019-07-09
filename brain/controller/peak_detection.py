@@ -12,25 +12,26 @@ def peak_detection(
     suffix='',
     plot=True,
     show=False,
-    threshold=None
+    threshold=None,
+    auto=True
 ):
     '''
 
-    implement z-score peak detection.
+    implement z-score peak detection, with default behavior if possible.
 
     '''
 
     if suffix:
         suffix = '_{a}'.format(a=suffix)
 
-    if not threshold:
+    if not threshold and auto:
         th = math.ceil(len(data) / 100)
 
         #
         # terminate: do not run if not enough data
         #
         if th > 0:
-            threshold = [x for x in range(th)]
+            threshold = [2**x for x in range(th) if range(th) < 3]
         else:
             return(False)
 
