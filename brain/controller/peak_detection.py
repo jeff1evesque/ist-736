@@ -24,12 +24,11 @@ def peak_detection(
     if suffix:
         suffix = '_{a}'.format(a=suffix)
 
+    #
+    # threshold: autogenerate if not provided, cancel if not enough data.
+    #
     if not threshold and auto:
         th = math.ceil(len(data) / 100)
-
-        #
-        # terminate: do not run if not enough data
-        #
         if th > 0:
             threshold = [2**x for x in range(th) if range(th) < 3]
         else:
