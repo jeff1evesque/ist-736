@@ -43,8 +43,7 @@ class PeakDetection():
             self.stdFilter = [[0] * len(self.y)]
 
             self.avgFilter[0][self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-            self.stdFilter[0]self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
-            self.stdFilter[0]self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+            self.stdFilter[0][self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
 
         elif isinstance(threshold, list):
             self.signals = [[0] * len(self.y) for x in threshold]
