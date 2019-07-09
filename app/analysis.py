@@ -183,7 +183,7 @@ def analyze(
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
         #
-        # index data: relabel index as up (0) or down (1) based on previous time
+        # index data: conditionally apply z-score threshold.
         #
         signals = peak_detection(
             data=data[sn][ts_index],
@@ -191,13 +191,17 @@ def analyze(
             suffix=sn
         )
 
+        # case 1: z-score index threshold determines trend
         if signals:
-            for x in range(len(signals)):
+            signal_range = range(1, len(signals) + 1)
+            signal_stream = {x: signals[x] for x in signal_range}
 
-###
-### ADD CODE HERE
-###
+            data[sn]['trend'] = [-z
+                if any([False if a < 0 else True for a in signal_stream[z]])
+                else z
+                for y in signal_stream[z] for z in signal_range]
 
+        # case 2: relabel up (0) or down (1) based on previous index value
         else:
             data[sn]['trend'] = [0
                 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
