@@ -45,7 +45,7 @@ def peak_detection(
 
         plt.plot(
             np.arange(1, len(y)+1),
-            avgFilter
+            avgFilter,
             color='cyan',
             lw=2
         )
