@@ -52,7 +52,7 @@ class PeakDetection():
 
             for i in range(len(threshold)):
                 self.avgFilter[i][self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-                self.stdFilter[i]self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+                self.stdFilter[i][self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
 
         else:
             print('Error ({f}): threshold must be int, or list of ints'.format(
