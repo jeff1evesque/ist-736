@@ -191,7 +191,7 @@ def analyze(
             suffix=sn
         )
 
-        # case 1: z-score index threshold determines trend
+        # case 1: z-score threshold determines trend index
         if signals:
             signal_range = range(1, len(signals) + 1)
             data[sn]['trend'] = [-z
@@ -199,7 +199,7 @@ def analyze(
                 else z
                 for y in signals[z-1] for z in signal_range]
 
-        # case 2: relabel up (0) or down (1) based on previous index value
+        # case 2: previous index value determines trend index
         else:
             data[sn]['trend'] = [0
                 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
