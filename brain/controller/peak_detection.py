@@ -28,10 +28,10 @@ def peak_detection(
     # threshold: autogenerate if not provided, cancel if not enough data.
     #
     if not threshold and auto:
-        th = math.ceil(math.log(len(data), 10))
+        lim = math.ceil(math.log(len(data), 10))
         if th > 0:
-            th = th if th < 3 else 3
-            threshold = [2**x for x in range(th) if th < 3]
+            lim = lim if lim < 3 else 3
+            threshold = [2**x for x in range(lim) if lim < 3]
         else:
             return(False)
 
