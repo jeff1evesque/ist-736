@@ -36,30 +36,31 @@ def peak_detection(
             return(False)
 
     peaks = PeakDetection(data=data, threshold=threshold)
+    data = peaks.get_data()
     signals = peaks.get_signals()
     stdFilter = peaks.get_stdfilter()
     avgFilter = peaks.get_avgFilter()
 
     if plot:
         plt.subplot(211)
-        plt.plot(np.arange(1, len(y)+1), y)
+        plt.plot(np.arange(1, len(data)+1), data)
 
         plt.plot(
-            np.arange(1, len(y)+1),
+            np.arange(1, len(data)+1),
             avgFilter,
             color='cyan',
             lw=2
         )
 
         plt.plot(
-            np.arange(1, len(y)+1),
+            np.arange(1, len(data)+1),
             avgFilter + threshold * stdFilter,
             color='green',
             lw=2
         )
 
         plt.plot(
-            np.arange(1, len(y)+1),
+            np.arange(1, len(data)+1),
             avgFilter - threshold * stdFilter,
             color='green',
             lw=2
@@ -67,7 +68,7 @@ def peak_detection(
 
         plt.subplot(212)
         plt.step(
-            np.arange(1, len(y)+1),
+            np.arange(1, len(data)+1),
             signals,
             color='red',
             lw=2
