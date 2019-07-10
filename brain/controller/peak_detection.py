@@ -29,7 +29,7 @@ def peak_detection(
     #
     if not threshold and auto:
         lim = math.ceil(math.log(len(data), 10))
-        if th > 0:
+        if lim > 0:
             lim = lim if lim < 3 else 3
             threshold = [2**x for x in range(lim) if lim < 3]
         else:
