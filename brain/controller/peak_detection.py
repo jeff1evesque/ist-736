@@ -35,7 +35,7 @@ def peak_detection(
         else:
             return(False)
 
-    peaks = PeakDetection(threshold=threshold)
+    peaks = PeakDetection(data=data, threshold=threshold)
     signals = peaks.get_signals()
     stdFilter = peaks.get_stdfilter()
     avgFilter = peaks.get_avgFilter()
