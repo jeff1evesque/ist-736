@@ -29,30 +29,30 @@ class PeakDetection():
 
         '''
 
-        self.y = list(data)
-        self.length = len(self.y)
+        self.data = list(data)
+        self.length = len(self.data)
         self.lag = lag
         self.threshold = threshold
         self.influence = influence
-        self.filteredY = np.array(self.y).tolist()
+        self.filteredY = np.array(self.data).tolist()
         self.this_file = os.path.basename(__file__)
 
         if isinstance(threshold, int):
-            self.signals = [[0] * len(self.y)]
-            self.avgFilter = [[0] * len(self.y)]
-            self.stdFilter = [[0] * len(self.y)]
+            self.signals = [[0] * len(self.data)]
+            self.avgFilter = [[0] * len(self.data)]
+            self.stdFilter = [[0] * len(self.data)]
 
-            self.avgFilter[0][self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-            self.stdFilter[0][self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+            self.avgFilter[0][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
+            self.stdFilter[0][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
 
         elif isinstance(threshold, list):
-            self.signals = [[0] * len(self.y) for x in threshold]
-            self.avgFilter = [[0] * len(self.y) for x in threshold]
-            self.stdFilter = [[0] * len(self.y) for x in threshold]
+            self.signals = [[0] * len(self.data) for x in threshold]
+            self.avgFilter = [[0] * len(self.data) for x in threshold]
+            self.stdFilter = [[0] * len(self.data) for x in threshold]
 
             for i in range(len(threshold)):
-                self.avgFilter[i][self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-                self.stdFilter[i][self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+                self.avgFilter[i][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
+                self.stdFilter[i][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
 
         else:
             print('Error ({f}): threshold must be int, or list of ints'.format(
@@ -66,19 +66,19 @@ class PeakDetection():
 
         '''
 
-        self.y.append(new_value)
-        idx = len(self.y) - 1
-        self.length = len(self.y)
+        self.data.append(new_value)
+        idx = len(self.data) - 1
+        self.length = len(self.data)
 
         if idx < self.lag:
             return(0)
         elif idx == self.lag:
-            self.filteredY = np.array(self.y).tolist()
-            self.signals = [[0] * len(self.y)]
-            self.avgFilter = [[0] * len(self.y)]
-            self.stdFilter = [[0] * len(self.y)]
-            self.avgFilter[0][self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-            self.stdFilter[0][self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+            self.filteredY = np.array(self.data).tolist()
+            self.signals = [[0] * len(self.data)]
+            self.avgFilter = [[0] * len(self.data)]
+            self.stdFilter = [[0] * len(self.data)]
+            self.avgFilter[0][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
+            self.stdFilter[0][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
             return(0)
 
         for i in range(len(self.threshold)):
@@ -87,22 +87,22 @@ class PeakDetection():
             self.avgFilter[i] += [0]
             self.stdFilter[i] += [0]
 
-            current_val = abs(self.y[idx] - self.avgFilter[i][idx - 1])
+            current_val = abs(self.data[idx] - self.avgFilter[i][idx - 1])
             threshold = self.threshold * self.stdFilter[i][idx - 1]
 
             if current_val > threshold:
-                if self.y[idx] > self.avgFilter[i][idx - 1]:
+                if self.data[idx] > self.avgFilter[i][idx - 1]:
                     self.signals[i][idx] = 1
                 else:
                     self.signals[i][idx] = -1
 
-                self.filteredY[idx] = self.influence * self.y[idx] + \
+                self.filteredY[idx] = self.influence * self.data[idx] + \
                     (1 - self.influence) * self.filteredY[idx - 1]
                 self.avgFilter[i][idx] = np.mean(self.filteredY[(idx - self.lag):idx])
                 self.stdFilter[i][idx] = np.std(self.filteredY[(idx - self.lag):idx])
             else:
                 self.signals[i][idx] = 0
-                self.filteredY[i] = self.y[i]
+                self.filteredY[i] = self.data[i]
                 self.avgFilter[i][idx] = np.mean(self.filteredY[(i - self.lag):i])
                 self.stdFilter[i][idx] = np.std(self.filteredY[(i - self.lag):i])
 
@@ -134,3 +134,12 @@ class PeakDetection():
         '''
 
         return(self.stdFilter)
+
+    def get_data(self):
+        '''
+
+        get current data.
+
+        '''
+
+        return(self.data)
