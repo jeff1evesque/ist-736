@@ -58,6 +58,7 @@ class PeakDetection():
             print('Error ({f}): threshold must be int, or list of ints'.format(
                 self.this_file
             ))
+            exit(999)
 
     def update(self, new_value):
         '''
