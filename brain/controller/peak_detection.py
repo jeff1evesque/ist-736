@@ -39,7 +39,7 @@ def peak_detection(
     data = peaks.get_data()
     signals = peaks.get_signals()
     stdFilter = peaks.get_stdfilter()
-    avgFilter = peaks.get_avgFilter()
+    avgFilter = peaks.get_avgfilter()
 
     if plot:
         plt.subplot(211)
