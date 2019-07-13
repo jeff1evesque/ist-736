@@ -34,7 +34,7 @@ class PeakDetection():
         self.lag = lag
         self.threshold = threshold
         self.influence = influence
-        self.filteredY = np.array(self.data).tolist()
+        self.filteredY = np.array(self.data)
         self.this_file = os.path.basename(__file__)
 
         if isinstance(threshold, int):
@@ -42,8 +42,8 @@ class PeakDetection():
             self.avg_filter = [[0] * len(self.data)]
             self.std_filter = [[0] * len(self.data)]
 
-            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
-            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
+            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag])
+            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
 
         elif isinstance(threshold, list):
             self.signals = [[0] * len(self.data) for x in threshold]
@@ -51,8 +51,8 @@ class PeakDetection():
             self.std_filter = [[0] * len(self.data) for x in threshold]
 
             for i in range(len(threshold)):
-                self.avg_filter[i][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
-                self.std_filter[i][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
+                self.avg_filter[i][self.lag - 1] = np.mean(self.data[0:self.lag])
+                self.std_filter[i][self.lag - 1] = np.std(self.data[0:self.lag])
 
         else:
             print('Error ({f}): threshold must be int, or list of ints'.format(
@@ -74,12 +74,12 @@ class PeakDetection():
         if idx < self.lag:
             return(0)
         elif idx == self.lag:
-            self.filteredY = np.array(self.data).tolist()
+            self.filteredY = np.array(self.data)
             self.signals = [[0] * len(self.data)]
             self.avg_filter = [[0] * len(self.data)]
             self.std_filter = [[0] * len(self.data)]
-            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag]).tolist()
-            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag]).tolist()
+            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag])
+            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
             return(0)
 
         for i in range(len(self.threshold)):
@@ -116,7 +116,7 @@ class PeakDetection():
 
         '''
 
-        return(self.signals)
+        return([np.asarray(x) for x in self.signals])
 
     def get_avg_filter(self):
         '''
@@ -125,7 +125,7 @@ class PeakDetection():
 
         '''
 
-        return(self.avg_filter)
+        return([np.asarray(x) for x in self.avg_filter])
 
     def get_std_filter(self):
         '''
@@ -134,7 +134,7 @@ class PeakDetection():
 
         '''
 
-        return(self.std_filter)
+        return([np.asarray(x) for x in self.std_filter])
 
     def get_data(self):
         '''
@@ -143,4 +143,4 @@ class PeakDetection():
 
         '''
 
-        return(self.data)
+        return(self.filteredY)
