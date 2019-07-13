@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 import math
-import numpy as np
 from brain.algorithm.peak_detection import PeakDetection
-import matplotlib.pyplot as plt
+from brain.view.peak_detection import peak_detection as plot_pd
 
 
 def peak_detection(
@@ -11,7 +10,6 @@ def peak_detection(
     directory='viz',
     suffix='',
     plot=True,
-    show=False,
     threshold=None,
     auto=True
 ):
@@ -20,9 +18,6 @@ def peak_detection(
     implement z-score peak detection, with default behavior if possible.
 
     '''
-
-    if suffix:
-        suffix = '_{a}'.format(a=suffix)
 
     #
     # threshold: autogenerate if not provided, cancel if not enough data.
@@ -37,49 +32,19 @@ def peak_detection(
 
     peaks = PeakDetection(data=data, threshold=threshold)
     data = peaks.get_data()
+
     signals = peaks.get_signals()
-    stdFilter = peaks.get_stdfilter()
-    avgFilter = peaks.get_avgfilter()
+    std_filter = peaks.get_std_filter()
+    avg_filter = peaks.get_avg_filter()
 
     if plot:
-        plt.subplot(211)
-        plt.plot(np.arange(1, len(data)+1), data)
-
-        plt.plot(
-            np.arange(1, len(data)+1),
-            avgFilter,
-            color='cyan',
-            lw=2
-        )
-
-        plt.plot(
-            np.arange(1, len(data)+1),
-            avgFilter + threshold * stdFilter,
-            color='green',
-            lw=2
-        )
-
-        plt.plot(
-            np.arange(1, len(data)+1),
-            avgFilter - threshold * stdFilter,
-            color='green',
-            lw=2
-        )
-
-        plt.subplot(212)
-        plt.step(
-            np.arange(1, len(data)+1),
-            signals,
-            color='red',
-            lw=2
-        )
-        plt.ylim(-1.5, 1.5)
-
-        plt.savefig('{d}/peak_detection{suffix}'.format(suffix=suffix))
-
-        if show:
-            plt.show()
-        else:
-            plt.close()
+        for i,x in enumerate(threshold):
+            plot_pd(
+                data=data,
+                threshold=x,
+                signals=signals,
+                std_filter=std_filter[i],
+                avg_filter=avg_filter[i]
+            )
 
     return(signals)
