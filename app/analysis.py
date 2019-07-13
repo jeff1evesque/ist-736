@@ -193,11 +193,11 @@ def analyze(
 
         # case 1: z-score threshold determines trend index
         if signals:
-            signal_range = range(1, len(signals) + 1)
+            signal_range = [x for x in range(len(signals))]
             data[sn]['trend'] = [-z
-                if any([False if a < 0 else True for a in signals[z-1]])
+                if any([False if a < 0 else True for a in y])
                 else z
-                for y in signals[z-1] for z in signal_range]
+                for z in signal_range for y in signals[z]]
 
         # case 2: previous index value determines trend index
         else:
