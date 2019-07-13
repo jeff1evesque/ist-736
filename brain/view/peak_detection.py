@@ -57,7 +57,10 @@ def peak_detection(
     )
     plt.ylim(-1.5, 1.5)
 
-    plt.savefig('{d}/peak_detection{suffix}'.format(suffix=suffix))
+    plt.savefig('{d}/peak_detection{suffix}'.format(
+        d=directory,
+        suffix=suffix
+    ))
 
     if show:
         plt.show()
