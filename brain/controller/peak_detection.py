@@ -42,7 +42,7 @@ def peak_detection(
             plot_pd(
                 data=data,
                 threshold=x,
-                signals=signals,
+                signals=signals[i],
                 std_filter=std_filter[i],
                 avg_filter=avg_filter[i]
             )
