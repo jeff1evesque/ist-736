@@ -217,6 +217,8 @@ def analyze(
                             m='distorted signal_result shape'
                         ))
 
+            data[sn]['trend'] = signal_result
+
         # case 2: previous index value determines trend index
         else:
             data[sn]['trend'] = [0
