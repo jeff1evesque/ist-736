@@ -192,7 +192,9 @@ def analyze(
             suffix=sn
         )
 
+        #
         # case 1: z-score threshold determines trend index
+        #
         if signals:
             signal_range = [x for x in range(len(signals))]
             signal_result = []
@@ -208,7 +210,10 @@ def analyze(
                     elif (i < len(signal_result) and s < 0):
                         signal_result[i] = -z
 
-                    elif (i < len(signal_result) and s >= 0):
+                    elif (i < len(signal_result) and s == 0):
+                        signal_result[i] = 0
+
+                    elif (i < len(signal_result) and s > 0):
                         signal_result[i] = z
 
                     else:
@@ -217,9 +222,21 @@ def analyze(
                             m='distorted signal_result shape'
                         ))
 
-            data[sn]['trend'] = signal_result
+            # monotic: if all same values use non z-score.
+            first = signal_result[0]
+            if all(x == first for x in signal_result):
+                data[sn]['trend'] = [0
+                    if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
+                    else 1
+                    for i,x in enumerate(data[sn][ts_index])]
 
+            # not monotonic
+            else:
+                data[sn]['trend'] = signal_result
+
+        #
         # case 2: previous index value determines trend index
+        #
         else:
             data[sn]['trend'] = [0
                 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
