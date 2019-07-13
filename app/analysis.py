@@ -36,6 +36,7 @@ def analyze(
     classify_results = {}
     ts_results = {}
     ts_results_sentiment = {}
+    this_file = os.path.basename(__file__)
 
     #
     # create directories
@@ -187,17 +188,34 @@ def analyze(
         #
         signals = peak_detection(
             data=data[sn][ts_index],
-            directory=directory,
+            directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
 
         # case 1: z-score threshold determines trend index
         if signals:
             signal_range = [x for x in range(len(signals))]
-            data[sn]['trend'] = [-z
-                if any([False if a < 0 else True for a in y])
-                else z
-                for z in signal_range for y in signals[z]]
+            signal_result = []
+
+            for z, signal in enumerate(signals):
+                for i,s in enumerate(signal):
+                    if (len(signal_result) == 0 or len(signal_result) == i):
+                        if s < 0:
+                            signal_result.append(-z)
+                        else:
+                            signal_result.append(z)
+
+                    elif (i < len(signal_result) and s < 0):
+                        signal_result[i] = -z
+
+                    elif (i < len(signal_result) and s >= 0):
+                        signal_result[i] = z
+
+                    else:
+                        print('Error ({f}): {m}.'.format(
+                            f=this_file,
+                            m='distorted signal_result shape'
+                        ))
 
         # case 2: previous index value determines trend index
         else:
