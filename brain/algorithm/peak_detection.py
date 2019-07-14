@@ -30,22 +30,22 @@ class PeakDetection():
         '''
 
         self.data = list(data)
-        self.length = len(self.data)
         self.lag = lag
-        self.threshold = threshold
+        self.length = len(self.data)
         self.influence = influence
         self.filteredY = np.array(self.data)
         self.this_file = os.path.basename(__file__)
 
         if isinstance(threshold, int):
+            self.threshold = [threshold]
             self.signals = [[0] * len(self.data)]
             self.avg_filter = [[0] * len(self.data)]
             self.std_filter = [[0] * len(self.data)]
-
             self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag])
             self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
 
         elif isinstance(threshold, list):
+            self.threshold = threshold
             self.signals = [[0] * len(self.data) for x in threshold]
             self.avg_filter = [[0] * len(self.data) for x in threshold]
             self.std_filter = [[0] * len(self.data) for x in threshold]
@@ -60,19 +60,40 @@ class PeakDetection():
             ))
             exit(999)
 
-    def update(self, new_value):
+    def add(self, new_value):
+        '''
+
+        add new value and update z-score model.
+
+        '''
+
+        self.filteredY(new_value)
+        self.update()
+
+    def remove(self, indices):
+        '''
+
+        remove value at specified index and regenerate scores.
+
+        '''
+
+        l = range(len(self.filteredY))
+        self.filteredY[:] = [self.filteredY[x] for x in l if x not in indices]
+        self.update()
+
+    def update(self):
         '''
 
         update series with new data, and return last value.
 
         '''
 
-        self.data.append(new_value)
         idx = len(self.data) - 1
         self.length = len(self.data)
 
         if idx < self.lag:
             return(0)
+
         elif idx == self.lag:
             self.filteredY = np.array(self.data)
             self.signals = [[0] * len(self.data)]
@@ -82,14 +103,14 @@ class PeakDetection():
             self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
             return(0)
 
-        for i in range(len(self.threshold)):
+        for i,t in enumerate(self.threshold):
+            self.filteredY += [0]
             self.signals[i] += [0]
-            self.filteredY[i] += [0]
             self.avg_filter[i] += [0]
             self.std_filter[i] += [0]
 
             current_val = abs(self.data[idx] - self.avg_filter[i][idx - 1])
-            threshold = self.threshold * self.std_filter[i][idx - 1]
+            threshold = t * self.std_filter[i][idx - 1]
 
             if current_val > threshold:
                 if self.data[idx] > self.avg_filter[i][idx - 1]:
@@ -103,9 +124,9 @@ class PeakDetection():
                 self.std_filter[i][idx] = np.std(self.filteredY[(idx - self.lag):idx])
             else:
                 self.signals[i][idx] = 0
-                self.filteredY[i] = self.data[i]
-                self.avg_filter[i][idx] = np.mean(self.filteredY[(i - self.lag):i])
-                self.std_filter[i][idx] = np.std(self.filteredY[(i - self.lag):i])
+                self.filteredY[idx] = self.data[i]
+                self.avg_filter[i][idx] = np.mean(self.filteredY[(idx - self.lag):idx])
+                self.std_filter[i][idx] = np.std(self.filteredY[(idx - self.lag):idx])
 
         return(self.signals)
 
