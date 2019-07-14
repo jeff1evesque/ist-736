@@ -43,7 +43,7 @@ class PeakDetection():
         self.avg_filter = [[0] * len(self.data) for x in threshold]
         self.std_filter = [[0] * len(self.data) for x in threshold]
 
-        self.initialize(self)
+        self.initialize()
 
     def add_data(self, new_value):
         '''
