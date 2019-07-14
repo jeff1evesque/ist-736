@@ -24,39 +24,47 @@ def peak_detection(
     if suffix:
         suffix = '_{a}'.format(a=suffix)
 
-    plt.subplot(211)
-    plt.plot(np.arange(1, len(data)+1), data)
+    fig, axs = plt.subplots(2, 1, constrained_layout=True)
+    fig.suptitle('Smoothed Z-Score', fontsize=16)
 
-    plt.plot(
+    #
+    # data: with smoothed filter between upper and lower bound.
+    #
+    axs[0].plot(np.arange(1, len(data)+1), data)
+    axs[0].plot(
         np.arange(1, len(data)+1),
         avg_filter,
         color='cyan',
         lw=2
     )
-
-    plt.plot(
+    axs[0].plot(
         np.arange(1, len(data)+1),
         avg_filter + threshold * std_filter,
         color='green',
         lw=2
     )
-
-    plt.plot(
+    axs[0].plot(
         np.arange(1, len(data)+1),
         avg_filter - threshold * std_filter,
         color='green',
         lw=2
     )
+    axs[0].set_title('Data: with smoothed filter between bounds.')
 
-    plt.subplot(212)
-    plt.step(
+    #
+    # signal: associated signal to provided data.
+    #
+    axs[1].step(
         np.arange(1, len(data)+1),
         signals,
         color='red',
         lw=2
     )
-    plt.ylim(-1.5, 1.5)
+    axs[1].set_title('Signal')
 
+    #
+    # save and plot
+    #
     plt.savefig('{d}/peak_detection{suffix}'.format(
         d=directory,
         suffix=suffix
