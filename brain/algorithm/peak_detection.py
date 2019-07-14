@@ -130,7 +130,7 @@ class PeakDetection():
                     self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
                 else:
                     self.signals[idx][i] = 0
-                    self.filtredY[i] = self.data[i]
+                    self.filteredY[i] = self.data[i]
                     self.avg_filter[idx][i] = np.mean(self.filteredY[(i-self.lag):i])
                     self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
 
