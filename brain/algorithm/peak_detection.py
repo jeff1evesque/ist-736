@@ -36,28 +36,14 @@ class PeakDetection():
         self.this_file = os.path.basename(__file__)
 
         if isinstance(threshold, int):
-            self.threshold = [threshold]
-            self.signals = [[0] * len(self.data)]
-            self.avg_filter = [[0] * len(self.data)]
-            self.std_filter = [[0] * len(self.data)]
-            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag])
-            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
+            threshold = [threshold]
 
-        elif isinstance(threshold, list):
-            self.threshold = threshold
-            self.signals = [[0] * len(self.data) for x in threshold]
-            self.avg_filter = [[0] * len(self.data) for x in threshold]
-            self.std_filter = [[0] * len(self.data) for x in threshold]
+        self.threshold = threshold
+        self.signals = [[0] * len(self.data) for x in threshold]
+        self.avg_filter = [[0] * len(self.data) for x in threshold]
+        self.std_filter = [[0] * len(self.data) for x in threshold]
 
-            for i in range(len(threshold)):
-                self.avg_filter[i][self.lag - 1] = np.mean(self.data[0:self.lag])
-                self.std_filter[i][self.lag - 1] = np.std(self.data[0:self.lag])
-
-        else:
-            print('Error ({f}): threshold must be int, or list of ints'.format(
-                self.this_file
-            ))
-            exit(999)
+        self.initialize(self)
 
     def add_data(self, new_value):
         '''
@@ -67,8 +53,9 @@ class PeakDetection():
         '''
 
         self.data.append(new_value)
+        self.filteredY += [0]
+
         for i,t in enumerate(self.threshold):
-            self.filteredY += [0]
             self.signals[i] += [0]
             self.avg_filter[i] += [0]
             self.std_filter[i] += [0]
@@ -91,7 +78,7 @@ class PeakDetection():
             self.filteredY[i][:] = [self.filteredY[x] for x in l]
             self.filteredY[i][:] = [self.filteredY[x] for x in l]
 
-        self.update()
+        self.initialize()
 
     def set_lag(self, lag):
         '''
@@ -119,6 +106,33 @@ class PeakDetection():
         '''
 
         self.lag = influence
+
+    def initialize(self):
+        '''
+
+        initialize z-score model.
+
+        '''
+
+        for idx in range(len(self.threshold)):
+            self.avg_filter[idx][self.lag - 1] = np.mean(self.data[0:self.lag])
+            self.std_filter[idx][self.lag - 1] = np.std(self.data[0:self.lag])
+
+            for i in range(self.lag, len(self.data) - 1):
+                if abs(self.data[i] - self.avg_filter[idx][i-1]) > self.threshold[idx] * self.std_filter[idx][i-1]:
+                    if self.data[i] > self.avg_filter[idx][i-1]:
+                        self.signals[idx][i] = 1
+                    else:
+                        self.signals[idx][i] = -1
+
+                    self.filteredY[i] = self.influence * self.data[i] + (1 - self.influence) * self.filteredY[i-1]
+                    self.avg_filter[idx][i] = np.mean(self.filteredY[(i-self.lag):i])
+                    self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
+                else:
+                    self.signals[idx][i] = 0
+                    self.filtredY[i] = self.data[i]
+                    self.avg_filter[idx][i] = np.mean(self.filteredY[(i-self.lag):i])
+                    self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
 
     def update(self):
         '''
