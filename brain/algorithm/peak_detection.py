@@ -31,7 +31,6 @@ class PeakDetection():
 
         self.data = list(data)
         self.lag = lag
-        self.length = len(self.data)
         self.influence = influence
         self.filteredY = np.array(self.data)
         self.this_file = os.path.basename(__file__)
@@ -88,8 +87,7 @@ class PeakDetection():
 
         '''
 
-        idx = len(self.data) - 1
-        self.length = len(self.data)
+        idx = len(self.data)
 
         if idx < self.lag:
             return(0)
@@ -164,4 +162,4 @@ class PeakDetection():
 
         '''
 
-        return(self.filteredY)
+        return(self.data)
