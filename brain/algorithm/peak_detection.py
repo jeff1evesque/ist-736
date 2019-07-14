@@ -59,7 +59,7 @@ class PeakDetection():
             ))
             exit(999)
 
-    def add(self, new_value):
+    def add_data(self, new_value):
         '''
 
         add new value and update z-score model.
@@ -75,16 +75,50 @@ class PeakDetection():
 
         self.update()
 
-    def remove(self, indices):
+    def remove_data(self, removal_indices):
         '''
 
         remove value at specified index and regenerate scores.
 
         '''
 
-        l = range(len(self.filteredY))
-        self.filteredY[:] = [self.filteredY[x] for x in l if x not in indices]
+        indices = range(len(self.filteredY))
+        l = [x for x in indices if x not in removal_indices]
+        self.filteredY[:] = [self.filteredY[x] for x in l]
+
+        for i in self.threshold:
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+
         self.update()
+
+    def update_lag(self, lag):
+        '''
+
+        update current lag.
+
+        '''
+
+        self.lag = lag
+
+    def update_threshold(self, threshold):
+        '''
+
+        update current theshold(s).
+
+        '''
+
+        self.lag = threshold
+
+    def update_influence(self, influence):
+        '''
+
+        update current influence.
+
+        '''
+
+        self.lag = influence
 
     def update(self):
         '''
@@ -164,3 +198,30 @@ class PeakDetection():
         '''
 
         return(self.data)
+
+    def get_lag(self):
+        '''
+
+        return current lag.
+
+        '''
+
+        return(self.lag)
+
+    def get_threshold(self):
+        '''
+
+        return current theshold(s).
+
+        '''
+
+        return(self.lag)
+
+    def get_influence(self):
+        '''
+
+        update current influence.
+
+        '''
+
+        return(self.lag)
