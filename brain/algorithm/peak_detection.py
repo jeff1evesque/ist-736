@@ -93,7 +93,7 @@ class PeakDetection():
 
         self.update()
 
-    def update_lag(self, lag):
+    def set_lag(self, lag):
         '''
 
         update current lag.
@@ -102,7 +102,7 @@ class PeakDetection():
 
         self.lag = lag
 
-    def update_threshold(self, threshold):
+    def set_threshold(self, threshold):
         '''
 
         update current theshold(s).
@@ -111,7 +111,7 @@ class PeakDetection():
 
         self.lag = threshold
 
-    def update_influence(self, influence):
+    def set_influence(self, influence):
         '''
 
         update current influence.
