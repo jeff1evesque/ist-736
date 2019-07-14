@@ -34,8 +34,7 @@ def peak_detection(
     # initialize: instantiate and create z-score model
     #
     peaks = PeakDetection(data=data, threshold=threshold)
-    for x in data:
-        peaks.update(x)
+    peaks.update()
 
     data = peaks.get_data()
     signals = peaks.get_signals()
