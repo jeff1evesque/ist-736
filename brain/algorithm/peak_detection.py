@@ -66,7 +66,13 @@ class PeakDetection():
 
         '''
 
-        self.filteredY(new_value)
+        self.data.append(new_value)
+        for i,t in enumerate(self.threshold):
+            self.filteredY += [0]
+            self.signals[i] += [0]
+            self.avg_filter[i] += [0]
+            self.std_filter[i] += [0]
+
         self.update()
 
     def remove(self, indices):
@@ -87,7 +93,7 @@ class PeakDetection():
 
         '''
 
-        idx = len(self.data)
+        idx = len(self.data) - 1
 
         if idx < self.lag:
             return(0)
@@ -102,12 +108,7 @@ class PeakDetection():
             return(0)
 
         for i,t in enumerate(self.threshold):
-            self.filteredY += [0]
-            self.signals[i] += [0]
-            self.avg_filter[i] += [0]
-            self.std_filter[i] += [0]
-
-            current_val = abs(self.data[idx] - self.avg_filter[i][idx - 1])
+            current_val = abs(self.data[idx - 1] - self.avg_filter[i][idx - 1])
             threshold = t * self.std_filter[i][idx - 1]
 
             if current_val > threshold:
