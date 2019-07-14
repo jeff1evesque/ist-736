@@ -49,7 +49,7 @@ def peak_detection(
         color='green',
         lw=2
     )
-    axs[0].set_title('Data: with smoothed filter between bounds.')
+    axs[0].set_title('Data')
 
     #
     # signal: associated signal to provided data.
