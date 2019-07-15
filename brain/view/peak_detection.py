@@ -65,7 +65,7 @@ def peak_detection(
     #
     # save and plot
     #
-    plt.savefig('{d}/peak_detection{suffix}'.format(
+    plt.savefig('{d}/peak_detection{suffix}.png'.format(
         d=directory,
         suffix=suffix
     ))
