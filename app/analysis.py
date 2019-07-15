@@ -188,6 +188,7 @@ def analyze(
         #
         signals = peak_detection(
             data=data[sn][ts_index],
+            threshold=[0.5],
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
@@ -196,10 +197,9 @@ def analyze(
         # case 1: z-score threshold determines trend index
         #
         if signals:
-            signal_range = [x for x in range(len(signals))]
             signal_result = []
-
-            for z, signal in enumerate(signals):
+            for z in range(1, len(signals) + 1):
+                signal = signals[z-1]
                 for i,s in enumerate(signal):
                     if (len(signal_result) == 0 or len(signal_result) == i):
                         if s < 0:
