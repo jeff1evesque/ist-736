@@ -21,7 +21,7 @@ def peak_detection(
 
     '''
 
-    if suffix:
+    if isinstance(suffix, int):
         suffix = '_{a}'.format(a=suffix)
 
     fig, axs = plt.subplots(2, 1, constrained_layout=True)
