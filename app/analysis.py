@@ -188,7 +188,7 @@ def analyze(
         #
         signals = peak_detection(
             data=data[sn][ts_index],
-            threshold=[0.5],
+            threshold=[0.5, 2],
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
@@ -207,14 +207,26 @@ def analyze(
                         else:
                             signal_result.append(z)
 
-                    elif (i < len(signal_result) and s < 0):
+                    elif (
+                        i < len(signal_result) and
+                        s < 0 and
+                        s < signal_result[i]
+                    ):
                         signal_result[i] = -z
 
-                    elif (i < len(signal_result) and s == 0):
-                        signal_result[i] = 0
-
-                    elif (i < len(signal_result) and s > 0):
+                    elif (
+                        i < len(signal_result) and
+                        s > 0 and
+                        s > signal_result[i]
+                    ):
                         signal_result[i] = z
+
+                    elif (
+                        i < len(signal_result) and
+                        s == 0 and
+                        s > signal_result[i]
+                    ):
+                        signal_result[i] = 0
 
                     else:
                         print('Error ({f}): {m}.'.format(
