@@ -204,8 +204,10 @@ def analyze(
                     if (len(signal_result) == 0 or len(signal_result) == i):
                         if s < 0:
                             signal_result.append(-z)
-                        else:
+                        elif s > 0:
                             signal_result.append(z)
+                        else:
+                            signal_result.append(0)
 
                     elif (
                         i < len(signal_result) and
