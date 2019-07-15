@@ -48,7 +48,7 @@ def peak_detection(
                 std_filter=std_filter[i],
                 avg_filter=avg_filter[i],
                 directory=directory,
-                suffix=i
+                suffix=x
             )
 
     return(signals)
