@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from collections import defaultdict
 from brain.view.plot import plot_bar
 from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
@@ -188,7 +189,7 @@ def analyze(
         #
         signals = peak_detection(
             data=data[sn][ts_index],
-            threshold=[0.5, 2],
+            threshold=[0.5],
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
@@ -256,6 +257,32 @@ def analyze(
                 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
                 else 1
                 for i,x in enumerate(data[sn][ts_index])]
+
+        #
+        # outlier class: remove class if training distribution is less than
+        #     50%, or greater than 150% all other class distribution(s).
+        #
+        counter = defaultdict(lambda :0)
+        for k in data[sn]['trend']:
+            counter[k] += 1
+
+        if len(counter) > 2:
+            for key, val in counter.items():
+                if all(val < 0.5 * v for k,v in counter.items() if v != val):
+                    data[sn].drop(
+                        data[sn][data[sn]['trend'] == key].index,
+                        inplace=True
+                    )
+                    data[sn].reset_index(inplace=True)
+                    break
+
+                elif all(val > 1.5 * v for k,v in counter.items() if v != val):
+                    data[sn].drop(
+                        data[sn][data[sn]['trend'] == key].index,
+                        inplace=True
+                    )
+                    data[sn].reset_index(inplace=True)
+                    break
 
         #
         # sentiment scores
