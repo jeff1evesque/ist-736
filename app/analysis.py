@@ -260,6 +260,30 @@ def analyze(
                 for i,x in enumerate(data[sn][ts_index])]
 
         #
+        # sentiment scores
+        #
+        s = Sentiment(data[sn], classify_index)
+        data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
+        data[sn].replace('\s+', ' ', regex=True, inplace=True)
+
+        #
+        # timeseries analysis
+        #
+        if analysis_ts:
+            ts_results[sn] = timeseries(
+                df=data[sn],
+                normalize_key=ts_index,
+                date_index='created_at',
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
+            )
+
+            with open('{directory}/adf_{sn}.txt'.format(
+                directory=directory_report,
+                sn=sn
+            ), 'w') as fp:
+                print(ts_results[sn]['arima']['adf'], file=fp)
+
+        #
         # outlier class: remove class if training distribution is less than
         #     50%, or greater than 150% of all other class distribution(s).
         #
@@ -286,20 +310,13 @@ def analyze(
                     break
 
         #
-        # sentiment scores
-        #
-        s = Sentiment(data[sn], classify_index)
-        data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
-        data[sn].replace('\s+', ' ', regex=True, inplace=True)
-
-        #
         # sufficient data: analysis performed if adequate amount of data.
         #
         # Note: 3 classes are utilized as a base case, while an outlier class
         #       can reduce the default to 2 classes. Each additional threshold
         #       adds two additional classes.
         #
-        if data[sn].shape[0] > (3 + (len(threshold - 1) * 2)) * 20:
+        if data[sn].shape[0] > (3 + ((len(threshold) - 1) * 2)) * 20:
             #
             # granger causality
             #
@@ -331,23 +348,6 @@ def analyze(
                     stopwords=stopwords,
                     k=500
                 )
-
-        #
-        # timeseries analysis
-        #
-        if analysis_ts:
-            ts_results[sn] = timeseries(
-                df=data[sn],
-                normalize_key=ts_index,
-                date_index='created_at',
-                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
-            )
-
-            with open('{directory}/adf_{sn}.txt'.format(
-                directory=directory_report,
-                sn=sn
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
 
     #
     # ensembled scores
