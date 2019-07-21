@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from collections import defaultdict
 from brain.view.plot import plot_bar
 from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
@@ -256,6 +257,22 @@ def analyze(
                 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
                 else 1
                 for i,x in enumerate(data[sn][ts_index])]
+
+        #
+        # outlier class: remove class if corresponding training distribution
+        #     is less than 25% of other class distribution.
+        #
+        counter = defaultdict(int)
+        for k in data[sn]['trend']:
+            counter[k] += 1
+
+        if len(counter) > 2:
+            for key, val in d.counter():
+                if all(val < 0.25 * v for all k,v in counter):
+                    data[sn].drop(
+                        data[sn][data[sn]['trend'] == key].index,
+                        inplace=True
+                    )
 
         #
         # sentiment scores
