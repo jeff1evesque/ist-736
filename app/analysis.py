@@ -187,9 +187,10 @@ def analyze(
         #
         # index data: conditionally use z-score threshold to relabel index.
         #
+        threshold = [0.5]
         signals = peak_detection(
             data=data[sn][ts_index],
-            threshold=[0.5],
+            threshold=threshold,
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
@@ -260,7 +261,7 @@ def analyze(
 
         #
         # outlier class: remove class if training distribution is less than
-        #     50%, or greater than 150% all other class distribution(s).
+        #     50%, or greater than 150% of all other class distribution(s).
         #
         counter = defaultdict(lambda :0)
         for k in data[sn]['trend']:
@@ -292,36 +293,44 @@ def analyze(
         data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
         #
-        # granger causality
+        # sufficient data: analysis performed if adequate amount of data.
         #
-        if analysis_granger:
-            for sentiment in sentiments:
-                granger(
-                    data[sn][[ts_index, sentiment]],
-                    maxlag=3,
-                    directory='{directory}/{sn}/granger'.format(
+        # Note: 3 classes are utilized as a base case, while an outlier class
+        #       can reduce the default to 2 classes. Each additional threshold
+        #       adds two additional classes.
+        #
+        if data[sn].shape[0] > (3 + (len(threshold - 1) * 2)) * 20:
+            #
+            # granger causality
+            #
+            if analysis_granger:
+                for sentiment in sentiments:
+                    granger(
+                        data[sn][[ts_index, sentiment]],
+                        maxlag=3,
+                        directory='{directory}/{sn}/granger'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        suffix=sentiment
+                    )
+
+            #
+            # classify
+            #
+            if analysis_classify:
+                classify_results[sn] = classify(
+                    data[sn],
+                    key_class='trend',
+                    key_text=classify_index,
+                    directory='{directory}/{sn}'.format(
                         directory=directory,
                         sn=sn
                     ),
-                    suffix=sentiment
+                    top_words=25,
+                    stopwords=stopwords,
+                    k=500
                 )
-
-        #
-        # classify
-        #
-        if analysis_classify:
-            classify_results[sn] = classify(
-                data[sn],
-                key_class='trend',
-                key_text=classify_index,
-                directory='{directory}/{sn}'.format(
-                    directory=directory,
-                    sn=sn
-                ),
-                top_words=25,
-                stopwords=stopwords,
-                k=500
-            )
 
         #
         # timeseries analysis
@@ -343,7 +352,7 @@ def analyze(
     #
     # ensembled scores
     #
-    if analysis_classify:
+    if analysis_classify and sn in classify_results:
         plot_bar(
             labels=screen_name,
             performance=[v[0] for k,v in classify_results.items()],
@@ -352,7 +361,7 @@ def analyze(
             rotation=90
         )
 
-    if analysis_ts:
+    if analysis_ts and sn in ts_results:
         plot_bar(
             labels=screen_name,
             performance=[v['arima']['mse'] for k,v in ts_results.items()],
