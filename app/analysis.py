@@ -259,20 +259,22 @@ def analyze(
                 for i,x in enumerate(data[sn][ts_index])]
 
         #
-        # outlier class: remove class if corresponding training distribution
-        #     is less than 25% of other class distribution.
+        # outlier class: remove class if training distribution is less than
+        #     25% of other class distribution.
         #
-        counter = defaultdict(int)
+        outlier_counter = defaultdict(lambda :0)
         for k in data[sn]['trend']:
-            counter[k] += 1
+            outlier_counter[k] += 1
 
-        if len(counter) > 2:
-            for key, val in d.counter():
-                if all(val < 0.25 * v for all k,v in counter):
+        if len(outlier_counter) > 2:
+            for key, val in outlier_counter.items():
+                if all(val < 0.25 * v for k,v in outlier_counter.items() if v != val):
                     data[sn].drop(
                         data[sn][data[sn]['trend'] == key].index,
                         inplace=True
                     )
+                    data[sn].reset_index(inplace=True)
+                    break
 
         #
         # sentiment scores
