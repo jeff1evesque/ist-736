@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os.path
 import numpy as np
 
 
@@ -12,71 +13,169 @@ class PeakDetection():
 
     '''
 
-    def __init__(self, data, lag, threshold, influence):
+    def __init__(self, data, lag=3, threshold=1, influence=0.5):
         '''
 
         instantiate series and threshold.
 
+        @data, univariate list.
+        @lag, moving windows.
+        @threshold, z-score (standard deviation) threshold, when exceeded
+            the corresponding value is considered signal.
+        @influence, weighting factor [0,1] for signal values, relative to
+            original datapoints. If 'influence=0.5', then signal values have
+            0.5 influence relative to original datapoints when recaculating
+            the new threshold.
+
         '''
 
-        self.y = list(data)
-        self.length = len(self.y)
+        self.data = list(data)
         self.lag = lag
-        self.threshold = threshold
         self.influence = influence
-        self.signals = [0] * len(self.y)
-        self.filteredY = np.array(self.y).tolist()
-        self.avgFilter = [0] * len(self.y)
-        self.stdFilter = [0] * len(self.y)
-        self.avgFilter[self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-        self.stdFilter[self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+        self.filteredY = np.array(self.data)
+        self.this_file = os.path.basename(__file__)
 
-    def update(self, new_value):
+        if isinstance(threshold, int):
+            threshold = [threshold]
+
+        self.threshold = threshold
+        self.signals = [[0] * len(self.data) for x in threshold]
+        self.avg_filter = [[0] * len(self.data) for x in threshold]
+        self.std_filter = [[0] * len(self.data) for x in threshold]
+
+        self.initialize()
+
+    def add_data(self, new_value):
+        '''
+
+        add new value and update z-score model.
+
+        '''
+
+        self.data.append(new_value)
+        self.filteredY += [0]
+
+        for i,t in enumerate(self.threshold):
+            self.signals[i] += [0]
+            self.avg_filter[i] += [0]
+            self.std_filter[i] += [0]
+
+        self.update()
+
+    def remove_data(self, removal_indices):
+        '''
+
+        remove value at specified index and regenerate scores.
+
+        '''
+
+        indices = range(len(self.filteredY))
+        l = [x for x in indices if x not in removal_indices]
+        self.filteredY[:] = [self.filteredY[x] for x in l]
+
+        for i in self.threshold:
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+            self.filteredY[i][:] = [self.filteredY[x] for x in l]
+
+        self.initialize()
+
+    def set_lag(self, lag):
+        '''
+
+        update current lag.
+
+        '''
+
+        self.lag = lag
+
+    def set_threshold(self, threshold):
+        '''
+
+        update current theshold(s).
+
+        '''
+
+        self.lag = threshold
+
+    def set_influence(self, influence):
+        '''
+
+        update current influence.
+
+        '''
+
+        self.lag = influence
+
+    def initialize(self):
+        '''
+
+        initialize z-score model.
+
+        '''
+
+        for idx in range(len(self.threshold)):
+            self.avg_filter[idx][self.lag - 1] = np.mean(self.data[0:self.lag])
+            self.std_filter[idx][self.lag - 1] = np.std(self.data[0:self.lag])
+
+            for i in range(self.lag, len(self.data) - 1):
+                if abs(self.data[i] - self.avg_filter[idx][i-1]) > self.threshold[idx] * self.std_filter[idx][i-1]:
+                    if self.data[i] > self.avg_filter[idx][i-1]:
+                        self.signals[idx][i] = 1
+                    else:
+                        self.signals[idx][i] = -1
+
+                    self.filteredY[i] = self.influence * self.data[i] + (1 - self.influence) * self.filteredY[i-1]
+                    self.avg_filter[idx][i] = np.mean(self.filteredY[(i-self.lag):i])
+                    self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
+                else:
+                    self.signals[idx][i] = 0
+                    self.filteredY[i] = self.data[i]
+                    self.avg_filter[idx][i] = np.mean(self.filteredY[(i-self.lag):i])
+                    self.std_filter[idx][i] = np.std(self.filteredY[(i-self.lag):i])
+
+    def update(self):
         '''
 
         update series with new data, and return last value.
 
         '''
 
-        self.y.append(new_value)
-        i = len(self.y) - 1
-        self.length = len(self.y)
+        idx = len(self.data) - 1
 
-        if i < self.lag:
-            return(0)
-        elif i == self.lag:
-            self.signals = [0] * len(self.y)
-            self.filteredY = np.array(self.y).tolist()
-            self.avgFilter = [0] * len(self.y)
-            self.stdFilter = [0] * len(self.y)
-            self.avgFilter[self.lag - 1] = np.mean(self.y[0:self.lag]).tolist()
-            self.stdFilter[self.lag - 1] = np.std(self.y[0:self.lag]).tolist()
+        if idx < self.lag:
             return(0)
 
-        self.signals += [0]
-        self.filteredY += [0]
-        self.avgFilter += [0]
-        self.stdFilter += [0]
+        elif idx == self.lag:
+            self.filteredY = np.array(self.data)
+            self.signals = [[0] * len(self.data)]
+            self.avg_filter = [[0] * len(self.data)]
+            self.std_filter = [[0] * len(self.data)]
+            self.avg_filter[0][self.lag - 1] = np.mean(self.data[0:self.lag])
+            self.std_filter[0][self.lag - 1] = np.std(self.data[0:self.lag])
+            return(0)
 
-        current_val = abs(self.y[i] - self.avgFilter[i - 1])
-        threshold = self.threshold * self.stdFilter[i - 1]
-        if current_val > threshold:
-            if self.y[i] > self.avgFilter[i - 1]:
-                self.signals[i] = 1
+        for i,t in enumerate(self.threshold):
+            current_val = abs(self.data[idx - 1] - self.avg_filter[i][idx - 1])
+            threshold = t * self.std_filter[i][idx - 1]
+
+            if current_val > threshold:
+                if self.data[idx] > self.avg_filter[i][idx - 1]:
+                    self.signals[i][idx] = 1
+                else:
+                    self.signals[i][idx] = -1
+
+                self.filteredY[idx] = self.influence * self.data[idx] + \
+                    (1 - self.influence) * self.filteredY[idx - 1]
+                self.avg_filter[i][idx] = np.mean(self.filteredY[(idx - self.lag):idx])
+                self.std_filter[i][idx] = np.std(self.filteredY[(idx - self.lag):idx])
             else:
-                self.signals[i] = -1
+                self.signals[i][idx] = 0
+                self.filteredY[idx] = self.data[i]
+                self.avg_filter[i][idx] = np.mean(self.filteredY[(idx - self.lag):idx])
+                self.std_filter[i][idx] = np.std(self.filteredY[(idx - self.lag):idx])
 
-            self.filteredY[i] = self.influence * self.y[i] + \
-                (1 - self.influence) * self.filteredY[i - 1]
-            self.avgFilter[i] = np.mean(self.filteredY[(i - self.lag):i])
-            self.stdFilter[i] = np.std(self.filteredY[(i - self.lag):i])
-        else:
-            self.signals[i] = 0
-            self.filteredY[i] = self.y[i]
-            self.avgFilter[i] = np.mean(self.filteredY[(i - self.lag):i])
-            self.stdFilter[i] = np.std(self.filteredY[(i - self.lag):i])
-
-        return(self.signals[i])
+        return(self.signals)
 
     def get_signals(self):
         '''
@@ -85,22 +184,58 @@ class PeakDetection():
 
         '''
 
-        return(self.signals)
+        return([np.asarray(x) for x in self.signals])
 
-    def get_avgfilter(self):
+    def get_avg_filter(self):
         '''
 
         get current average filter.
 
         '''
 
-        return(self.avgFilter)
+        return([np.asarray(x) for x in self.avg_filter])
 
-    def get_avgfilter(self):
+    def get_std_filter(self):
         '''
 
         get current standard deviation filter.
 
         '''
 
-        return(self.stdFilter)
+        return([np.asarray(x) for x in self.std_filter])
+
+    def get_data(self):
+        '''
+
+        get current data.
+
+        '''
+
+        return(self.data)
+
+    def get_lag(self):
+        '''
+
+        return current lag.
+
+        '''
+
+        return(self.lag)
+
+    def get_threshold(self):
+        '''
+
+        return current theshold(s).
+
+        '''
+
+        return(self.lag)
+
+    def get_influence(self):
+        '''
+
+        update current influence.
+
+        '''
+
+        return(self.lag)

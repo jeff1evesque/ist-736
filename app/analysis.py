@@ -9,6 +9,7 @@ from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import timeseries
 from brain.controller.granger import granger
+from brain.controller.peak_detection import peak_detection
 
 
 def analyze(
@@ -35,6 +36,7 @@ def analyze(
     classify_results = {}
     ts_results = {}
     ts_results_sentiment = {}
+    this_file = os.path.basename(__file__)
 
     #
     # create directories
@@ -182,13 +184,82 @@ def analyze(
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
         #
-        # index data: relabel index as up (0) or down (1) based on previous time
+        # index data: conditionally use z-score threshold to relabel index.
         #
-        data[sn]['trend'] = [0 if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
-            else 1
-            for i,x in enumerate(data[sn][ts_index])]
+        signals = peak_detection(
+            data=data[sn][ts_index],
+            threshold=[0.5, 2],
+            directory='{a}/{b}'.format(a=directory, b=sn),
+            suffix=sn
+        )
 
-        # sentiment analysis
+        #
+        # case 1: z-score threshold determines trend index
+        #
+        if signals:
+            signal_result = []
+            for z in range(1, len(signals) + 1):
+                signal = signals[z-1]
+                for i,s in enumerate(signal):
+                    if (len(signal_result) == 0 or len(signal_result) == i):
+                        if s < 0:
+                            signal_result.append(-z)
+                        elif s > 0:
+                            signal_result.append(z)
+                        else:
+                            signal_result.append(0)
+
+                    elif (
+                        i < len(signal_result) and
+                        s < 0 and
+                        s < signal_result[i]
+                    ):
+                        signal_result[i] = -z
+
+                    elif (
+                        i < len(signal_result) and
+                        s > 0 and
+                        s > signal_result[i]
+                    ):
+                        signal_result[i] = z
+
+                    elif (
+                        i < len(signal_result) and
+                        s == 0 and
+                        s > signal_result[i]
+                    ):
+                        signal_result[i] = 0
+
+                    else:
+                        print('Error ({f}): {m}.'.format(
+                            f=this_file,
+                            m='distorted signal_result shape'
+                        ))
+
+            # monotic: if all same values use non z-score.
+            first = signal_result[0]
+            if all(x == first for x in signal_result):
+                data[sn]['trend'] = [0
+                    if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
+                    else 1
+                    for i,x in enumerate(data[sn][ts_index])]
+
+            # not monotonic
+            else:
+                data[sn]['trend'] = signal_result
+
+        #
+        # case 2: previous index value determines trend index
+        #
+        else:
+            data[sn]['trend'] = [0
+                if data[sn][ts_index][i] > data[sn][ts_index].get(i-1, 0)
+                else 1
+                for i,x in enumerate(data[sn][ts_index])]
+
+        #
+        # sentiment scores
+        #
         s = Sentiment(data[sn], classify_index)
         data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
         data[sn].replace('\s+', ' ', regex=True, inplace=True)
