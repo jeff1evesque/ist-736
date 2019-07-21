@@ -260,7 +260,7 @@ def analyze(
 
         #
         # outlier class: remove class if training distribution is less than
-        #     30% of other class distribution.
+        #     50%, or greater than 150% all other class distribution(s).
         #
         outlier_counter = defaultdict(lambda :0)
         for k in data[sn]['trend']:
@@ -268,7 +268,15 @@ def analyze(
 
         if len(outlier_counter) > 2:
             for key, val in outlier_counter.items():
-                if all(val < 0.3 * v for k,v in outlier_counter.items() if v != val):
+                if all(val < 0.5 * v for k,v in outlier_counter.items() if v != val):
+                    data[sn].drop(
+                        data[sn][data[sn]['trend'] == key].index,
+                        inplace=True
+                    )
+                    data[sn].reset_index(inplace=True)
+                    break
+
+                elif all(val > 1.5 * v for k,v in outlier_counter.items() if v != val):
                     data[sn].drop(
                         data[sn][data[sn]['trend'] == key].index,
                         inplace=True
