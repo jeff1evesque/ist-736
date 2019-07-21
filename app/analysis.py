@@ -188,7 +188,7 @@ def analyze(
         #
         signals = peak_detection(
             data=data[sn][ts_index],
-            threshold=[0.5, 2],
+            threshold=[0.5],
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
