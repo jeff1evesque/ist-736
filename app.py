@@ -30,16 +30,16 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-    ('CHRIS', 'CBOE_VX1'),
-    ('NASDAQOMX', 'COMP-NASDAQ'),
-    ('FINRA', 'FNYX_QQQ'),
-    ('FINRA', 'FNSQ_SPY'),
+    ('BATS', 'BATS_AAPL'),
     ('BATS', 'BATS_AMZN'),
     ('BATS', 'BATS_GOOGL'),
-    ('BATS', 'BATS_AAPL'),
-    ('BATS', 'BATS_NFLX'),
     ('BATS', 'BATS_MMT'),
+    ('BATS', 'BATS_NFLX'),
+    ('CHRIS', 'CBOE_VX1'),
+    ('NASDAQOMX', 'COMP-NASDAQ'),
     ('FINRA', 'FNYX_MMM'),
+    ('FINRA', 'FNSQ_SPY'),
+    ('FINRA', 'FNYX_QQQ'),
     ('EIA', 'PET_RWTC_D'),
     ('WFC', 'PR_CON_15YFIXED_IR'),
     ('WFC', 'PR_CON_30YFIXED_APR')
