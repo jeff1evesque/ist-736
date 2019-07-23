@@ -43,12 +43,14 @@ def timeseries(
             model_type='arima',
             date_index=date_index
         )
-        model_scores['arima'] = {
-            'mse': a.get_mse(),
-            'adf': a.get_adf()
-        }
 
-        if plot:
+        if a:
+            model_scores['arima'] = {
+                'mse': a.get_mse(),
+                'adf': a.get_adf()
+            }
+
+        if a and plot:
             #
             # @dates, full date range
             # @train_actual, entire train values
