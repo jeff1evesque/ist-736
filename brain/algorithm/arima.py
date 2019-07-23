@@ -164,7 +164,7 @@ class Arima():
                     except:
                         continue
 
-        return(best_adf, best_score, best_cfg)
+        return(best_adf, best_score, best_pqd)
 
     def get_order(self):
         '''

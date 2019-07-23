@@ -44,7 +44,7 @@ def model(
         #
         if result[0][1] <= 0.05:
             iterations = len(model.get_data(key=normalize_key)[1])
-            model.train(iterations=iterations)
+            model.train(iterations=iterations, order=result[2])
 
         else:
             return(False)
