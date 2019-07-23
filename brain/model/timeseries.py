@@ -27,9 +27,27 @@ def model(
             train=False
         )
 
-        # train: use rolling length
-        iterations = len(model.get_data(key=normalize_key)[1])
-        model.train(iterations=iterations)
+        # induce stationarity
+        result = model.grid_search(p_values=[0, 1, 2, 4])
+
+        #
+        # train: if model is stationary make prediction using rolling length.
+        #
+        # @result[0], returns the adf statistic, and pvalue:
+        #
+        #     - adf statistic, the more negative, the more likely to reject the
+        #         null hypothesis (Ho).
+        #
+        #     - pvalue <= 0.05, reject Ho since data does not have unit root
+        #         and is stationary. Otherwise, data has stationary root then
+        #         reject the Ho.
+        #
+        if result[0][1] <= 0.05:
+            iterations = len(model.get_data(key=normalize_key)[1])
+            model.train(iterations=iterations)
+
+        else:
+            return(False)
 
     elif model_type == 'lstm':
         model = Lstm(

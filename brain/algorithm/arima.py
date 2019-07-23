@@ -137,6 +137,35 @@ class Arima():
         self.mse = mean_squared_error(actuals, predicted)
         self.rolling = rolling
 
+    def grid_search(
+        self,
+        p_values=(0,1,2),
+        d_values=range(0,3),
+        q_values=range(0,3)
+    ):
+        '''
+
+        determine optimal arima arguments using (p,q,d) range.
+
+        '''
+
+        best_adf, best_score, best_pqd = float('inf'), None
+        for p in p_values:
+            for d in d_values:
+                for q in q_values:
+                    order = (p,d,q)
+                    try:
+                        model = self.train(order=order)
+                        mse = self.get_mse()
+                        if mse < best_score:
+                            best_adf = self.get_adf()
+                            best_score = mse
+                            best_pqd = order
+                    except:
+                        continue
+
+        return(best_adf, best_score, best_cfg)
+
     def get_order(self):
         '''
 
@@ -213,6 +242,7 @@ class Arima():
 
         try:
             result = adfuller(data)
+
         except Exception as e:
             result = -999
             print(e)
