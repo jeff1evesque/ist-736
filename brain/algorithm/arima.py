@@ -149,7 +149,7 @@ class Arima():
 
         '''
 
-        best_adf, best_score, best_pqd = float('inf'), None
+        best_adf, best_score, best_pqd = float('inf'), float('inf'), None
         for p in p_values:
             for d in d_values:
                 for q in q_values:
