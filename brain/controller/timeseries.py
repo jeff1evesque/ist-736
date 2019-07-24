@@ -44,32 +44,43 @@ def timeseries(
             date_index=date_index
         )
 
-        if a:
+        arima_suffix = '{s}_{order}'.format(
+            s=suffix,
+            order='-'.join([str(x) for x in a[1]])
+        )
+
+        if a[0]:
             model_scores['arima'] = {
-                'mse': a.get_mse(),
-                'adf': a.get_adf()
+                'mse': a[0].get_mse(),
+                'adf': a[0].get_adf()
             }
 
-        if a and plot:
+        if a[0] and plot:
             #
             # @dates, full date range
             # @train_actual, entire train values
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            dates = a.get_data()
+            dates = a[0].get_data()
 
             if diff > 1:
-                train_actual = a.get_difference(
-                    data=a.get_data(key=normalize_key, key_to_list='True')[0],
+                train_actual = a[0].get_difference(
+                    data=a[0].get_data(
+                        key=normalize_key,
+                        key_to_list='True'
+                    )[0],
                     diff=diff
                 )
 
             else:
-                train_actual = a.get_data(key=normalize_key, key_to_list='True')[0]
+                train_actual = a[0].get_data(
+                    key=normalize_key,
+                    key_to_list='True'
+                )[0]
 
-            test_actual = a.get_differences()[0]
-            predicted = a.get_differences()[1]
+            test_actual = a[0].get_differences()[0]
+            predicted = a[0].get_differences()[1]
 
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual,
@@ -91,7 +102,7 @@ def timeseries(
                 xlab='dates',
                 ylab='values',
                 directory=directory,
-                filename='ts_train_arima{s}'.format(s=suffix),
+                filename='ts_train_arima{s}'.format(s=arima_suffix),
                 rotation=90,
                 xticks=xticks
             )
@@ -102,18 +113,18 @@ def timeseries(
                 ylab='value',
                 hue='variable',
                 directory=directory,
-                filename='ts_test_arima{s}'.format(s=suffix),
+                filename='ts_test_arima{s}'.format(s=arima_suffix),
                 rotation=90,
                 xticks=xticks
             )
 
             # trend analysis
-            decomposed = a.get_decomposed()
+            decomposed = a[0].get_decomposed()
             decomposed.plot()
             plt.savefig(
                 '{d}/{f}'.format(
                     d=directory,
-                    f='trend{suffix}'.format(suffix=suffix)
+                    f='trend{suffix}'.format(suffix=arima_suffix)
                 )
             )
 
