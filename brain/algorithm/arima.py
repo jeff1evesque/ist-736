@@ -98,6 +98,9 @@ class Arima():
         '''
 
         actuals, predicted, rolling, differences = [], [], [], []
+        self.df_train = self.df_train[pd.notnull(
+            self.df_train[self.normalize_key]
+        )]
         self.history = self.df_train[self.normalize_key].tolist()
 
         #
