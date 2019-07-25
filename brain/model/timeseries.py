@@ -28,7 +28,7 @@ def model(
         )
 
         # induce stationarity
-        result = model.grid_search(p_values=[0, 1, 2, 4])
+        result = model.grid_search()
 
         #
         # train: if model is stationary make prediction using rolling length.
