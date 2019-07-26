@@ -101,6 +101,7 @@ class Arima():
         self.df_train = self.df_train[pd.notnull(
             self.df_train[self.normalize_key]
         )]
+        self.history = self.df_train[self.normalize_key].tolist()
 
         #
         # @order, if supplied through R, elements will be interpretted as float.
@@ -166,10 +167,11 @@ class Arima():
                             np.isfinite(adf[0]) and
                             np.isfinite(adf[1])
                          ):
-                            best_adf = self.get_adf()
+                            best_adf = adf
                             best_score = mse
                             best_pqd = order
-                    except:
+                    except Exception as e:
+                        print(e)
                         continue
 
         return(best_adf, best_score, best_pqd)
