@@ -23,6 +23,7 @@ def model(
         model = Arima(
             data=df,
             normalize_key=normalize_key,
+            log_transform=True,
             date_index=date_index,
             train=False
         )
