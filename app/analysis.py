@@ -274,7 +274,9 @@ def analyze(
                 df=data[sn],
                 normalize_key=ts_index,
                 date_index='created_at',
-                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn),
+                suffix=ts_index,
+                auto_scale=(30, 0.2)
             )
 
             with open('{directory}/adf_{sn}.txt'.format(
