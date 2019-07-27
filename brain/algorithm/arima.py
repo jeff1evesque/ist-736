@@ -150,7 +150,7 @@ class Arima():
 
     def grid_search(
         self,
-        p_values=(0,1,2),
+        p_values=range(0,3),
         d_values=range(0,3),
         q_values=range(0,3)
     ):
@@ -178,6 +178,7 @@ class Arima():
                             best_adf = adf
                             best_score = mse
                             best_pqd = order
+
                     except Exception as e:
                         print(e)
                         continue
