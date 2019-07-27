@@ -11,6 +11,7 @@ def model(
     model_type='arima',
     date_index='date',
     epochs=100
+    log_transform=0
 ):
     '''
 
@@ -23,7 +24,7 @@ def model(
         model = Arima(
             data=df,
             normalize_key=normalize_key,
-            log_transform=True,
+            log_transform=log_transform,
             date_index=date_index,
             train=False
         )

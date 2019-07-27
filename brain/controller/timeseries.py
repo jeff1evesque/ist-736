@@ -40,6 +40,7 @@ def timeseries(
         a = model(
             df=df,
             normalize_key=normalize_key,
+            log_transform=0.01,
             model_type='arima',
             date_index=date_index
         )
