@@ -161,7 +161,7 @@ class Arima():
 
         @auto_scale, dynamically generate (p,q,d) based on data length.
             [0], minimum threshold required for auto-scaling
-            [1], scaling factor
+            [1], scaling factor, determines the (p,q,d) range
 
         '''
 
@@ -171,7 +171,7 @@ class Arima():
             all(isinstance(x, int) for x in autoscale) and
             len(self.history > auto_scale[0]
         ):
-            auto_range = math.ceil(len(self.history) / auto_scale[1])
+            auto_range = math.ceil(len(self.history) * auto_scale[1])
             p_value=range(0, auto_range)
             d_value=range(0, auto_range)
             q_value=range(0, auto_range)

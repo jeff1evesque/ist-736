@@ -11,7 +11,8 @@ def model(
     model_type='arima',
     date_index='date',
     epochs=100,
-    log_transform=0
+    log_transform=0,
+    auto_scale=False
 ):
     '''
 
@@ -30,7 +31,7 @@ def model(
         )
 
         # induce stationarity
-        result = model.grid_search()
+        result = model.grid_search(auto_scale=auto_scale)
 
         #
         # train: if model is stationary make prediction using rolling length.
