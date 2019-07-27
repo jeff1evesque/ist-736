@@ -40,7 +40,7 @@ class Arima():
 
         if log_transform:
             self.data[normalize_key] = self.data[normalize_key].map(
-                lambda a: log(a)
+                lambda a: log(a+0.01)
             )
 
         # replace 'nan' with overall average

@@ -49,13 +49,13 @@ def timeseries(
             order='-'.join([str(x) for x in a[1]])
         )
 
-        if a[0]:
+        if a and a[0]:
             model_scores['arima'] = {
                 'mse': a[0].get_mse(),
                 'adf': a[0].get_adf()
             }
 
-        if a[0] and plot:
+        if a and a[0] and plot:
             #
             # @dates, full date range
             # @train_actual, entire train values
