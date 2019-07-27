@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
-from numpy import log
+from math import log
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -34,15 +34,14 @@ class Arima():
 
         if isinstance(data, dict):
             self.data = pd.DataFrame(data)
-            if log_transform:
-                self.data[normalize_key] = self.data[normalize_key].map(
-                    lambda a: log(a)
-                )
 
         else:
             self.data = data
-            if log_transform:
-                self.data = log(self.data)
+
+        if log_transform:
+            self.data[normalize_key] = self.data[normalize_key].map(
+                lambda a: log(a)
+            )
 
         # replace 'nan' with overall average
         self.data[normalize_key] = [x if str(x) != 'nan'
