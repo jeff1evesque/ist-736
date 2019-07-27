@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
-from math import log
+from math import log, ceil
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -152,13 +152,29 @@ class Arima():
         self,
         p_values=range(0,3),
         d_values=range(0,3),
-        q_values=range(0,3)
+        q_values=range(0,3),
+        auto_scale=None
     ):
         '''
 
         determine optimal arima arguments using (p,q,d) range.
 
+        @auto_scale, dynamically generate (p,q,d) based on data length.
+            [0], minimum threshold required for auto-scaling
+            [1], scaling factor
+
         '''
+
+        if (
+            auto_scale and
+            len(auto_scale) == 2 and
+            all(isinstance(x, int) for x in autoscale) and
+            len(self.history > auto_scale[0]
+        ):
+            auto_range = math.ceil(len(self.history) / auto_scale[1])
+            p_value=range(0, auto_range)
+            d_value=range(0, auto_range)
+            q_value=range(0, auto_range)
 
         best_adf, best_score, best_pqd = float('inf'), float('inf'), None
         for p in p_values:
