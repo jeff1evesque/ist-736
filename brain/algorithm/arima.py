@@ -168,7 +168,7 @@ class Arima():
         if (
             auto_scale and
             len(auto_scale) == 2 and
-            all(isinstance(x, int) for x in autoscale) and
+            all(isinstance(x, int) for x in auto_scale) and
             len(self.history > auto_scale[0])
         ):
             auto_range = math.ceil(len(self.history) * auto_scale[1])
