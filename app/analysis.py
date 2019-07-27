@@ -267,7 +267,14 @@ def analyze(
         data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
         #
-        # timeseries analysis
+        # timeseries analysis: if dataset not 50 elements or more (x), use the
+        #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
+        #     is determined by 0.2x:
+        #
+        #     (p,q,d) = (range(0, 0.2x), range(0, 0.2x), range(0, 0.2x))
+        #
+        # Note: if arima does not converge, or the adf test does not satisfy
+        #       p < 0.05, the corresponding model is thrown out.
         #
         if analysis_ts:
             ts_results[sn] = timeseries(
@@ -276,14 +283,16 @@ def analyze(
                 date_index='created_at',
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                 suffix=ts_index,
-                auto_scale=(30, 0.2)
+                auto_scale=(50, 0.2)
             )
 
-            with open('{directory}/adf_{sn}.txt'.format(
-                directory=directory_report,
-                sn=sn
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
+            if 'arima' in ts_results[sn]:
+                with open('{directory}/adf_{sn}_{type}.txt'.format(
+                    directory=directory_report,
+                    sn=sn,
+                    type=ts_index
+                ), 'w') as fp:
+                    print(ts_results[sn]['arima']['adf'], file=fp)
 
         #
         # outlier class: remove class if training distribution is less than
@@ -363,19 +372,21 @@ def analyze(
             rotation=90
         )
 
-    if analysis_ts and sn in ts_results:
-        plot_bar(
-            labels=screen_name,
-            performance=[v['arima']['mse'] for k,v in ts_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_arima.png',
-            rotation=90
-        )
+    if analysis_ts:
+        if any('arima' in v for k,v in ts_results.items()):
+            plot_bar(
+                labels=screen_name,
+                performance=[v['arima']['mse'] for k,v in ts_results.items()],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_arima.png',
+                rotation=90
+            )
 
-        plot_bar(
-            labels=screen_name,
-            performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_lstm.png',
-            rotation=90
-        )
+        if any('lstm' in v for k,v in ts_results.items()):
+            plot_bar(
+                labels=screen_name,
+                performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm.png',
+                rotation=90
+            )

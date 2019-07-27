@@ -165,13 +165,19 @@ class Arima():
 
         '''
 
+        try:
+            data = self.history
+
+        except:
+            data = self.data[self.normalize_key]
+
         if (
             auto_scale and
             len(auto_scale) == 2 and
-            all(isinstance(x, int) for x in auto_scale) and
-            len(self.history > auto_scale[0])
+            all(isinstance(x, (int, float)) for x in auto_scale) and
+            len(data) > auto_scale[0]
         ):
-            auto_range = math.ceil(len(self.history) * auto_scale[1])
+            auto_range = ceil(len(data) * auto_scale[1])
             p_value=range(0, auto_range)
             d_value=range(0, auto_range)
             q_value=range(0, auto_range)

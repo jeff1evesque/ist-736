@@ -45,7 +45,11 @@ def model(
         #         and is stationary. Otherwise, data has stationary root then
         #         reject the Ho.
         #
-        if result[0][1] <= 0.05:
+        if (
+            isinstance(result[0], list) and
+            len(result[0]) == 2 and
+            result[0][1] <= 0.05
+        ):
             iterations = len(model.get_data(key=normalize_key)[1])
             model.train(iterations=iterations, order=result[2])
             return(model, result[2])
