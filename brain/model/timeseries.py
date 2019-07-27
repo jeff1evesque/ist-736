@@ -10,7 +10,7 @@ def model(
     normalize_key,
     model_type='arima',
     date_index='date',
-    epochs=100
+    epochs=100,
     log_transform=0
 ):
     '''
@@ -30,7 +30,7 @@ def model(
         )
 
         # induce stationarity
-        result = model.grid_search()
+        result = model.grid_search(q_values=range(0,4))
 
         #
         # train: if model is stationary make prediction using rolling length.
