@@ -382,14 +382,15 @@ def analyze(
         if any(
             pd.notnull(k) and
             pd.notnull(v) and
-            len(v) >= 1 for k,v in ts_results.items()
+            len(v) >= 1 for k,v in classify_results.items()
         ):
-            classify_result = [(k, v[0])
-                for k,v in ts_results.items() if pd.notnull(v)]
+            c_result = [(k, v[0])
+                for k,v in classify_results.items()
+                    if pd.notnull(v) and len(v) >= 1]
 
             plot_bar(
-                labels=[x for x in classify_result],
-                performance=[v[0] for k,v in classify_results.items()],
+                labels=[x for x in c_result],
+                performance=[v[0] for k,v in c_result],
                 directory='{directory}'.format(directory=directory),
                 filename='accuracy_overall.png',
                 rotation=90
@@ -401,24 +402,24 @@ def analyze(
             pd.notnull(v) and
             'arima' in v for k,v in ts_results.items()
         ):
-            arima_result = [(k, v['arima']['mse'])
+            a_result = [(k, v['arima']['mse'])
                 for k,v in ts_results.items() if 'arima' in v]
 
             plot_bar(
-                labels=[x[0] for x in arima_result],
-                performance=[x[1] for x in arima_result],
+                labels=[x[0] for x in a_result],
+                performance=[x[1] for x in a_result],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
         if any('lstm' in v for k,v in ts_results.items()):
-            lstm_result = [(k, v['lstm']['mse'][1])
+            l_result = [(k, v['lstm']['mse'][1])
                 for k,v in ts_results.items() if 'lstm' in v]
 
             plot_bar(
-                labels=[x[0] for x in lstm_result],
-                performance=[x[1] for x in lstm_result],
+                labels=[x[0] for x in l_result],
+                performance=[x[1] for x in l_result],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',
                 rotation=90
