@@ -109,20 +109,24 @@ def analyze(
 
     if analysis_ts_sentiment:
         if any('arima' in v for k,v in ts_results_sentiment.items()):
-            s1 = [v['arima']['mse'] for k,v in ts_results_sentiment.items() if 'arima' in v]
+            s1 = [(k, v['arima']['mse'])
+                for k,v in ts_results_sentiment.items() if 'arima' in v]
+
             plot_bar(
-                labels=screen_name,
-                performance=s1,
+                labels=[x[0] for x in s1],
+                performance=[x[1] for x in s1],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima_sentiment.png',
                 rotation=90
             )
 
         if any('lstm' in v for k,v in ts_results_sentiment.items()):
-            s2 = [v['lstm']['mse'][1] for k,v in ts_results_sentiment.items() if 'lstm' in v]
+            s2 = [(k, v['lstm']['mse'][1])
+                for k,v in ts_results_sentiment.items() if 'lstm' in v]
+
             plot_bar(
-                labels=screen_name,
-                performance=s2,
+                labels=[x[0] for x in s2],
+                performance=[x[1] for x in s2],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm_sentiment.png',
                 rotation=90
@@ -377,18 +381,24 @@ def analyze(
 
     if analysis_ts:
         if any('arima' in v for k,v in ts_results.items()):
+            arima_result = [(k, v['arima']['mse'])
+                for k,v in ts_results.items() if 'arima' in v]
+
             plot_bar(
-                labels=screen_name,
-                performance=[v['arima']['mse'] for k,v in ts_results.items() if 'arima' in v],
+                labels=[x[0] for x in arima_result],
+                performance=[x[1] for x in arima_result],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
         if any('lstm' in v for k,v in ts_results.items()):
+            lstm_result = [(k, v['lstm']['mse'][1])
+                for k,v in ts_results.items() if 'lstm' in v]
+
             plot_bar(
-                labels=screen_name,
-                performance=[v['lstm']['mse'][1] for k,v in ts_results.items() if 'lstm' in v],
+                labels=[x[0] for x in lstm_result],
+                performance=[x[1] for x in lstm_result],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',
                 rotation=90
