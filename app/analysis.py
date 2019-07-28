@@ -108,7 +108,11 @@ def analyze(
                         )
 
     if analysis_ts_sentiment:
-        if any('arima' in v for k,v in ts_results_sentiment.items()):
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v for k,v in ts_results_sentiment.items()
+        ):
             s1 = [(k, v['arima']['mse'])
                 for k,v in ts_results_sentiment.items() if 'arima' in v]
 
@@ -120,7 +124,11 @@ def analyze(
                 rotation=90
             )
 
-        if any('lstm' in v for k,v in ts_results_sentiment.items()):
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v for k,v in ts_results_sentiment.items()
+        ):
             s2 = [(k, v['lstm']['mse'][1])
                 for k,v in ts_results_sentiment.items() if 'lstm' in v]
 
@@ -370,17 +378,29 @@ def analyze(
     #
     # ensembled scores
     #
-    if analysis_classify and sn in classify_results:
-        plot_bar(
-            labels=screen_name,
-            performance=[v[0] for k,v in classify_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='accuracy_overall.png',
-            rotation=90
-        )
+    if analysis_classify:
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            len(v) >= 1 for k,v in ts_results.items()
+        ):
+            classify_result = [(k, v[0])
+                for k,v in ts_results.items() if pd.notnull(v)]
+
+            plot_bar(
+                labels=[x for x in classify_result],
+                performance=[v[0] for k,v in classify_results.items()],
+                directory='{directory}'.format(directory=directory),
+                filename='accuracy_overall.png',
+                rotation=90
+            )
 
     if analysis_ts:
-        if any('arima' in v for k,v in ts_results.items()):
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v for k,v in ts_results.items()
+        ):
             arima_result = [(k, v['arima']['mse'])
                 for k,v in ts_results.items() if 'arima' in v]
 
