@@ -46,8 +46,8 @@ def model(
         #         reject the Ho.
         #
         if (
-            isinstance(result[0], list) and
-            len(result[0]) == 2 and
+            isinstance(result[0], (list, set, tuple)) and
+            len(result[0]) >= 2 and
             result[0][1] <= 0.05
         ):
             iterations = len(model.get_data(key=normalize_key)[1])

@@ -96,34 +96,37 @@ def analyze(
                     lstm_epochs=50
                 )
 
-                with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                    directory=directory_report,
-                    sn=sn,
-                    sent=sentiment
-                ), 'w') as fp:
-                    print(
-                        ts_results_sentiment[sn]['arima']['adf'],
-                        file=fp
-                    )
+                if 'arima' in ts_results_sentiment[sn]:
+                    with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                        directory=directory_report,
+                        sn=sn,
+                        sent=sentiment
+                    ), 'w') as fp:
+                        print(
+                            ts_results_sentiment[sn]['arima']['adf'],
+                            file=fp
+                        )
 
     if analysis_ts_sentiment:
-        s1 = [v['arima']['mse'] for k,v in ts_results_sentiment.items()]
-        plot_bar(
-            labels=screen_name,
-            performance=s1,
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_arima_sentiment.png',
-            rotation=90
-        )
+        if any('arima' in v for k,v in ts_results_sentiment.items()):
+            s1 = [v['arima']['mse'] for k,v in ts_results_sentiment.items() if 'arima' in v]
+            plot_bar(
+                labels=screen_name,
+                performance=s1,
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_arima_sentiment.png',
+                rotation=90
+            )
 
-        s2 = [v['lstm']['mse'][1] for k,v in ts_results_sentiment.items()]
-        plot_bar(
-            labels=screen_name,
-            performance=s2,
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_lstm_sentiment.png',
-            rotation=90
-        )
+        if any('lstm' in v for k,v in ts_results_sentiment.items()):
+            s2 = [v['lstm']['mse'][1] for k,v in ts_results_sentiment.items() if 'lstm' in v]
+            plot_bar(
+                labels=screen_name,
+                performance=s2,
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm_sentiment.png',
+                rotation=90
+            )
 
     #
     # preprocess: left join on twitter dataset(s).
@@ -376,7 +379,7 @@ def analyze(
         if any('arima' in v for k,v in ts_results.items()):
             plot_bar(
                 labels=screen_name,
-                performance=[v['arima']['mse'] for k,v in ts_results.items()],
+                performance=[v['arima']['mse'] for k,v in ts_results.items() if 'arima' in v],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima.png',
                 rotation=90
@@ -385,7 +388,7 @@ def analyze(
         if any('lstm' in v for k,v in ts_results.items()):
             plot_bar(
                 labels=screen_name,
-                performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
+                performance=[v['lstm']['mse'][1] for k,v in ts_results.items() if 'lstm' in v],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',
                 rotation=90
