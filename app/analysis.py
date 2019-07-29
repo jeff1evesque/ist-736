@@ -382,11 +382,11 @@ def analyze(
         if any(
             pd.notnull(k) and
             pd.notnull(v) and
-            len(v) >= 1 for k,v in classify_results.items()
+            isinstance(v, tuple) for k,v in classify_results.items()
         ):
             c_result = [(k, v[0])
                 for k,v in classify_results.items()
-                    if pd.notnull(v) and len(v) >= 1]
+                    if pd.notnull(k) and pd.notnull(v) and isinstance(v, tuple)]
 
             plot_bar(
                 labels=[x for x in c_result],
