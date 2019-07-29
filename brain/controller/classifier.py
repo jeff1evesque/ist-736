@@ -725,27 +725,28 @@ def classify(
             rotation=rotation
         )
 
-        [plot_bar(
-            labels=range(len(v)),
-            performance=v,
-            directory=directory,
-            filename='bargraph_kfold_{model}{suffix}'.format(
-                model=k,
-                suffix=suffix
-            ),
-            rotation=rotation
-        ) for k,v in kfold_scores.items()]
+        for k,v in kfold_scores.items():
+            plot_bar(
+                labels=range(len(v)),
+                performance=v,
+                directory=directory,
+                filename='bargraph_kfold_{model}{suffix}'.format(
+                    model=k,
+                    suffix=suffix
+                ),
+                rotation=rotation
 
-        [plot_bar(
-            labels=['precision', 'recall', 'fscore'],
-            performance=v[:-1],
-            directory=directory,
-            filename='bargraph_prf_{model}{suffix}'.format(
-                model=k,
-                suffix=suffix
-            ),
-            rotation=rotation
-        ) for k,v in prf_scores.items()]
+        for k,v in prf_scores.items():
+            plot_bar(
+                labels=['precision', 'recall', 'fscore'],
+                performance=v[:-1],
+                directory=directory,
+                filename='bargraph_prf_{model}{suffix}'.format(
+                    model=k,
+                    suffix=suffix
+                ),
+                rotation=rotation
+            )
 
     # return score
     return(score_good, kfold_scores, prf_scores, indicative_words)
