@@ -735,6 +735,7 @@ def classify(
                     suffix=suffix
                 ),
                 rotation=rotation
+            )
 
         for k,v in prf_scores.items():
             plot_bar(
