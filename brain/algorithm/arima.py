@@ -93,13 +93,16 @@ class Arima():
         else:
             return(self.df_train, self.df_test)
 
-    def train(self, iterations=1, order=[1,0,0]):
+    def train(self, iterations=1, order=[1,0,0], auto_grid_search=False):
         '''
 
         train arima model.
 
         @order, (p,q,d) arguments can be defined using acf (MA), and pacf (AR)
             implementation. Corresponding large significant are indicators.
+
+        @auto_grid_search, implement default grid-search when 'True',
+            otherwise implement 'auto_scale' grid search when 'auto'.
 
         Note: requires 'split_data' to be executed.
 
@@ -119,6 +122,11 @@ class Arima():
         self.order = [int(i) for i in order]
 
         for t in range(iterations):
+            if auto_grid_search == 'auto':
+                self.order = self.grid_search(auto_scale=True)
+            elif auto_grid_search:
+                self.order = self.grid_search()
+
             model = ARIMA(self.history, order=self.order)
             model_fit = model.fit(disp=0)
             output = model_fit.forecast()
