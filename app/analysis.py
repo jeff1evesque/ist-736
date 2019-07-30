@@ -389,8 +389,8 @@ def analyze(
                     if pd.notnull(k) and pd.notnull(v) and isinstance(v, tuple)]
 
             plot_bar(
-                labels=[x for x in c_result],
-                performance=[v[0] for k,v in c_result],
+                labels=[x[0] for x in c_result],
+                performance=[x[1] for x in c_result],
                 directory='{directory}'.format(directory=directory),
                 filename='accuracy_overall.png',
                 rotation=90
