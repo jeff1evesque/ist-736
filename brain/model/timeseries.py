@@ -13,7 +13,7 @@ def model(
     epochs=100,
     log_transform=0,
     auto_scale=False,
-    auto_grid_search=False
+    rolling_grid_search=False
 ):
     '''
 
@@ -55,13 +55,13 @@ def model(
             successful = model.train(
                 iterations=iterations,
                 order=result[2],
-                auto_grid_search=auto_grid_search
+                rolling_grid_search=rolling_grid_search
             )
 
             if not successful:
                 return(False)
 
-            if auto_grid_search:
+            if rolling_grid_search:
                 return(model, self.get_order())
 
             return(model, result[2])
