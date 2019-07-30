@@ -13,7 +13,8 @@ def model(
     epochs=100,
     log_transform=0,
     auto_scale=False,
-    rolling_grid_search=False
+    rolling_grid_search=False,
+    catch_grid_search=False
 ):
     '''
 
@@ -55,7 +56,8 @@ def model(
             success = model.train(
                 iterations=iterations,
                 order=result[2],
-                rolling_grid_search=rolling_grid_search
+                rolling_grid_search=rolling_grid_search,
+                catch_grid_search=catch_grid_search
             )
 
             if not success:

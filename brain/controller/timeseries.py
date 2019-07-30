@@ -20,7 +20,8 @@ def timeseries(
     xticks=True,
     lstm_epochs=100,
     auto_scale=False,
-    rolling_grid_search=False
+    rolling_grid_search=False,
+    catch_grid_search=False
 ):
     '''
 
@@ -46,7 +47,8 @@ def timeseries(
             model_type='arima',
             date_index=date_index,
             auto_scale=auto_scale,
-            rolling_grid_search=rolling_grid_search
+            rolling_grid_search=rolling_grid_search,
+            catch_grid_search=catch_grid_search
         )
 
         if a and len(a) == 2:

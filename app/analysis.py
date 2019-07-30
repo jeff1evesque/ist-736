@@ -94,7 +94,7 @@ def analyze(
                     ),
                     suffix=sentiment,
                     lstm_epochs=50,
-                    rolling_grid_search=True
+                    catch_grid_search=True
                 )
 
                 if 'arima' in ts_results_sentiment[sn]:

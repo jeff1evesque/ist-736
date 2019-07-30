@@ -93,7 +93,13 @@ class Arima():
         else:
             return(self.df_train, self.df_test)
 
-    def train(self, iterations=1, order=[1,0,0], rolling_grid_search=False):
+    def train(
+        self,
+        iterations=1,
+        order=[1,0,0],
+        rolling_grid_search=False,
+        catch_grid_search=False
+    ):
         '''
 
         train arima model.
@@ -103,6 +109,9 @@ class Arima():
 
         @rolling_grid_search, implement default grid-search when 'True',
             otherwise implement 'auto_scale' grid search when 'auto'.
+
+        @catch_grid_search, implement grid-search if exception raised during
+            'model.fit'.
 
         Note: requires 'split_data' to be executed.
 
@@ -135,10 +144,21 @@ class Arima():
 
             try:
                 model_fit = model.fit(disp=0)
+                fit_success = True
 
             except Exception as e:
-                print('Error: {e}'.format(e=e))
-                return(False)
+                print('Warning: exception raised, running grid-search.')
+                print('Message: {e}'.format(e=e))
+                fit_success = False
+
+            if not fit_success and catch_grid_search:
+                try:
+                    self.order = self.grid_search()[2]
+
+                except Exception as e:
+                    print('Error: cannot accomodate exception with grid-search.')
+                    print('Message: {e}'.format(e=e))
+                    return(False)
 
             output = model_fit.forecast()
             yhat = float(output[0])
