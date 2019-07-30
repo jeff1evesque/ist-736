@@ -57,6 +57,10 @@ def model(
                 order=result[2],
                 auto_grid_search=auto_grid_search
             )
+
+            if auto_grid_search:
+                return(model, self.get_order())
+
             return(model, result[2])
 
         else:

@@ -123,9 +123,9 @@ class Arima():
 
         for t in range(iterations):
             if auto_grid_search == 'auto':
-                self.order = self.grid_search(auto_scale=True)
+                self.order = self.grid_search(auto_scale=True)[2]
             elif auto_grid_search:
-                self.order = self.grid_search()
+                self.order = self.grid_search()[2]
 
             model = ARIMA(self.history, order=self.order)
             model_fit = model.fit(disp=0)
