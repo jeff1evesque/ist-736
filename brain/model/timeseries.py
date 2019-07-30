@@ -52,11 +52,14 @@ def model(
             result[0][1] <= 0.05
         ):
             iterations = len(model.get_data(key=normalize_key)[1])
-            model.train(
+            successful = model.train(
                 iterations=iterations,
                 order=result[2],
                 auto_grid_search=auto_grid_search
             )
+
+            if not successful:
+                return(False)
 
             if auto_grid_search:
                 return(model, self.get_order())

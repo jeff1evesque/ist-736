@@ -128,7 +128,14 @@ class Arima():
                 self.order = self.grid_search()[2]
 
             model = ARIMA(self.history, order=self.order)
-            model_fit = model.fit(disp=0)
+
+            try:
+                model_fit = model.fit(disp=0)
+
+            except Exception as e:
+                print('Error: {e}'.format(e=e))
+                return(False)
+
             output = model_fit.forecast()
             yhat = float(output[0])
             predicted.append(yhat)
@@ -155,6 +162,8 @@ class Arima():
         self.differences = (actuals, predicted, differences)
         self.mse = mean_squared_error(actuals, predicted)
         self.rolling = rolling
+
+        return(True)
 
     def grid_search(
         self,
