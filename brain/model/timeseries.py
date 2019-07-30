@@ -12,7 +12,8 @@ def model(
     date_index='date',
     epochs=100,
     log_transform=0,
-    auto_scale=False
+    auto_scale=False,
+    auto_grid_search=False
 ):
     '''
 
@@ -51,7 +52,11 @@ def model(
             result[0][1] <= 0.05
         ):
             iterations = len(model.get_data(key=normalize_key)[1])
-            model.train(iterations=iterations, order=result[2])
+            model.train(
+                iterations=iterations,
+                order=result[2],
+                auto_grid_search=auto_grid_search
+            )
             return(model, result[2])
 
         else:

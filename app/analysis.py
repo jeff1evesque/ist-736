@@ -93,7 +93,8 @@ def analyze(
                         sn=sn
                     ),
                     suffix=sentiment,
-                    lstm_epochs=50
+                    lstm_epochs=50,
+                    auto_grid_search='auto'
                 )
 
                 if 'arima' in ts_results_sentiment[sn]:
