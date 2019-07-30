@@ -52,13 +52,13 @@ def model(
             result[0][1] <= 0.05
         ):
             iterations = len(model.get_data(key=normalize_key)[1])
-            successful = model.train(
+            success = model.train(
                 iterations=iterations,
                 order=result[2],
                 rolling_grid_search=rolling_grid_search
             )
 
-            if not successful:
+            if not success:
                 return(False)
 
             if rolling_grid_search:
