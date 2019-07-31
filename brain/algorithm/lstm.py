@@ -99,7 +99,7 @@ class Lstm():
 
         given a vector [x], a matrix [x, y] is returned:
 
-            x           y
+            x       y
             112		118
             118		132
             132		129
