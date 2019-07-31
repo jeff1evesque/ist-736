@@ -151,15 +151,17 @@ class Arima():
                 print('Message: {e}'.format(e=e))
                 fit_success = False
 
-            if not fit_success and catch_grid_search:
-                try:
+            try:
+                if not fit_success and catch_grid_search:
                     self.order = self.grid_search()[2]
                     model_fit = model.fit(disp=0)
+                else:
+                    raise ValueError('fit_success or catch_grid_search not set')
 
-                except Exception as e:
-                    print('Error: cannot accomodate exception with grid-search.')
-                    print('Message: {e}'.format(e=e))
-                    return(False)
+            except Exception as e:
+                print('Error: cannot accomodate exception with grid-search.')
+                print('Message: {e}'.format(e=e))
+                return(False)
 
             output = model_fit.forecast()
             yhat = float(output[0])
