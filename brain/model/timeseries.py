@@ -6,7 +6,7 @@ from brain.algorithm.arima import Arima
 from brain.algorithm.lstm import Lstm
 
 def model(
-    df,
+    data,
     normalize_key,
     model_type='arima',
     date_index='date',
@@ -25,7 +25,7 @@ def model(
     # initialize classifier
     if model_type == 'arima':
         model = Arima(
-            data=df,
+            data=data,
             normalize_key=normalize_key,
             log_transform=log_transform,
             date_index=date_index,
@@ -73,7 +73,7 @@ def model(
 
     elif model_type == 'lstm':
         model = Lstm(
-            data=df,
+            data=data,
             normalize_key=normalize_key,
             date_index=date_index,
         )

@@ -6,44 +6,90 @@ from brain.model.timeseries import model
 from brain.view.timeseries import plot_ts
 import matplotlib.pyplot as plt
 
-def timeseries(
-    df,
-    normalize_key,
-    directory='viz',
-    flag_arima=True,
-    flag_lstm=True,
-    plot=True,
-    show=False,
-    suffix=None,
-    date_index='date',
-    diff=1,
-    xticks=True,
-    lstm_epochs=100,
-    auto_scale=False,
-    rolling_grid_search=False,
-    catch_grid_search=False
-):
+class Timeseries():
     '''
 
-    implement designated classifiers.
+    controller for arima and lstm models.
 
     '''
 
-    # local variables
-    model_scores = {}
+    def __init__(
+        self,
+        df,
+        normalize_key,
+        directory='viz',
+        flag_arima=True,
+        flag_lstm=True,
+        plot=True,
+        show=False,
+        suffix=None,
+        date_index='date',
+        diff=1,
+        xticks=True,
+        lstm_epochs=100,
+        auto_scale=False,
+        rolling_grid_search=False,
+        catch_grid_search=False
+    ):
 
-    if suffix:
-        suffix = '_{suffix}'.format(suffix=suffix)
-    else:
-        suffix=''
+        # local variables
+        self.df = df
+        self.model_scores = {}
 
-    # arima: autoregressive integrated moving average
-    if flag_arima:
+        if suffix:
+            self.suffix = '_{suffix}'.format(suffix=suffix)
+        else:
+            self.suffix=''
+
+        # implement models
+        if flag_arima:
+            self.arima(
+                df,
+                normalize_key=normalize_key,
+                log_transform=0.01,
+                date_index=date_index,
+                auto_scale=auto_scale,
+                rolling_grid_search=rolling_grid_search,
+                catch_grid_search=catch_grid_search,
+                directory=directory
+            )
+
+        if flag_lstm:
+            self.lstm(
+                df,
+                normalize_key=normalize_key,
+                date_index=date_index,
+                epochs=lstm_epochs,
+                directory=directory
+            )
+
+    def arima(
+        self,
+        df,
+        normalize_key,
+        directory='viz',
+        plot=True,
+        show=False,
+        suffix=None,
+        date_index='date',
+        diff=1,
+        xticks=True,
+        auto_scale=False,
+        log_transform=0.01,
+        rolling_grid_search=False,
+        catch_grid_search=False
+    ):
+        '''
+
+        implement arima model.
+
+        '''
+
         # initialize
         a = model(
-            df=df,
+            data=df,
             normalize_key=normalize_key,
-            log_transform=0.01,
+            log_transform=log_transform,
             model_type='arima',
             date_index=date_index,
             auto_scale=auto_scale,
@@ -57,7 +103,7 @@ def timeseries(
                 order='-'.join([str(x) for x in a[1]])
             )
 
-            model_scores['arima'] = {
+            self.model_scores['arima'] = {
                 'mse': a[0].get_mse(),
                 'adf': a[0].get_adf()
             }
@@ -140,20 +186,37 @@ def timeseries(
                 else:
                     plt.close()
 
-    # lstm: long short term memory
-    if flag_lstm:
+    def lstm(
+        self,
+        df,
+        normalize_key,
+        directory='viz',
+        plot=True,
+        show=False,
+        suffix=None,
+        date_index='date',
+        epochs=100,
+        xticks=True
+    ):
+
+        '''
+
+        implement arima model.
+
+        '''
+
         # intialize
         l = model(
-            df=df,
+            data=df,
             normalize_key=normalize_key,
             model_type='lstm',
             date_index=date_index,
-            epochs=lstm_epochs
+            epochs=epochs
         )
 
         # predict
         l.predict()
-        model_scores['lstm'] = {
+        self.model_scores['lstm'] = {
             'mse': l.get_mse(),
             'history': l.get_fit_history()
         }
@@ -207,5 +270,14 @@ def timeseries(
                 xticks=xticks
             )
 
-    # return score
-    return(model_scores)
+    def get_model_scores(self, key=None):
+        '''
+
+        get current model scores for all implemented models.
+
+        '''
+
+        if key:
+            return(self.model_scores[key])
+
+        return(self.model_scores)
