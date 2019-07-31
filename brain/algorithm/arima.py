@@ -154,6 +154,7 @@ class Arima():
             if not fit_success and catch_grid_search:
                 try:
                     self.order = self.grid_search()[2]
+                    model_fit = model.fit(disp=0)
 
                 except Exception as e:
                     print('Error: cannot accomodate exception with grid-search.')
