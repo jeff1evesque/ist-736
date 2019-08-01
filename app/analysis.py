@@ -8,7 +8,7 @@ from collections import defaultdict
 from brain.view.plot import plot_bar
 from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
-from brain.controller.timeseries import timeseries
+from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
 from brain.controller.peak_detection import peak_detection
 
@@ -74,17 +74,24 @@ def analyze(
         #
         data[sn] = data[sn].groupby([
             'created_at',
-            'screen_name',
-            'positive',
-            'neutral',
-            'negative'
+            'screen_name'
         ]).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
         if analysis_ts_sentiment:
+            #
+            # sentiment scores
+            #
+            s = Sentiment(data[sn], classify_index)
+            data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
+            data[sn].replace('\s+', ' ', regex=True, inplace=True)
+
+            #
+            # timeseries model on sentiment
+            #
             for sentiment in sentiments:
-                ts_results_sentiment[sn] = timeseries(
+                ts_sentiment = Timeseries(
                     df=data[sn],
                     normalize_key=sentiment,
                     date_index='created_at',
@@ -96,6 +103,7 @@ def analyze(
                     lstm_epochs=50,
                     catch_grid_search=True
                 )
+                ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
 
                 if 'arima' in ts_results_sentiment[sn]:
                     with open('{directory}/adf_{sn}_{sent}.txt'.format(
@@ -108,6 +116,9 @@ def analyze(
                             file=fp
                         )
 
+    #
+    # plot sentiment scores
+    #
     if analysis_ts_sentiment:
         if any(
             pd.notnull(k) and
@@ -272,13 +283,6 @@ def analyze(
                 for i,x in enumerate(data[sn][ts_index])]
 
         #
-        # sentiment scores
-        #
-        s = Sentiment(data[sn], classify_index)
-        data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
-        data[sn].replace('\s+', ' ', regex=True, inplace=True)
-
-        #
         # timeseries analysis: if dataset not 50 elements or more (x), use the
         #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
         #     is determined by 0.15x:
@@ -289,7 +293,7 @@ def analyze(
         #       p < 0.05, the corresponding model is thrown out.
         #
         if analysis_ts:
-            ts_results[sn] = timeseries(
+            ts_stock = Timeseries(
                 df=data[sn],
                 normalize_key=ts_index,
                 date_index='created_at',
@@ -297,6 +301,7 @@ def analyze(
                 suffix=ts_index,
                 auto_scale=(50, 0.15)
             )
+            ts_results[sn] = ts_stock.get_model_scores()
 
             if 'arima' in ts_results[sn]:
                 with open('{directory}/adf_{sn}_{type}.txt'.format(
