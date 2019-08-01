@@ -33,26 +33,26 @@ class Arima():
         '''
 
         if isinstance(data, dict):
-            self.data = pd.DataFrame(data)
+            self.__data = pd.DataFrame(data)
 
         else:
-            self.data = data
+            self.__data = data
 
         if log_transform:
-            self.data[normalize_key] = self.data[normalize_key].map(
+            self.__data[normalize_key] = self.__data[normalize_key].map(
                 lambda a: log(a + log_transform)
             )
 
         # replace 'nan' with overall average
-        self.data[normalize_key] = [x if str(x) != 'nan'
-            else np.nanmean(self.data[normalize_key])
-                for x in self.data[normalize_key]]
+        self.__data[normalize_key] = [x if str(x) != 'nan'
+            else np.nanmean(self.__data[normalize_key])
+                for x in self.__data[normalize_key]]
 
         self.normalize_key = normalize_key
-        self.row_length = len(self.data)
+        self.row_length = len(self.__data)
 
         # sort dataframe by date
-        self.data.sort_index(inplace=True)
+        self.__data.sort_index(inplace=True)
 
         # create train + test
         self.split_data()
@@ -72,7 +72,7 @@ class Arima():
 
         # split without shuffling timeseries
         self.X_train, self.y_test = train_test_split(
-            self.data,
+            self.__data,
             test_size=test_size,
             shuffle=False
         )
@@ -214,7 +214,7 @@ class Arima():
             data = self.history
 
         except:
-            data = self.data[self.normalize_key]
+            data = self.__data[self.normalize_key]
 
         if (
             auto_scale and
@@ -369,7 +369,7 @@ class Arima():
 
         '''
 
-        return(self.data.index.values)
+        return(self.__data.index.values)
 
     def get_decomposed(self, series=None, model='additive', freq=1):
         '''
@@ -379,7 +379,7 @@ class Arima():
         '''
 
         if not series:
-            series = self.data[self.normalize_key]
+            series = self.__data[self.normalize_key]
 
         result = seasonal_decompose(series, model=model, freq=freq)
 
