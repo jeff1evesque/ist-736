@@ -37,30 +37,32 @@ class Timeseries():
         self.model_scores = {}
 
         if suffix:
-            self.suffix = '_{suffix}'.format(suffix=suffix)
+            suffix = '_{suffix}'.format(suffix=suffix)
         else:
-            self.suffix=''
+            suffix=''
 
         # implement models
         if flag_arima:
             self.arima(
-                df,
+                self.df,
                 normalize_key=normalize_key,
                 log_transform=0.01,
                 date_index=date_index,
                 auto_scale=auto_scale,
                 rolling_grid_search=rolling_grid_search,
                 catch_grid_search=catch_grid_search,
-                directory=directory
+                directory=directory,
+                suffix=suffix
             )
 
         if flag_lstm:
             self.lstm(
-                df,
+                self.df,
                 normalize_key=normalize_key,
                 date_index=date_index,
                 epochs=lstm_epochs,
-                directory=directory
+                directory=directory,
+                suffix=suffix
             )
 
     def arima(
@@ -87,9 +89,9 @@ class Timeseries():
 
         # initialize
         a = model(
-            data=df,
+            df=df,
             normalize_key=normalize_key,
-            log_transform=log_transform,
+            log_transform=False,
             model_type='arima',
             date_index=date_index,
             auto_scale=auto_scale,
@@ -207,7 +209,7 @@ class Timeseries():
 
         # intialize
         l = model(
-            data=df,
+            df=df,
             normalize_key=normalize_key,
             model_type='lstm',
             date_index=date_index,
