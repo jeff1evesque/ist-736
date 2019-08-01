@@ -91,7 +91,7 @@ class Timeseries():
         a = model(
             df=df,
             normalize_key=normalize_key,
-            log_transform=False,
+            log_transform=log_transform,
             model_type='arima',
             date_index=date_index,
             auto_scale=auto_scale,
