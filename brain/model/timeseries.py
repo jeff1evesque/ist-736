@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import re
+import pandas as pd
 from pathlib import Path
 from brain.algorithm.arima import Arima
 from brain.algorithm.lstm import Lstm
@@ -29,9 +30,11 @@ def model(
     # initialize classifier
     if model_type == 'arima':
         model = Arima(
-            data=df[normalize_key],
-            log_transform=log_transform,
-            date_index=date_index
+            data=pd.Series(
+                df[normalize_key].values,
+                [pd.Timestamp(x) for x in df[date_index]]
+            ),
+            log_transform=log_transform
         )
 
         # induce stationarity
