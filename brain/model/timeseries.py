@@ -22,14 +22,16 @@ def model(
 
     '''
 
+
+    # sort dataframe by date
+    df.sort_index(inplace=True)
+
     # initialize classifier
     if model_type == 'arima':
         model = Arima(
-            data=df,
-            normalize_key=normalize_key,
+            data=df[normalize_key],
             log_transform=log_transform,
-            date_index=date_index,
-            train=False
+            date_index=date_index
         )
 
         # induce stationarity
@@ -52,7 +54,8 @@ def model(
             len(result[0]) >= 2 and
             result[0][1] <= 0.05
         ):
-            iterations = len(model.get_data(key=normalize_key)[1])
+
+            iterations = len(model.get_data()[1])
             success = model.train(
                 iterations=iterations,
                 order=result[2],

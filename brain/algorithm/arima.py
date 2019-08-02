@@ -21,7 +21,6 @@ class Arima():
         self,
         data,
         train=False,
-        normalize_key=None,
         log_transform=0,
         date_index='date',
         iterations=1
@@ -32,27 +31,18 @@ class Arima():
 
         '''
 
-        if isinstance(data, dict):
-            self.__data = pd.DataFrame(data)
-
-        else:
-            self.__data = data
-
+        self.data = data
         if log_transform:
-            self.__data[normalize_key] = self.__data[normalize_key].map(
+            self.data = self.data.map(
                 lambda a: log(a + log_transform)
             )
 
         # replace 'nan' with overall average
-        self.__data[normalize_key] = [x if str(x) != 'nan'
-            else np.nanmean(self.__data[normalize_key])
-                for x in self.__data[normalize_key]]
+        self.data = [x if str(x) != 'nan'
+            else np.nanmean(self.data)
+                for x in self.data]
 
-        self.normalize_key = normalize_key
-        self.row_length = len(self.__data)
-
-        # sort dataframe by date
-        self.__data.sort_index(inplace=True)
+        self.row_length = len(self.data)
 
         # create train + test
         self.split_data()
@@ -72,26 +62,21 @@ class Arima():
 
         # split without shuffling timeseries
         self.X_train, self.y_test = train_test_split(
-            self.__data,
+            self.data,
             test_size=test_size,
             shuffle=False
         )
-        self.df_train = pd.DataFrame(self.X_train)
-        self.df_test = pd.DataFrame(self.y_test)
+        self.df_train = self.X_train
+        self.df_test = self.y_test
 
-    def get_data(self, key=None, key_to_list=False):
+    def get_data(self):
         '''
 
         get current train and test data.
 
         '''
 
-        if key:
-            if key_to_list:
-                return(self.df_train[key].tolist(), self.df_test[key].tolist())
-            return(self.df_train[key], self.df_test[key])
-        else:
-            return(self.df_train, self.df_test)
+        return(self.df_train, self.df_test)
 
     def train(
         self,
@@ -118,10 +103,8 @@ class Arima():
         '''
 
         actuals, predicted, rolling, differences = [], [], [], []
-        self.df_train = self.df_train[pd.notnull(
-            self.df_train[self.normalize_key]
-        )]
-        self.history = self.df_train[self.normalize_key].tolist()
+        self.df_train = [x for x in self.df_train if pd.notnull(x)]
+        self.history = self.df_train
 
         #
         # @order, if supplied through R, elements will be interpretted as float.
@@ -147,21 +130,29 @@ class Arima():
                 fit_success = True
 
             except Exception as e:
-                print('Warning: exception raised, running grid-search.')
+                print('\n\n')
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print('Warning: exception raised fitting model.')
                 print('Message: {e}'.format(e=e))
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                 fit_success = False
 
             try:
                 if not fit_success and catch_grid_search:
                     self.order = self.grid_search()[2]
+                    model = ARIMA(self.history, order=self.order)
                     model_fit = model.fit(disp=0)
+                    fit_success = True
 
                 elif not fit_success:
                     raise ValueError('No model fit, try setting catch_grid_search.')
 
             except Exception as e:
-                print('Error: cannot accomodate exception with grid-search.')
+                print('\n\n')
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print('Warning: cannot accomodate exception with grid-search.')
                 print('Message: {e}'.format(e=e))
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                 return(False)
 
             output = model_fit.forecast()
@@ -176,7 +167,7 @@ class Arima():
             #     which defines the rolling predictions.
             #
             try:
-                obs = float(self.df_test[self.normalize_key].tolist()[t])
+                obs = float(self.df_test[t])
                 actuals.append(obs)
                 differences.append(abs(1-(yhat/obs)))
 
@@ -214,7 +205,7 @@ class Arima():
             data = self.history
 
         except:
-            data = self.__data[self.normalize_key]
+            data = self.data
 
         if (
             auto_scale and
@@ -247,7 +238,11 @@ class Arima():
                             best_pqd = order
 
                     except Exception as e:
-                        print(e)
+                        print('\n\n')
+                        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                        print('Warning: exception raised running grid-search.')
+                        print('Message: {e}'.format(e=e))
+                        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                         continue
 
         return(best_adf, best_score, best_pqd)
@@ -287,7 +282,7 @@ class Arima():
         if data:
             original = data
         else:
-            original = self.df_test[self.normalize_key].values
+            original = self.df_test
 
         # determine difference
         if int(diff) > 0:
@@ -315,15 +310,15 @@ class Arima():
 
         '''
 
-        if not data and self.normalize_key:
+        if not data:
             # ensure adf matches arima integrated difference
             if self.order:
                 data = self.get_difference()
 
             else:
-                data = self.df_test[self.normalize_key].values
+                data = self.df_test
 
-        elif not data and not self.normalize_key:
+        elif not data:
             data = 'Provide valid list'
 
         try:
@@ -362,15 +357,6 @@ class Arima():
 
         return(self.history)
 
-    def get_index(self):
-        '''
-
-        get dataframe row index.
-
-        '''
-
-        return(self.__data.index.values)
-
     def get_decomposed(self, series=None, model='additive', freq=1):
         '''
 
@@ -379,7 +365,7 @@ class Arima():
         '''
 
         if not series:
-            series = self.__data[self.normalize_key]
+            series = self.data
 
         result = seasonal_decompose(series, model=model, freq=freq)
 

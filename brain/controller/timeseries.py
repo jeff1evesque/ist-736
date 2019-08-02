@@ -44,7 +44,6 @@ class Timeseries():
         # implement models
         if flag_arima:
             self.arima(
-                self.df,
                 normalize_key=normalize_key,
                 log_transform=0.01,
                 date_index=date_index,
@@ -57,7 +56,6 @@ class Timeseries():
 
         if flag_lstm:
             self.lstm(
-                self.df,
                 normalize_key=normalize_key,
                 date_index=date_index,
                 epochs=lstm_epochs,
@@ -67,7 +65,6 @@ class Timeseries():
 
     def arima(
         self,
-        df,
         normalize_key,
         directory='viz',
         plot=True,
@@ -89,7 +86,7 @@ class Timeseries():
 
         # initialize
         a = model(
-            df=df,
+            df=self.df,
             normalize_key=normalize_key,
             log_transform=log_transform,
             model_type='arima',
@@ -99,7 +96,7 @@ class Timeseries():
             catch_grid_search=catch_grid_search
         )
 
-        if a and len(a) == 2:
+        if a and isinstance(a, (tuple, list, set)) and len(a) == 2:
             arima_suffix = '{s}_{order}'.format(
                 s=suffix,
                 order='-'.join([str(x) for x in a[1]])
@@ -121,18 +118,12 @@ class Timeseries():
 
                 if diff > 1:
                     train_actual = a[0].get_difference(
-                        data=a[0].get_data(
-                            key=normalize_key,
-                            key_to_list='True'
-                        )[0],
+                        data=a[0].get_data()[0],
                         diff=diff
                     )
 
                 else:
-                    train_actual = a[0].get_data(
-                        key=normalize_key,
-                        key_to_list='True'
-                    )[0]
+                    train_actual = a[0].get_data()[0]
 
                 test_actual = a[0].get_differences()[0]
                 predicted = a[0].get_differences()[1]
@@ -190,7 +181,6 @@ class Timeseries():
 
     def lstm(
         self,
-        df,
         normalize_key,
         directory='viz',
         plot=True,
@@ -209,7 +199,7 @@ class Timeseries():
 
         # intialize
         l = model(
-            df=df,
+            df=self.df,
             normalize_key=normalize_key,
             model_type='lstm',
             date_index=date_index,

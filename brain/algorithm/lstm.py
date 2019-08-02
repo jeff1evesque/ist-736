@@ -36,14 +36,14 @@ class Lstm():
         self.look_back = look_back
 
         if isinstance(data, dict):
-            self.__data = pd.DataFrame(data)
+            self.data = pd.DataFrame(data)
         else:
-            self.__data = data
+            self.data = data
 
-        self.row_length = len(self.__data)
+        self.row_length = len(self.data)
 
         # sort dataframe by date
-        self.__data.sort_index(inplace=True)
+        self.data.sort_index(inplace=True)
 
         # create train + test
         self.split_data()
@@ -76,7 +76,7 @@ class Lstm():
 
         # split without shuffling timeseries
         self.df_train, self.df_test = train_test_split(
-            self.__data,
+            self.data,
             test_size=test_size,
             shuffle=False
         )
@@ -280,4 +280,4 @@ class Lstm():
 
         '''
 
-        return(self.__data.index.values)
+        return(self.data.index.values)
