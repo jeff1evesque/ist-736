@@ -142,7 +142,7 @@ class Timeseries():
                 plot_ts(
                     data=pd.DataFrame({
                         'values': train_actual,
-                        'dates': dates[0].index
+                        'dates': dates[0].index.values
                     }),
                     xlab='dates',
                     ylab='values',
@@ -200,6 +200,7 @@ class Timeseries():
         l = model(
             df=self.df,
             model_type='lstm',
+            normalize_key=normalize_key,
             date_index=date_index,
             epochs=epochs
         )
@@ -227,7 +228,7 @@ class Timeseries():
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': dates[1].index
+                'dates': dates[1].index.values
             })
             test_predicted_df_long = pd.melt(
                 test_predicted_df,
@@ -239,7 +240,7 @@ class Timeseries():
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
-                    'dates': dates[0].index
+                    'dates': dates[0].index.values
                 }),
                 xlab='dates',
                 ylab='values',

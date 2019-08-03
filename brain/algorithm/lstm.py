@@ -76,6 +76,7 @@ class Lstm():
             test_size=test_size,
             shuffle=False
         )
+        self.history = self.df_train
 
     def get_data(self):
         '''
@@ -207,8 +208,45 @@ class Lstm():
         #
         # @inverse_transform, convert prediction back to normal scale.
         #
-        self.train_predict = self.scaler.inverse_transform(train_predict)
-        self.test_predict = self.scaler.inverse_transform(test_predict)
+        inverse_train_predict = self.scaler.inverse_transform(train_predict)
+        inverse_test_predict = self.scaler.inverse_transform(test_predict)
+
+        #
+        # rolling prediction: occurs when the overall history exceeds original
+        #     data length.
+        #
+        if len(self.history) > len(self.data):
+            history_idx = pd.date_range(
+                self.history.tail(1).index[-1],
+                periods=2,
+                freq='D'
+            )[1:]
+
+            self.test_predict = pd.Series(
+                [x[0] for x in inverse_test_predict],
+                index=history_idx
+            )
+
+        else:
+            self.test_predict = pd.Series(
+                [x[0] for x in inverse_test_predict],
+                index=self.df_test.index.values
+            )
+
+        self.history = self.history.append(self.test_predict)
+
+        self.train_predict = pd.Series(
+            [x[0] for x in inverse_train_predict],
+            index=self.history.index.values
+        )
+
+        print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
+        print(inverse_test_predict)
+        print('--------------------------------------------------------')
+        print(self.test_predict)
+        print('--------------------------------------------------------')
+        print(self.trainX)
+        print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
 
         return(self.train_predict, self.test_predict)
 
@@ -231,8 +269,12 @@ class Lstm():
         actual_train, actual_test = self.get_actual()
 
         try:
-            train_score = math.sqrt(mean_squared_error(actual_train[0], self.train_predict[:,0]))
-            test_score = math.sqrt(mean_squared_error(actual_test[0], self.test_predict[:,0]))
+            train_score = math.sqrt(
+                mean_squared_error(actual_train[0], self.train_predict[:,0])
+            )
+            test_score = math.sqrt(
+                mean_squared_error(actual_test[0], self.test_predict[:,0])
+            )
             return(train_score, test_score)
 
         except:
