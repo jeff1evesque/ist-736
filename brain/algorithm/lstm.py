@@ -23,9 +23,7 @@ class Lstm():
         self,
         data,
         look_back=1,
-        train=False,
-        normalize_key=None,
-        date_index='date'
+        train=False
     ):
         '''
 
@@ -48,18 +46,16 @@ class Lstm():
         # create train + test
         self.split_data()
 
-        self.normalize_key = normalize_key
+        # normalize
+        train_x, self.trainY = self.normalize(self.df_train.values)
+        test_x, self.testY = self.normalize(self.df_test.values)
 
-        if normalize_key:
-            train_x, self.trainY = self.normalize(self.df_train)
-            test_x, self.testY = self.normalize(self.df_test)
-
-            #
-            # reshape for lstm: convert current [samples, features] to required lstm 
-            #     format [samples, timesteps, features].
-            #
-            self.trainX = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
-            self.testX = np.reshape(test_x, (test_x.shape[0], 1, test_x.shape[1]))
+        #
+        # reshape for lstm: convert current [samples, features] to required lstm
+        #     format [samples, timesteps, features].
+        #
+        self.trainX = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
+        self.testX = np.reshape(test_x, (test_x.shape[0], 1, test_x.shape[1]))
 
         # train
         if train:
@@ -81,17 +77,13 @@ class Lstm():
             shuffle=False
         )
 
-    def get_data(self, key=None, key_to_list=False):
+    def get_data(self):
         '''
 
         get current train and test data.
 
         '''
 
-        if key:
-            if key_to_list:
-                return(self.df_train[key].tolist(), self.df_test[key].tolist())
-            return(self.df_train[key], self.df_test[key])
         return(self.df_train, self.df_test)
 
     def normalize(self, data):
@@ -112,7 +104,7 @@ class Lstm():
 
         # scaling normalization
         self.scaler = MinMaxScaler(feature_range = (0, 1))
-        dataset = self.scaler.fit_transform(data[[self.normalize_key]])
+        dataset = self.scaler.fit_transform(data[:, np.newaxis])
 
         # eliminate edge cases
         if (self.look_back >= self.row_length):
