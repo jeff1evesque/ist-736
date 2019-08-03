@@ -115,7 +115,6 @@ class Timeseries():
                 # @predicted, only predicted values
                 #
                 dates = a[0].get_data()
-
                 if diff > 1:
                     train_actual = a[0].get_difference(
                         data=a[0].get_data()[0],
@@ -131,7 +130,7 @@ class Timeseries():
                 test_predicted_df = pd.DataFrame({
                     'actual': test_actual,
                     'predicted': predicted,
-                    'dates': dates[1][date_index][:len(test_actual)]
+                    'dates': a[0].get_data()[1].index
                 })
                 test_predicted_df_long = pd.melt(
                     test_predicted_df,
@@ -143,7 +142,7 @@ class Timeseries():
                 plot_ts(
                     data=pd.DataFrame({
                         'values': train_actual,
-                        'dates': dates[0][date_index][:len(train_actual)]
+                        'dates': dates[0].index
                     }),
                     xlab='dates',
                     ylab='values',

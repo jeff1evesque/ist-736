@@ -32,7 +32,7 @@ def model(
         model = Arima(
             data=pd.Series(
                 df[normalize_key].values,
-                [pd.Timestamp(x) for x in df[date_index]]
+                [pd.Timestamp(x) for x in df[date_index].values]
             ),
             log_transform=log_transform
         )

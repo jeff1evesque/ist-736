@@ -64,6 +64,7 @@ class Arima():
         )
         self.df_train = self.X_train
         self.df_test = self.y_test
+        self.history = self.df_train
 
     def get_data(self):
         '''
@@ -94,12 +95,14 @@ class Arima():
         @catch_grid_search, implement grid-search if exception raised during
             'model.fit'.
 
+        @history_idx, create DatetimeIndex by last value of index and remove
+            first value by indexing.
+
         Note: requires 'split_data' to be executed.
 
         '''
 
         actuals, predicted, rolling, differences = [], [], [], []
-        self.history = self.df_train
 
         #
         # @order, if supplied through R, elements will be interpretted as float.
@@ -171,7 +174,15 @@ class Arima():
                 rolling.append(obs)
 
             # rolling prediction data
-            self.history.append(pd.Series([obs]), ignore_index=True)
+            history_idx = pd.date_range(
+                self.history.tail(1).index[-1],
+                periods=2,
+                freq='D'
+            )[1:]
+
+            self.history = self.history.append(
+                pd.Series(obs, index=history_idx)
+            )
 
         self.differences = (actuals, predicted, differences)
         self.mse = mean_squared_error(actuals, predicted)
