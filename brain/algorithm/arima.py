@@ -22,7 +22,6 @@ class Arima():
         data,
         train=False,
         log_transform=0,
-        date_index='date',
         iterations=1
     ):
         '''
@@ -38,10 +37,7 @@ class Arima():
             )
 
         # replace 'nan' with overall average
-        self.data = [x if str(x) != 'nan'
-            else np.nanmean(self.data)
-                for x in self.data]
-
+        self.data.dropna(inplace=True)
         self.row_length = len(self.data)
 
         # create train + test
@@ -103,7 +99,6 @@ class Arima():
         '''
 
         actuals, predicted, rolling, differences = [], [], [], []
-        self.df_train = [x for x in self.df_train if pd.notnull(x)]
         self.history = self.df_train
 
         #
@@ -112,7 +107,6 @@ class Arima():
         #     python, which breaks iterable indices.
         #
         self.order = [int(i) for i in order]
-
         for t in range(iterations):
             if (
                 isinstance(rolling_grid_search, (list, set, tuple)) and
@@ -123,7 +117,8 @@ class Arima():
             elif rolling_grid_search:
                 self.order = self.grid_search()[2]
 
-            model = ARIMA(self.history, order=self.order)
+
+            model = ARIMA(self.history.tolist(), order=self.order)
 
             try:
                 model_fit = model.fit(disp=0)
@@ -176,7 +171,7 @@ class Arima():
                 rolling.append(obs)
 
             # rolling prediction data
-            self.history.append(obs)
+            self.history.append(pd.Series([obs]), ignore_index=True)
 
         self.differences = (actuals, predicted, differences)
         self.mse = mean_squared_error(actuals, predicted)
