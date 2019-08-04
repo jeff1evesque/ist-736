@@ -214,21 +214,21 @@ class Timeseries():
 
         if plot:
             #
-            # @dates, full date range
             # @train_actual, entire train values
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            dates = l.get_data()
-            train_actual = l.get_data()[0]
-            train_predicted = [x[0] for x in l.get_predict_test()[0]]
-            test_actual = l.get_data()[1]
-            test_predicted = [x[0] for x in l.get_predict_test()[1]]
+            l_data = l.get_data(remove_lookup=True)
+            l_predict_test = l.get_predict_test()
+            train_actual = l_data[0]
+            train_predicted = [x for x in l_predict_test[0]]
+            test_actual = l_data[1]
+            test_predicted = [x for x in l_predict_test[1]]
 
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': dates[1].index.values
+                'dates': l_data[1].index.values
             })
             test_predicted_df_long = pd.melt(
                 test_predicted_df,
@@ -240,7 +240,7 @@ class Timeseries():
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
-                    'dates': dates[0].index.values
+                    'dates':  l_data[0].index.values
                 }),
                 xlab='dates',
                 ylab='values',

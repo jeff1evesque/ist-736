@@ -67,12 +67,22 @@ class Lstm():
         )
         self.history = self.df_train
 
-    def get_data(self):
+    def get_data(self, remove_lookup=False):
         '''
 
         get current train and test data.
 
+        @remove_lookup, model train lagged original timeseries by a 'look_back'
+            factor. To account for this, the original test split is trimmed by
+            this same factor.
+
         '''
+
+        if remove_lookup:
+            return(
+                self.df_train,
+                self.df_test[:len(self.df_test) - self.look_back - 1]
+            )
 
         return(self.df_train, self.df_test)
 
