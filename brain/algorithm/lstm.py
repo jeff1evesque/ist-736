@@ -233,19 +233,10 @@ class Lstm():
         else:
             self.test_predict = pd.Series(
                 [x[0] for x in inverse_test_predict],
-                index=self.df_test.index.values
+                index=self.df_test[: len(self.df_test) - self.look_back - 1].index.values
             )
 
         self.history = self.history.append(self.test_predict)
-
-        print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
-        print(inverse_test_predict)
-        print('--------------------------------------------------------')
-        print(self.test_predict)
-        print('--------------------------------------------------------')
-        print(self.trainX)
-        print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
-
         self.train_predict = pd.Series(
             [x[0] for x in inverse_train_predict],
             index=self.history.index.values
