@@ -31,32 +31,20 @@ class Lstm():
 
         '''
 
-        self.history = pd.Series()
+        self.data = data
         self.look_back = look_back
-
-        if isinstance(data, dict):
-            self.data = pd.DataFrame(data)
-        else:
-            self.data = data
-
         self.row_length = len(self.data)
+        self.history = pd.Series()
 
         # sort dataframe by date
         self.data.sort_index(inplace=True)
 
-        # create train + test
+        #
+        # split and normalize
+        #
         self.split_data()
-
-        # normalize
-        train_x, self.trainY = self.normalize(self.df_train)
-        test_x, self.testY = self.normalize(self.df_test)
-
-        #
-        # reshape for lstm: convert current [samples, features] to required lstm
-        #     format [samples, timesteps, features].
-        #
-        self.trainX = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
-        self.testX = np.reshape(test_x, (test_x.shape[0], 1, test_x.shape[1]))
+        self.trainX, self.trainY = self.normalize(self.get_data()[0])
+        self.testX, self.testY = self.normalize(self.get_data()[1])
 
         # train
         if train:
@@ -77,6 +65,7 @@ class Lstm():
             test_size=test_size,
             shuffle=False
         )
+        self.history = self.df_train
 
     def get_data(self):
         '''
@@ -90,7 +79,7 @@ class Lstm():
     def normalize(self, data):
         '''
 
-        given a vector [x], a matrix [x, y] is returned:
+        normalization step: given vector [x], return [x, y] matrix:
 
             x       y
             112		118
@@ -99,11 +88,15 @@ class Lstm():
             129		121
             121		135
 
-        @train_set, must be the value column from the original dataframe.
+        reshape step: train data to conform to lstm format requirements.
+            convert current [samples, features] to required lstm format
+            format [samples, timesteps, features].
 
         '''
 
-        # scaling normalization
+        #
+        # normalization step: utilize scaling normalization.
+        #
         self.scaler = MinMaxScaler(feature_range = (0, 1))
         dataset = self.scaler.fit_transform(data[:, np.newaxis])
 
@@ -112,16 +105,22 @@ class Lstm():
             self.look_back = math.ceil(self.row_length / 4)
 
         # convert array of values into dataset matrix
-        X_train, y_train = [], []
+        X, y = [], []
         for i in range(len(dataset) - self.look_back - 1):
             a = dataset[i:(i+self.look_back), 0]
-            X_train.append(a)
-            y_train.append(dataset[i + self.look_back, 0])
-            self.history = self.history.append(
-                data[i:(i+self.look_back)]
-            )
+            X.append(a)
+            y.append(dataset[i + self.look_back, 0])
 
-        return(np.array(X_train), np.array(y_train))
+        #
+        # reshape step
+        #
+        return(
+            np.reshape(
+                np.array(X),
+                (np.array(X).shape[0], 1, np.array(X).shape[1])
+            ),
+            np.array(y)
+        )
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -177,6 +176,15 @@ class Lstm():
             batch_size = self.batch_size
         )
 
+    def update_train(self):
+        '''
+
+        update current train data with 'self.history'.
+
+        '''
+
+        self.df_train = self.history
+
     def get_lstm_params(self):
         '''
 
@@ -198,20 +206,25 @@ class Lstm():
             self.scaler.inverse_transform([self.testY])
         )
 
-    def predict(self, timesteps=10):
+    def predict(self, type='train'):
         '''
 
         generate prediction using hold out sample.
 
+        @inverse_transform, convert prediction back to normal scale.
+
         '''
 
-        train_predict = self.regressor.predict(self.trainX)
-        test_predict = self.regressor.predict(self.testX)
+        if not hasattr(self, 'train_predict') or type == 'train':
+            train_predict = self.regressor.predict(self.trainX)
+            inverse_train_predict = self.scaler.inverse_transform(train_predict)
 
-        #
-        # @inverse_transform, convert prediction back to normal scale.
-        #
-        inverse_train_predict = self.scaler.inverse_transform(train_predict)
+            self.train_predict = pd.Series(
+                [x for x in self.df_train],
+                index=self.df_train.index.values
+            )
+
+        test_predict = self.regressor.predict(self.testX)
         inverse_test_predict = self.scaler.inverse_transform(test_predict)
 
         #
@@ -233,14 +246,10 @@ class Lstm():
         else:
             self.test_predict = pd.Series(
                 [x[0] for x in inverse_test_predict],
-                index=self.df_test[: len(self.df_test) - self.look_back - 1].index.values
+                index=self.df_test[:len(self.df_test) - self.look_back - 1].index.values
             )
 
         self.history = self.history.append(self.test_predict)
-        self.train_predict = pd.Series(
-            [x[0] for x in inverse_train_predict],
-            index=self.history.index.values
-        )
 
         return(self.train_predict, self.test_predict)
 
