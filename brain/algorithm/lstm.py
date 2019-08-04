@@ -31,6 +31,7 @@ class Lstm():
 
         '''
 
+        self.history = pd.Series()
         self.look_back = look_back
 
         if isinstance(data, dict):
@@ -47,8 +48,8 @@ class Lstm():
         self.split_data()
 
         # normalize
-        train_x, self.trainY = self.normalize(self.df_train.values)
-        test_x, self.testY = self.normalize(self.df_test.values)
+        train_x, self.trainY = self.normalize(self.df_train)
+        test_x, self.testY = self.normalize(self.df_test)
 
         #
         # reshape for lstm: convert current [samples, features] to required lstm
@@ -76,7 +77,6 @@ class Lstm():
             test_size=test_size,
             shuffle=False
         )
-        self.history = self.df_train
 
     def get_data(self):
         '''
@@ -117,6 +117,9 @@ class Lstm():
             a = dataset[i:(i+self.look_back), 0]
             X_train.append(a)
             y_train.append(dataset[i + self.look_back, 0])
+            self.history = self.history.append(
+                data[i:(i+self.look_back)]
+            )
 
         return(np.array(X_train), np.array(y_train))
 
@@ -235,11 +238,6 @@ class Lstm():
 
         self.history = self.history.append(self.test_predict)
 
-        self.train_predict = pd.Series(
-            [x[0] for x in inverse_train_predict],
-            index=self.history.index.values
-        )
-
         print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
         print(inverse_test_predict)
         print('--------------------------------------------------------')
@@ -247,6 +245,11 @@ class Lstm():
         print('--------------------------------------------------------')
         print(self.trainX)
         print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
+
+        self.train_predict = pd.Series(
+            [x[0] for x in inverse_train_predict],
+            index=self.history.index.values
+        )
 
         return(self.train_predict, self.test_predict)
 
