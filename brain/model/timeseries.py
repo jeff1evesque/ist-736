@@ -23,7 +23,6 @@ def model(
 
     '''
 
-
     # sort dataframe by date
     df.sort_index(inplace=True)
 
