@@ -78,10 +78,9 @@ def model(
 
     elif model_type == 'lstm':
         model = Lstm(
-            data=pd.Series(
-                df[normalize_key].values,
-                [pd.Timestamp(x) for x in df[date_index].values]
-            )
+            data=df,
+            normalize_key=normalize_key,
+            date_index=date_index,
         )
         model.train(epochs=epochs)
 
