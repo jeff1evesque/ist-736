@@ -23,6 +23,7 @@ def model(
 
     '''
 
+
     # sort dataframe by date
     df.sort_index(inplace=True)
 
@@ -70,7 +71,6 @@ def model(
 
             if rolling_grid_search:
                 return(model, self.get_order())
-
             return(model, result[2])
 
         else:
@@ -78,9 +78,11 @@ def model(
 
     elif model_type == 'lstm':
         model = Lstm(
-            data=df,
-            normalize_key=normalize_key,
-            date_index=date_index,
+            data=pd.Series(
+                df[normalize_key].values,
+                [pd.Timestamp(x) for x in df[date_index].values]
+            ),
+            look_back=10
         )
         model.train(epochs=epochs)
 

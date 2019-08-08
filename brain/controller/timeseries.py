@@ -197,10 +197,12 @@ class Timeseries():
         '''
 
         # intialize
+
+
         l = model(
             df=self.df,
-            normalize_key=normalize_key,
             model_type='lstm',
+            normalize_key=normalize_key,
             date_index=date_index,
             epochs=epochs
         )
@@ -214,21 +216,21 @@ class Timeseries():
 
         if plot:
             #
-            # @dates, full date range
             # @train_actual, entire train values
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            dates = l.get_data()
-            train_actual = l.get_data(normalize_key, key_to_list='True')[0]
-            train_predicted = [x[0] for x in l.get_predict_test()[0]]
-            test_actual = l.get_data(normalize_key, key_to_list='True')[1]
-            test_predicted = [x[0] for x in l.get_predict_test()[1]]
+            l_data = l.get_data(remove_lookup=True)
+            l_predict_test = l.get_predict_test()
+            train_actual = l_data[0]
+            train_predicted = [x for x in l_predict_test[0]]
+            test_actual = l_data[1]
+            test_predicted = [x for x in l_predict_test[1]]
 
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': dates[1][date_index][-len(test_predicted):]
+                'dates': l_data[1].index.values
             })
             test_predicted_df_long = pd.melt(
                 test_predicted_df,
@@ -240,7 +242,7 @@ class Timeseries():
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
-                    'dates': dates[0][date_index][:len(train_actual)]
+                    'dates':  l_data[0].index.values
                 }),
                 xlab='dates',
                 ylab='values',
