@@ -45,8 +45,17 @@ class Lstm():
         self.split_data()
         trainX, self.trainY = self.normalize(self.get_data()[0])
         testX, self.testY = self.normalize(self.get_data()[1])
+
+        print('11111111111111111111111111111111111111111111111111')
+        print(self.trainY)
+        print('11111111111111111111111111111111111111111111111111')
+
         self.trainX = self.reshape(trainX),
         self.testX = self.reshape(testX)
+
+        print('11111111111111111111111111111111111111111111111111')
+        print(self.trainX)
+        print('11111111111111111111111111111111111111111111111111')
 
         # train
         if train:
@@ -88,39 +97,35 @@ class Lstm():
 
         return(self.df_train, self.df_test)
 
-    def normalize(self, data):
+    def split_sequence(self, sequence, n, m):
         '''
 
-        normalization step: given vector [x], return [x, y] matrix:
+        use last n steps as input to forecast next m steps.
 
-            x       y
-            112		118
-            118		132
-            132		129
-            129		121
-            121		135
+            sequence = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+
+            let n = 4, m = 2
+
+            Therefore,
+                [5, 10, 15, 20] [25, 30]
+                [25, 30, 35, 40] [45, 50]
 
         '''
 
-        #
-        # normalization step: utilize scaling normalization.
-        #
-        self.scaler = MinMaxScaler(feature_range = (0, 1))
-        dataset = self.scaler.fit_transform(np.reshape(
-            data.values,
-            (-1, 1)
-        ))
-
-        # eliminate edge cases
-        if (self.look_back >= self.row_length):
-            self.look_back = math.ceil(self.row_length / 4)
-
-        # convert array of values into dataset matrix
         X, y = [], []
-        for i in range(len(dataset)-self.look_back-1):
-            a = dataset[i:(i+self.look_back), 0]
-            X.append(a)
-            y.append(dataset[i + self.look_back, 0])
+        for i in range(len(sequence)):
+            # find the end of this pattern
+	        end_ix = i + n
+            out_end_ix = end_ix + m
+
+            # check if we are beyond the sequence
+            if out_end_ix > len(sequence):
+                break
+
+            # gather input and output parts of the pattern
+            seq_x, seq_y = sequence[i:end_ix], sequence[end_ix:out_end_ix]
+            X.append(seq_x)
+            y.append(seq_y)
 
         return(np.array(X), np.array(y))
 
