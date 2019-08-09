@@ -114,16 +114,17 @@ class Lstm():
 
         X, y = [], []
         for i in range(len(sequence)):
-            # find the end of this pattern
-	        end_ix = i + n
-            out_end_ix = end_ix + m
+            # subsample indices
+	        n_end_index = i + n
+            m_end_index = n_end_index + m
 
-            # check if we are beyond the sequence
-            if out_end_ix > len(sequence):
+            # cannot exceed sequence
+            if m_end_index > len(sequence):
                 break
 
-            # gather input and output parts of the pattern
-            seq_x, seq_y = sequence[i:end_ix], sequence[end_ix:out_end_ix]
+            # aggregate subsamples
+            seq_x = sequence[i:n_end_index]
+            seq_y = sequence[n_end_index:m_end_index]
             X.append(seq_x)
             y.append(seq_y)
 
