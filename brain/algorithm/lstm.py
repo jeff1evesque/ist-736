@@ -4,9 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import Dropout
+from keras.layers import Dense, Flatten, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
@@ -31,35 +29,73 @@ class Lstm():
 
         '''
 
+        n_steps = 4
         self.data = data
         self.look_back = look_back
         self.row_length = len(self.data)
-        self.history = pd.Series()
 
         # sort dataframe by date
         self.data.sort_index(inplace=True)
 
         #
-        # split and normalize
+        # split sequence
         #
         self.split_data()
-        trainX, self.trainY = self.normalize(self.get_data()[0])
-        testX, self.testY = self.normalize(self.get_data()[1])
+        self.scale()
+        X, self.trainY = self.split_sequence(self.df_train, n_steps)
 
-        print('11111111111111111111111111111111111111111111111111')
-        print(self.trainY)
-        print('11111111111111111111111111111111111111111111111111')
+        #
+        # normalize data
+        #
+        self.scale()
 
-        self.trainX = self.reshape(trainX),
-        self.testX = self.reshape(testX)
-
-        print('11111111111111111111111111111111111111111111111111')
-        print(self.trainX)
-        print('11111111111111111111111111111111111111111111111111')
+        # reshape
+        n_features = 1
+        self.trainX = self.reshape(X, n_features)
 
         # train
         if train:
             self.train()
+
+    def scale(self):
+        '''
+
+        scale provided current split data.
+
+        Note: this requires split_data to have run.
+
+        '''
+
+        # fit scaler
+        self.scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.scaler = scaler.fit(self.df_train)
+
+        # transform train
+        train = self.df_train.reshape(
+            self.df_train.shape[0],
+            self.df_train.shape[1]
+        )
+        self.train_scaled = scaler.transform(train)
+
+        # transform test
+        test = self.df_test.reshape(
+            self.df_test.shape[0],
+            self.df_test.shape[1]
+        )
+        self.test_scaled = scaler.transform(test)
+
+    def invert_scale(self, X, y_hat):
+        '''
+
+        inverse scale predicted value
+
+        '''
+
+        new_row = [x for x in X] + [yhat]
+        array = numpy.array(new_row)
+        array = array.reshape(1, len(array))
+        inverted = self.scaler.inverse_transform(array)
+        return(inverted[0, -1])
 
     def split_data(self, test_size=0.2):
         '''
@@ -76,28 +112,26 @@ class Lstm():
             test_size=test_size,
             shuffle=False
         )
-        self.history = self.df_train
 
-    def get_data(self, remove_lookup=False):
+    def get_data(self):
         '''
 
         get current train and test data.
 
-        @remove_lookup, model train lagged original timeseries by a 'look_back'
-            factor. To account for this, the original test split is trimmed by
-            this same factor.
-
         '''
-
-        if remove_lookup:
-            return(
-                self.df_train,
-                self.df_test[:len(self.df_test) - self.look_back - 1]
-            )
 
         return(self.df_train, self.df_test)
 
-    def split_sequence(self, sequence, n, m):
+    def get_actual(self):
+        '''
+
+        get lagged values.
+
+        '''
+
+        return([self.trainY], [self.testY])
+
+    def split_sequence(self, sequence, n, m=1):
         '''
 
         use last n steps as input to forecast next m steps.
@@ -115,7 +149,7 @@ class Lstm():
         X, y = [], []
         for i in range(len(sequence)):
             # subsample indices
-	        n_end_index = i + n
+            n_end_index = i + n
             m_end_index = n_end_index + m
 
             # cannot exceed sequence
@@ -130,15 +164,14 @@ class Lstm():
 
         return(np.array(X), np.array(y))
 
-    def reshape(self, x):
+    def reshape(self, x, n_features):
         '''
 
-        reshape [samples, features] to [samples, timesteps, features], which is
-        required by the implemented LSTM model.
+        reshape [samples, features] to [samples, timesteps, features].
 
         '''
 
-        return(np.reshape(x.shape[0], 1, x.shape[1]))
+        return(x.reshape((x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -170,7 +203,7 @@ class Lstm():
         self.regressor.add(LSTM(
             units = 50,
             return_sequences = True,
-            input_shape = (1, self.look_back)
+            input_shape = (4, 1)
         ))
         self.regressor.add(Dropout(0.2))
 
@@ -196,6 +229,13 @@ class Lstm():
         self.regressor.add(Dropout(0.2))
 
         #
+        # reduce dimensionality
+        #
+        # Note: https://github.com/keras-team/keras/issues/6351
+        #
+        self.regressor.add(Flatten())
+
+        #
         # output layer: only one neuron, since only one value predicted.
         #
         self.regressor.add(Dense(units = 1))
@@ -208,20 +248,11 @@ class Lstm():
 
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
-            self.trainX,
-            self.trainY,
+            self.train_scaled,
+            self.train_scaled,
             epochs = self.epochs,
             batch_size = self.batch_size
         )
-
-    def update_train(self):
-        '''
-
-        update current train data with 'self.history'.
-
-        '''
-
-        self.df_train = self.history
 
     def get_lstm_params(self):
         '''
@@ -232,18 +263,6 @@ class Lstm():
 
         return(self.epochs, self.batch_size)
 
-    def get_actual(self):
-        '''
-
-        return actual lagged values.
-
-        '''
-
-        return(
-            self.scaler.inverse_transform([self.trainY]),
-            self.scaler.inverse_transform([self.testY])
-        )
-
     def predict(self, type='train'):
         '''
 
@@ -253,41 +272,14 @@ class Lstm():
 
         '''
 
-        if not hasattr(self, 'train_predict') or type == 'train':
-            train_predict = self.regressor.predict(self.trainX)
-            inverse_train_predict = self.scaler.inverse_transform(train_predict)
-
-            self.train_predict = pd.Series(
-                [x for x in self.df_train],
-                index=self.df_train.index.values
-            )
-
+        train_predict = self.regressor.predict(self.trainX)
         test_predict = self.regressor.predict(self.testX)
-        inverse_test_predict = self.scaler.inverse_transform(test_predict)
 
         #
-        # rolling prediction: occurs when the overall history exceeds original
-        #     data length.
+        # @inverse_transform, convert prediction back to normal scale.
         #
-        if len(self.history) > len(self.data):
-            history_idx = pd.date_range(
-                self.history.tail(1).index[-1],
-                periods=2,
-                freq='D'
-            )[1:]
-
-            self.test_predict = pd.Series(
-                [x[0] for x in inverse_test_predict],
-                index=history_idx
-            )
-
-        else:
-            self.test_predict = pd.Series(
-                [x[0] for x in inverse_test_predict],
-                index=self.df_test[:len(self.df_test) - self.look_back - 1].index.values
-            )
-
-        self.history = self.history.append(self.test_predict)
+        self.train_predict = self.invert_scale(self.trainX, train_predict)
+        self.test_predict = self.invert_scale(self.trainY, test_predict)
 
         return(self.train_predict, self.test_predict)
 
