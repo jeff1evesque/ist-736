@@ -20,7 +20,8 @@ class Lstm():
     def __init__(
         self,
         data,
-        look_back=1,
+        n_features=1,
+        n_steps=4,
         train=False
     ):
         '''
@@ -29,10 +30,9 @@ class Lstm():
 
         '''
 
-        n_steps = 4
+        self.n_steps = n_steps
+        self.n_features = n_features
         self.data = data
-        self.look_back = look_back
-        self.row_length = len(self.data)
 
         # sort dataframe by date
         self.data.sort_index(inplace=True)
@@ -41,48 +41,50 @@ class Lstm():
         # split sequence
         #
         self.split_data()
-        self.scale()
-        X, self.trainY = self.split_sequence(self.df_train, n_steps)
+        X, self.trainY = self.split_sequence(
+            self.df_train,
+            self.n_steps
+        )
 
         #
         # normalize data
         #
-        self.scale()
+        self.train_scaled = self.scale(X)
 
         # reshape
         n_features = 1
         self.trainX = self.reshape(X, n_features)
 
+        print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz')
+        print(type(self.trainX))
+        print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz')
+
         # train
         if train:
             self.train()
 
-    def scale(self):
+    def scale(self, data=None, feature_range=(-1, 1)):
         '''
 
-        scale provided current split data.
+        Current train and test data is scaled, to better help convergence.
+        Without a scaled dataset, convergence may take a long time, especially
+        if variance is high. When data has high order of variance, convergence
+        may not even occur.
+
+        @feature_range, range of transformed scale, with zero mean.
 
         Note: this requires split_data to have run.
 
         '''
 
-        # fit scaler
-        self.scaler = MinMaxScaler(feature_range=(-1, 1))
-        self.scaler = scaler.fit(self.df_train)
+        if data is None:
+            data = self.data
 
-        # transform train
-        train = self.df_train.reshape(
-            self.df_train.shape[0],
-            self.df_train.shape[1]
-        )
-        self.train_scaled = scaler.transform(train)
-
-        # transform test
-        test = self.df_test.reshape(
-            self.df_test.shape[0],
-            self.df_test.shape[1]
-        )
-        self.test_scaled = scaler.transform(test)
+        #
+        # fit scaler: scaler requires 2D array
+        #
+        self.scaler = MinMaxScaler(feature_range=feature_range)
+        return(self.scaler.fit_transform(data))
 
     def invert_scale(self, X, y_hat):
         '''
@@ -171,7 +173,7 @@ class Lstm():
 
         '''
 
-        return(x.reshape((x.shape[0], x.shape[1], n_features)))
+        return(np.reshape(x, (x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -203,7 +205,7 @@ class Lstm():
         self.regressor.add(LSTM(
             units = 50,
             return_sequences = True,
-            input_shape = (4, 1)
+            input_shape = (self.n_steps, self.n_features)
         ))
         self.regressor.add(Dropout(0.2))
 
