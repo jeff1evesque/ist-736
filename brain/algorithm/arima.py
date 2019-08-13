@@ -37,8 +37,7 @@ class Arima():
             )
 
         # replace 'nan' with overall average
-        self.data.dropna(inplace=True)
-        self.row_length = len(self.data)
+        self.data.fillna(self.data.mean(), inplace=True)
 
         # create train + test
         self.split_data()
