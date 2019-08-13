@@ -20,9 +20,9 @@ class Lstm():
     def __init__(
         self,
         data,
-        n_features=1,
         n_steps=4,
-        train=False
+        train=False,
+        type='univariate'
     ):
         '''
 
@@ -31,11 +31,20 @@ class Lstm():
         '''
 
         self.n_steps = n_steps
-        self.n_features = n_features
         self.data = data
+        self.type = type
 
-        # sort dataframe by date
-        self.data.sort_index(inplace=True)
+        #
+        # cleanse data: sort univariate, and replace 'nan' with average.
+        #
+        if self.type != 'multivariate':
+            self.data.sort_index(inplace=True)
+            self.data.fillna(self.data.mean(), inplace=True)
+
+        #
+        # keep track of data
+        #
+        self.history = self.data
 
         #
         # split sequence
@@ -51,13 +60,24 @@ class Lstm():
         #
         self.train_scaled = self.scale(X)
 
-        # reshape
-        n_features = 1
-        self.trainX = self.reshape(X, n_features)
+        if self.type == 'multivariate':
+            self.n_features = X.shape[2]
 
-        print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz')
-        print(type(self.trainX))
-        print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz')
+        else:
+            self.n_features = 1
+
+        print('pppppppppppppppppppppppppppppppppppppppppppppp')
+        print(self.history)
+        print('pppppppppppppppppppppppppppppppppppppppppppppp')
+
+        #
+        # reshape: univariate with 'n_features=1'
+        #
+        self.trainX = self.reshape(X, self.n_features)
+
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        print(self.trainX)
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
 
         # train
         if train:
@@ -136,7 +156,8 @@ class Lstm():
     def split_sequence(self, sequence, n, m=1):
         '''
 
-        use last n steps as input to forecast next m steps.
+        split univariate sequence into samples, use last n steps as input to
+        forecast next m steps.
 
             sequence = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 
@@ -159,8 +180,14 @@ class Lstm():
                 break
 
             # aggregate subsamples
-            seq_x = sequence[i:n_end_index]
-            seq_y = sequence[n_end_index:m_end_index]
+            if self.type == 'multivariate':
+                seq_x = sequence[i:n_end_index, -1]
+                seq_y = sequence[n_end_index - 1:m_end_index -1]
+
+            else:
+                seq_x = sequence[i:n_end_index]
+                seq_y = sequence[n_end_index:m_end_index]
+
             X.append(seq_x)
             y.append(seq_y)
 
@@ -173,7 +200,10 @@ class Lstm():
 
         '''
 
-        return(np.reshape(x, (x.shape[0], x.shape[1], n_features)))
+        print('555555555555555555555555555555555555')
+        print(n_features)
+        print('555555555555555555555555555555555555')
+        return(x.reshape((x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
