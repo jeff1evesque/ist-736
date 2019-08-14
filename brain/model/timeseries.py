@@ -81,9 +81,10 @@ def model(
             data=pd.Series(
                 df[normalize_key].values,
                 [pd.Timestamp(x) for x in df[date_index].values]
-            ),
-            look_back=10
+            )
         )
+        print('AAAAAA')
         model.train(epochs=epochs)
+        print('BBBBBBB')
 
         return(model)

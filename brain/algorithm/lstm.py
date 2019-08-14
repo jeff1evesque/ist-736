@@ -59,25 +59,30 @@ class Lstm():
         # normalize data
         #
         self.train_scaled = self.scale(X)
+        self.test_scaled = self.scale(self.trainY)
 
         if self.type == 'multivariate':
             self.n_features = X.shape[2]
 
+            #
+            # TODO: incomplete
+            #
+
         else:
             self.n_features = 1
 
-        print('pppppppppppppppppppppppppppppppppppppppppppppp')
-        print(self.history)
-        print('pppppppppppppppppppppppppppppppppppppppppppppp')
+        ####
+        #### https://stackoverflow.com/questions/44704435/error-when-checking-model-input-expected-lstm-1-input-to-have-3-dimensions-but
+        ####
 
-        #
-        # reshape: univariate with 'n_features=1'
-        #
-        self.trainX = self.reshape(X, self.n_features)
-
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-        print(self.trainX)
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+            #
+            # reshape: univariate with 'n_features=1'
+            #
+            self.trainX = self.reshape(self.train_scaled, self.n_features)
+            
+            print('###############################################################')
+            print(self.trainX)
+            print('###############################################################')
 
         # train
         if train:
@@ -184,6 +189,10 @@ class Lstm():
                 seq_x = sequence[i:n_end_index, -1]
                 seq_y = sequence[n_end_index - 1:m_end_index -1]
 
+                #
+                # TODO: incomplete
+                #
+
             else:
                 seq_x = sequence[i:n_end_index]
                 seq_y = sequence[n_end_index:m_end_index]
@@ -198,12 +207,16 @@ class Lstm():
 
         reshape [samples, features] to [samples, timesteps, features].
 
+        @samples, the number of data, or how many rows in your data set
+        @timesteps, the number of times to feed in the model or LSTM
+        @features,  the number of columns of each sample
+
         '''
 
-        print('555555555555555555555555555555555555')
-        print(n_features)
-        print('555555555555555555555555555555555555')
-        return(x.reshape((x.shape[0], x.shape[1], n_features)))
+        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
+        print(len(x), x.shape[1], n_features)
+        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
+        return(x.reshape(x.shape[0], x.shape[1], n_features))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -235,7 +248,10 @@ class Lstm():
         self.regressor.add(LSTM(
             units = 50,
             return_sequences = True,
-            input_shape = (self.n_steps, self.n_features)
+            input_shape = (
+                self.n_steps,
+                self.n_features
+            )
         ))
         self.regressor.add(Dropout(0.2))
 
@@ -281,7 +297,7 @@ class Lstm():
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
             self.train_scaled,
-            self.train_scaled,
+            self.test_scaled,
             epochs = self.epochs,
             batch_size = self.batch_size
         )
