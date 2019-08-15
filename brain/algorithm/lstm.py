@@ -213,10 +213,7 @@ class Lstm():
 
         '''
 
-        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
-        print(len(x), x.shape[1], n_features)
-        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
-        return(x.reshape(x.shape[0], x.shape[1], n_features))
+        return(np.reshape(x, (x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -270,23 +267,13 @@ class Lstm():
         self.regressor.add(Dropout(0.2))
 
         # fourth LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            return_sequences = True
-        ))
+        self.regressor.add(LSTM(units = 50))
         self.regressor.add(Dropout(0.2))
-
-        #
-        # reduce dimensionality
-        #
-        # Note: https://github.com/keras-team/keras/issues/6351
-        #
-        self.regressor.add(Flatten())
 
         #
         # output layer: only one neuron, since only one value predicted.
         #
-        self.regressor.add(Dense(units = 1))
+        self.regressor.add(Dense(units = 1, activation = 'sigmoid'))
 
         # compile the RNN
         self.regressor.compile(
@@ -299,7 +286,8 @@ class Lstm():
             self.train_scaled,
             self.test_scaled,
             epochs = self.epochs,
-            batch_size = self.batch_size
+            batch_size = self.batch_size,
+            verbose=0
         )
 
     def get_lstm_params(self):
