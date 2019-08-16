@@ -15,6 +15,8 @@ class Lstm():
 
     apply lstm variant of recurrent neural network.
 
+    Note: keras==2.1.2 is required.
+
     '''
 
     def __init__(
@@ -79,9 +81,12 @@ class Lstm():
             # reshape: univariate with 'n_features=1'
             #
             self.trainX = self.reshape(self.train_scaled, self.n_features)
+            self.trainY = self.reshape(self.test_scaled, self.n_features)
             
             print('###############################################################')
             print(self.trainX)
+            print('###############################################################')
+            print(self.trainY)
             print('###############################################################')
 
         # train
@@ -244,6 +249,7 @@ class Lstm():
         #
         self.regressor.add(LSTM(
             units = 50,
+            activation='relu',
             return_sequences = True,
             input_shape = (
                 self.n_steps,
@@ -255,6 +261,7 @@ class Lstm():
         # second LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
+            activation='relu',
             return_sequences = True
         ))
         self.regressor.add(Dropout(0.2))
@@ -262,12 +269,16 @@ class Lstm():
         # third LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
+            activation='relu',
             return_sequences = True
         ))
         self.regressor.add(Dropout(0.2))
 
         # fourth LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(units = 50))
+        self.regressor.add(LSTM(
+            units = 50,
+            activation='relu'
+        ))
         self.regressor.add(Dropout(0.2))
 
         #
@@ -283,11 +294,11 @@ class Lstm():
 
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
-            self.train_scaled,
-            self.test_scaled,
+            self.trainX,
+            self.trainY,
             epochs = self.epochs,
             batch_size = self.batch_size,
-            verbose=0
+            verbose=1
         )
 
     def get_lstm_params(self):
