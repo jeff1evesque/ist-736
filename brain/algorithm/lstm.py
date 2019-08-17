@@ -284,7 +284,10 @@ class Lstm():
         #
         # output layer: only one neuron, since only one value predicted.
         #
-        self.regressor.add(Dense(units = 1, activation = 'sigmoid'))
+        self.regressor.add(Dense(
+            units= 1,
+            activation = 'sigmoid'
+        ))
 
         # compile the RNN
         self.regressor.compile(
