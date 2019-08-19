@@ -33,8 +33,12 @@ class Lstm():
         '''
 
         self.n_steps = n_steps
-        self.data = data
         self.type = type
+
+        print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
+        self.data = data.apply(lambda x: self.scale(x))
+        print(self.data)
+        print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
 
         #
         # cleanse data: sort univariate, and replace 'nan' with average.
@@ -53,7 +57,7 @@ class Lstm():
         #
         self.split_data()
         X, self.trainY = self.split_sequence(
-            self.df_train,
+            self.df_train.values,
             self.n_steps
         )
 
@@ -62,6 +66,11 @@ class Lstm():
         #
         self.train_scaled = self.scale(X)
         self.test_scaled = self.scale(self.trainY)
+
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        for i in range(len(self.train_scaled)):
+	        print(self.train_scaled[i], self.test_scaled)
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
 
         if self.type == 'multivariate':
             self.n_features = X.shape[2]
@@ -82,12 +91,6 @@ class Lstm():
             #
             self.trainX = self.reshape(self.train_scaled, self.n_features)
             self.trainY = self.reshape(self.test_scaled, self.n_features)
-            
-            print('###############################################################')
-            print(self.trainX)
-            print('###############################################################')
-            print(self.trainY)
-            print('###############################################################')
 
         # train
         if train:
@@ -186,13 +189,13 @@ class Lstm():
             m_end_index = n_end_index + m
 
             # cannot exceed sequence
-            if m_end_index > len(sequence):
+            if m_end_index > len(sequence) - 1:
                 break
 
             # aggregate subsamples
             if self.type == 'multivariate':
-                seq_x = sequence[i:n_end_index, -1]
-                seq_y = sequence[n_end_index - 1:m_end_index -1]
+                seq_x = sequence[i:n_end_index]
+                seq_y = sequence[n_end_index:m_end_index]
 
                 #
                 # TODO: incomplete
@@ -200,7 +203,7 @@ class Lstm():
 
             else:
                 seq_x = sequence[i:n_end_index]
-                seq_y = sequence[n_end_index:m_end_index]
+                seq_y = sequence[n_end_index]
 
             X.append(seq_x)
             y.append(seq_y)
@@ -218,7 +221,7 @@ class Lstm():
 
         '''
 
-        return(np.reshape(x, (x.shape[0], x.shape[1], n_features)))
+        return(x.reshape(x.shape[0], x.shape[1], n_features))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -301,7 +304,7 @@ class Lstm():
             self.trainY,
             epochs = self.epochs,
             batch_size = self.batch_size,
-            verbose=1
+            verbose = 1
         )
 
     def get_lstm_params(self):
