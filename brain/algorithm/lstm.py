@@ -34,12 +34,12 @@ class Lstm():
 
         self.n_steps = n_steps
         self.type = type
-
-        print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
-        print(data.values)
-        self.data = self.scale([data.values])
-        print(self.data)
-        print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
+        self.data = self.scale(
+            data.values.reshape(
+                len(data.values),
+                1
+            )
+        )
 
         #
         # cleanse data: sort univariate, and replace 'nan' with average.
