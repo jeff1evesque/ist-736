@@ -86,5 +86,6 @@ def model(
         print('AAAAAA')
         model.train(epochs=epochs)
         print('BBBBBBB')
+        exit(999)
 
         return(model)

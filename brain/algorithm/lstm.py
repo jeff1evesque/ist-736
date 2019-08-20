@@ -36,7 +36,8 @@ class Lstm():
         self.type = type
 
         print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
-        self.data = data.apply(lambda x: self.scale(x))
+        print(data.values)
+        self.data = self.scale([data.values])
         print(self.data)
         print('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
 

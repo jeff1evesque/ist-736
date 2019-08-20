@@ -208,6 +208,7 @@ class Timeseries():
         )
 
         # predict
+        exit(999)
         l.predict()
         self.model_scores['lstm'] = {
             'mse': l.get_mse(),
