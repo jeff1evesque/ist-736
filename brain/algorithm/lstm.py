@@ -32,19 +32,13 @@ class Lstm():
 
         '''
 
-        self.n_steps = n_steps
         self.type = type
-        self.data = self.scale(
-            data.values.reshape(
-                len(data.values),
-                1
-            )
-        )
 
         #
         # cleanse data: sort univariate, and replace 'nan' with average.
         #
         if self.type != 'multivariate':
+            self.data = data
             self.data.sort_index(inplace=True)
             self.data.fillna(self.data.mean(), inplace=True)
 
@@ -52,13 +46,20 @@ class Lstm():
         # keep track of data
         #
         self.history = self.data
+        self.n_steps = n_steps
+        self.data = [x[0] for x in self.scale(
+            data.values.reshape(
+                len(data.values),
+                1
+            )
+        )]
 
         #
         # split sequence
         #
         self.split_data()
         X, self.trainY = self.split_sequence(
-            self.df_train.values,
+            self.df_train,
             self.n_steps
         )
 
@@ -66,12 +67,12 @@ class Lstm():
         # normalize data
         #
         self.train_scaled = self.scale(X)
-        self.test_scaled = self.scale(self.trainY)
-
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-        for i in range(len(self.train_scaled)):
-	        print(self.train_scaled[i], self.test_scaled)
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        self.test_scaled = self.scale(
+            self.trainY.reshape(
+                len(self.trainY),
+                1
+            )
+        )
 
         if self.type == 'multivariate':
             self.n_features = X.shape[2]
