@@ -91,8 +91,14 @@ class Lstm():
             #
             # reshape: univariate with 'n_features=1'
             #
-            self.trainX = self.reshape(self.train_scaled, self.n_features)
-            self.trainY = self.reshape(self.test_scaled, self.n_features)
+            self.trainX = [x.flatten().tolist() for x in self.reshape(
+                self.train_scaled,
+                self.n_features
+            )]
+            self.trainY = [x[0][0] for x in self.reshape(
+                self.test_scaled,
+                self.n_features
+            )]
 
         # train
         if train:
