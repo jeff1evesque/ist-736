@@ -84,10 +84,6 @@ class Lstm():
         else:
             self.n_features = 1
 
-        ####
-        #### https://stackoverflow.com/questions/44704435/error-when-checking-model-input-expected-lstm-1-input-to-have-3-dimensions-but
-        ####
-
             #
             # reshape: univariate with 'n_features=1'
             #
@@ -203,7 +199,7 @@ class Lstm():
             # aggregate subsamples
             if self.type == 'multivariate':
                 seq_x = sequence[i:n_end_index]
-                seq_y = sequence[n_end_index:m_end_index]
+                seq_y = sequence[n_end_index]
 
                 #
                 # TODO: incomplete
@@ -211,7 +207,7 @@ class Lstm():
 
             else:
                 seq_x = sequence[i:n_end_index]
-                seq_y = sequence[n_end_index]
+                seq_y = sequence[n_end_index:m_end_index]
 
             X.append(seq_x)
             y.append(seq_y)
@@ -229,7 +225,7 @@ class Lstm():
 
         '''
 
-        return(x.reshape(x.shape[0], x.shape[1], n_features))
+        return((x.reshape(x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -303,8 +299,14 @@ class Lstm():
         # compile the RNN
         self.regressor.compile(
             optimizer = 'adam',
-            loss = 'mean_squared_error'
+            loss = 'mse'
         )
+
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        print(self.trainX)
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        print(self.trainY)
+        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
 
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
