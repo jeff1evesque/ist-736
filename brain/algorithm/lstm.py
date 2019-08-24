@@ -22,7 +22,8 @@ class Lstm():
     def __init__(
         self,
         data,
-        n_steps=4,
+        n_steps_in=4,
+        n_steps_out=1,
         train=False,
         type='univariate'
     ):
@@ -46,7 +47,8 @@ class Lstm():
         # keep track of data
         #
         self.history = self.data
-        self.n_steps = n_steps
+        self.n_steps_in = n_steps_in
+        self.n_steps_out = n_steps_out
         self.data = [x[0] for x in self.scale(
             data.values.reshape(
                 len(data.values),
@@ -60,7 +62,8 @@ class Lstm():
         self.split_data()
         X, self.trainY = self.split_sequence(
             self.df_train,
-            self.n_steps
+            n=self.n_steps_in,
+            m=self.n_steps_out
         )
 
         #
@@ -87,14 +90,8 @@ class Lstm():
             #
             # reshape: univariate with 'n_features=1'
             #
-            self.trainX = [x.flatten().tolist() for x in self.reshape(
-                self.train_scaled,
-                self.n_features
-            )]
-            self.trainY = [x[0][0] for x in self.reshape(
-                self.test_scaled,
-                self.n_features
-            )]
+            self.trainX = [[[a] for a in x] for x in self.train_scaled]
+            self.trainY = [[x] for x in self.test_scaled.tolist()]
 
         # train
         if train:
@@ -225,7 +222,7 @@ class Lstm():
 
         '''
 
-        return((x.reshape(x.shape[0], x.shape[1], n_features)))
+        return(x.reshape((x.shape[0], x.shape[1], n_features)))
 
     def train(self, epochs=100, batch_size=32):
         '''
@@ -259,7 +256,7 @@ class Lstm():
             activation='relu',
             return_sequences = True,
             input_shape = (
-                self.n_steps,
+                self.n_steps_in,
                 self.n_features
             )
         ))
@@ -310,8 +307,8 @@ class Lstm():
 
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
-            self.trainX,
-            self.trainY,
+            [self.train_scaled],
+            [self.trainY],
             epochs = self.epochs,
             batch_size = self.batch_size,
             verbose = 1

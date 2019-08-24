@@ -83,9 +83,7 @@ def model(
                 [pd.Timestamp(x) for x in df[date_index].values]
             )
         )
-        print('AAAAAA')
         model.train(epochs=epochs)
-        print('BBBBBBB')
         exit(999)
 
         return(model)
