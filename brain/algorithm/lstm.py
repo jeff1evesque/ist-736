@@ -70,7 +70,7 @@ class Lstm():
         # normalize data
         #
         self.train_scaled = self.scale(X)
-        self.test_scaled = self.scale(
+        self.testY = self.scale(
             self.trainY.reshape(
                 len(self.trainY),
                 1
@@ -90,8 +90,8 @@ class Lstm():
             #
             # reshape: univariate with 'n_features=1'
             #
-            self.trainX = [[[a] for a in x] for x in self.train_scaled]
-            self.trainY = [[x] for x in self.test_scaled.tolist()]
+            X = np.array([[[a] for a in x] for x in self.train_scaled])
+            self.trainX = X.reshape(X.shape[0], X.shape[1], 1)
 
         # train
         if train:
@@ -224,7 +224,7 @@ class Lstm():
 
         return(x.reshape((x.shape[0], x.shape[1], n_features)))
 
-    def train(self, epochs=100, batch_size=32):
+    def train(self, epochs=100, batch_size=32, validation_split=0):
         '''
 
         train lstm model.
@@ -281,7 +281,8 @@ class Lstm():
         # fourth LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation='relu'
+            activation='relu',
+            return_sequences = False
         ))
         self.regressor.add(Dropout(0.2))
 
@@ -289,7 +290,7 @@ class Lstm():
         # output layer: only one neuron, since only one value predicted.
         #
         self.regressor.add(Dense(
-            units= 1,
+            units = 1,
             activation = 'sigmoid'
         ))
 
@@ -299,19 +300,14 @@ class Lstm():
             loss = 'mse'
         )
 
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-        print(self.trainX)
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-        print(self.trainY)
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
-            [self.train_scaled],
-            [self.trainY],
+            self.trainX,
+            self.trainY,
             epochs = self.epochs,
             batch_size = self.batch_size,
-            verbose = 1
+            verbose = 1,
+            validation_split = validation_split
         )
 
     def get_lstm_params(self):
