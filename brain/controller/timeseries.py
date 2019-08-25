@@ -198,8 +198,6 @@ class Timeseries():
         '''
 
         # intialize
-
-
         l = model(
             df=self.df,
             model_type='lstm',
