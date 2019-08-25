@@ -84,6 +84,5 @@ def model(
             )
         )
         model.train(epochs=epochs)
-        exit(999)
 
         return(model)
