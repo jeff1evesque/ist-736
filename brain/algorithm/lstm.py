@@ -205,6 +205,15 @@ class Lstm():
                 'test_data': self.df_test
             })
 
+    def get_predict_test(self):
+        '''
+
+        return previous prediction result.
+
+        '''
+
+        return(self.train_predict, self.test_predict)
+
     def get_actual(self):
         '''
 
@@ -383,15 +392,6 @@ class Lstm():
         #
         self.train_predict = self.scaler.inverse_transform(train_predict)
         self.test_predict = self.scaler.inverse_transform(test_predict)
-
-        return(self.train_predict, self.test_predict)
-
-    def get_predict_test(self):
-        '''
-
-        return previous prediction result.
-
-        '''
 
         return(self.train_predict, self.test_predict)
 
