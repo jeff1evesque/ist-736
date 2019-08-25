@@ -178,14 +178,32 @@ class Lstm():
             shuffle=False
         )
 
-    def get_data(self):
+    def get_data(self, type=None):
         '''
 
         get current train and test data.
 
         '''
 
-        return(self.df_train, self.df_test)
+        if type == 'train_index':
+            return(self.history[:len(self.df_train)].index)
+
+        elif type == 'test_index':
+            return(self.history[:len(self.df_test)].index)
+
+        elif type == 'train_data':
+            return(self.history[:len(self.df_train)].index)
+
+        elif type == 'test_data':
+            return(self.history[:len(self.df_test)].index)
+
+        else:
+            return({
+                'train_index': self.history[:len(self.df_train)].index,
+                'test_index': self.history[-len(self.df_test):].index,
+                'train_data': self.df_train,
+                'test_data': self.df_test
+            })
 
     def get_actual(self):
         '''
@@ -357,21 +375,14 @@ class Lstm():
 
         '''
 
-        x_input = np.array([70, 80, 90])
-        x_input = x_input.reshape((1, 3, 1))
-        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
-        print(x_input)
-        print(self.testX)
-        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
-
         train_predict = self.regressor.predict(self.trainX, verbose=verbose)
         test_predict = self.regressor.predict(self.testX, verbose=verbose)
 
         #
         # @inverse_transform, convert prediction back to normal scale.
         #
-        self.train_predict = self.invert_scale(self.trainX, train_predict)
-        self.test_predict = self.invert_scale(self.trainY, test_predict)
+        self.train_predict = self.scaler.inverse_transform(train_predict)
+        self.test_predict = self.scaler.inverse_transform(test_predict)
 
         return(self.train_predict, self.test_predict)
 
