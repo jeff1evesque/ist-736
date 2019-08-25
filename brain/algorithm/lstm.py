@@ -354,7 +354,8 @@ class Lstm():
         # output layer: only one neuron, since only one value predicted.
         #
         self.regressor.add(Dense(
-            units = 1
+            units = 1,
+            activation = activation
         ))
 
         # compile the RNN
