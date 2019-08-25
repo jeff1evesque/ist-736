@@ -67,16 +67,8 @@ class Lstm():
         )
 
         #
-        # normalize data
+        # conditionally define uni/multi-variate
         #
-        self.train_scaled = self.scale(X)
-        self.testY = self.scale(
-            self.trainY.reshape(
-                len(self.trainY),
-                1
-            )
-        )
-
         if self.type == 'multivariate':
             self.n_features = X.shape[2]
 
@@ -85,13 +77,38 @@ class Lstm():
             #
 
         else:
+            # univariate: one feature
             self.n_features = 1
 
             #
-            # reshape: univariate with 'n_features=1'
+            # normalize data
+            #
+            self.train_scaled = self.scale(X)
+            self.trainY = self.scale(
+                self.trainY.reshape(
+                    len(self.trainY),
+                    self.n_features
+                )
+            )
+
+            self.testX = [self.scale(
+                np.array(self.df_test).reshape(
+                    len(self.df_test),
+                    self.n_features
+                )
+            )]
+
+, verbose=verbose
+
+            #
+            # reshape
             #
             X = np.array([[[a] for a in x] for x in self.train_scaled])
-            self.trainX = X.reshape(X.shape[0], X.shape[1], 1)
+            self.trainX = X.reshape(
+                X.shape[0],
+                X.shape[1],
+                self.n_features
+            )
 
         # train
         if train:
@@ -319,7 +336,7 @@ class Lstm():
 
         return(self.epochs, self.batch_size)
 
-    def predict(self, type='train'):
+    def predict(self, type='train', verbose=0):
         '''
 
         generate prediction using hold out sample.
@@ -328,8 +345,8 @@ class Lstm():
 
         '''
 
-        train_predict = self.regressor.predict(self.trainX)
-        test_predict = self.regressor.predict(self.testX)
+        train_predict = self.regressor.predict(self.trainX, verbose=verbose)
+        test_predict = self.regressor.predict(self.testX, verbose=verbose)
 
         #
         # @inverse_transform, convert prediction back to normal scale.
