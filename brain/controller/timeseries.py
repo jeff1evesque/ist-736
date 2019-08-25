@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+import numpy as np
 import pandas as pd
 from brain.model.timeseries import model
 from brain.view.timeseries import plot_ts
@@ -225,12 +226,14 @@ class Timeseries():
             train_actual = l_data['train_data']
             train_predicted = [x for x in l_predict_test[0]]
             test_actual = l_data['test_data']
-            test_predicted = [x for x in l_predict_test[1]]
+            test_predicted = [x[0]
+                if isinstance(x, (tuple, list, set, np.ndarray))
+                else x for x in l_predict_test[1]]
 
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': l_data['test_index']
+                'dates': l_data['test_index'][-len(test_predicted):]
             })
             test_predicted_df_long = pd.melt(
                 test_predicted_df,
@@ -242,7 +245,7 @@ class Timeseries():
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
-                    'dates':  l_data[0].index.values
+                    'dates':  l_data['train_index']
                 }),
                 xlab='dates',
                 ylab='values',
