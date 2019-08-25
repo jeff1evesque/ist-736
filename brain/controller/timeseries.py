@@ -28,6 +28,10 @@ class Timeseries():
         diff=1,
         xticks=True,
         lstm_epochs=100,
+        lstm_dropout=0.2,
+        lstm_batch_size=32,
+        lstm_validation_split=0,
+        lstm_activation='linear'
         auto_scale=False,
         rolling_grid_search=False,
         catch_grid_search=False
@@ -60,6 +64,10 @@ class Timeseries():
                 normalize_key=normalize_key,
                 date_index=date_index,
                 epochs=lstm_epochs,
+                dropout=lstm_dropout,
+                batch_size=lstm_batch_size,
+                validation_split=lstm_validation_split,
+                activation='linear',
                 directory=directory,
                 suffix=suffix
             )
@@ -188,6 +196,10 @@ class Timeseries():
         suffix=None,
         date_index='date',
         epochs=100,
+        dropout=0.2,
+        batch_size=32,
+        validation_split=0,
+        activation='linear',
         xticks=True
     ):
 
@@ -203,7 +215,11 @@ class Timeseries():
             model_type='lstm',
             normalize_key=normalize_key,
             date_index=date_index,
-            epochs=epochs
+            epochs=epochs,
+            dropout=dropout,
+            batch_size=batch_size,
+            validation_split=validation_split,
+            activation=activation
         )
 
         # predict
