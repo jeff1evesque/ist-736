@@ -100,7 +100,7 @@ def analyze(
                         sn=sn
                     ),
                     suffix=sentiment,
-                    lstm_epochs=50,
+                    lstm_epochs=1000,
                     catch_grid_search=True
                 )
                 ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
@@ -350,15 +350,16 @@ def analyze(
             #
             if analysis_granger:
                 for sentiment in sentiments:
-                    granger(
-                        data[sn][[ts_index, sentiment]],
-                        maxlag=3,
-                        directory='{directory}/{sn}/granger'.format(
-                            directory=directory,
-                            sn=sn
-                        ),
-                        suffix=sentiment
-                    )
+                    if sentiment in data[sn]:
+                        granger(
+                            data[sn][[ts_index, sentiment]],
+                            maxlag=3,
+                            directory='{directory}/{sn}/granger'.format(
+                                directory=directory,
+                                sn=sn
+                            ),
+                            suffix=sentiment
+                        )
 
             #
             # classify
