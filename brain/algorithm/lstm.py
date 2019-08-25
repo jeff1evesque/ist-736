@@ -280,7 +280,13 @@ class Lstm():
 
         return(x.reshape((x.shape[0], x.shape[1], n_features)))
 
-    def train(self, epochs=100, batch_size=32, validation_split=0):
+    def train(
+        self,
+        epochs=100,
+        batch_size=32,
+        validation_split=0,
+        activation='linear'
+    ):
         '''
 
         train lstm model.
@@ -294,6 +300,8 @@ class Lstm():
             size parameter, (8, time_steps, num_input_units).
 
         @Dropout, each layer ignores 20% of neurons to reduce overfitting.
+        @activation, 'linear' is generally preferred for regression, while
+            'softmax' is better for classification.
 
         '''
 
@@ -309,7 +317,7 @@ class Lstm():
         #
         self.regressor.add(LSTM(
             units = 50,
-            activation='relu',
+            activation = activation,
             return_sequences = True,
             input_shape = (
                 self.n_steps_in,
@@ -321,7 +329,7 @@ class Lstm():
         # second LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation='relu',
+            activation = activation,
             return_sequences = True
         ))
         self.regressor.add(Dropout(0.2))
@@ -329,7 +337,7 @@ class Lstm():
         # third LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation='relu',
+            activation = activation,
             return_sequences = True
         ))
         self.regressor.add(Dropout(0.2))
@@ -337,7 +345,7 @@ class Lstm():
         # fourth LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation='relu',
+            activation = activation,
             return_sequences = False
         ))
         self.regressor.add(Dropout(0.2))
@@ -346,8 +354,7 @@ class Lstm():
         # output layer: only one neuron, since only one value predicted.
         #
         self.regressor.add(Dense(
-            units = 1,
-            activation = 'sigmoid'
+            units = 1
         ))
 
         # compile the RNN
