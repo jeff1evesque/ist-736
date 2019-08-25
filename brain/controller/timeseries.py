@@ -220,17 +220,17 @@ class Timeseries():
             # @test_actual, entire train values
             # @predicted, only predicted values
             #
-            l_data = l.get_data(remove_lookup=True)
+            l_data = l.get_data()
             l_predict_test = l.get_predict_test()
-            train_actual = l_data[0]
+            train_actual = l_data['train_data']
             train_predicted = [x for x in l_predict_test[0]]
-            test_actual = l_data[1]
+            test_actual = l_data['test_data']
             test_predicted = [x for x in l_predict_test[1]]
 
             test_predicted_df = pd.DataFrame({
                 'actual': test_actual[-len(test_predicted):],
                 'predicted': test_predicted,
-                'dates': l_data[1].index.values
+                'dates': l_data['test_index']
             })
             test_predicted_df_long = pd.melt(
                 test_predicted_df,
