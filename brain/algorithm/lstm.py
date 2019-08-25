@@ -60,8 +60,13 @@ class Lstm():
         # split sequence
         #
         self.split_data()
-        X, self.trainY = self.split_sequence(
+        X1, self.trainY = self.split_sequence(
             self.df_train,
+            n=self.n_steps_in,
+            m=self.n_steps_out
+        )
+        X2, self.testY = self.split_sequence(
+            self.df_test,
             n=self.n_steps_in,
             m=self.n_steps_out
         )
@@ -70,7 +75,7 @@ class Lstm():
         # conditionally define uni/multi-variate
         #
         if self.type == 'multivariate':
-            self.n_features = X.shape[2]
+            self.n_features = X1.shape[2]
 
             #
             # TODO: incomplete
@@ -83,7 +88,7 @@ class Lstm():
             #
             # normalize data
             #
-            self.train_scaled = self.scale(X)
+            self.train_scaled = self.scale(X1)
             self.trainY = self.scale(
                 self.trainY.reshape(
                     len(self.trainY),
@@ -91,22 +96,29 @@ class Lstm():
                 )
             )
 
-            self.testX = [self.scale(
-                np.array(self.df_test).reshape(
-                    len(self.df_test),
+            self.test_scaled = self.scale(X2)
+            self.testY = self.scale(
+                np.array(self.testY).reshape(
+                    len(self.testY),
                     self.n_features
                 )
-            )]
-
-, verbose=verbose
+            )
 
             #
             # reshape
             #
-            X = np.array([[[a] for a in x] for x in self.train_scaled])
-            self.trainX = X.reshape(
-                X.shape[0],
-                X.shape[1],
+            X1 = np.array([[[a] for a in x] for x in self.train_scaled])
+            X2 = np.array([[[a] for a in x] for x in self.test_scaled])
+
+            self.trainX = X1.reshape(
+                X1.shape[0],
+                X1.shape[1],
+                self.n_features
+            )
+
+            self.testX = X2.reshape(
+                X2.shape[0],
+                X2.shape[1],
                 self.n_features
             )
 
@@ -344,6 +356,13 @@ class Lstm():
         @inverse_transform, convert prediction back to normal scale.
 
         '''
+
+        x_input = np.array([70, 80, 90])
+        x_input = x_input.reshape((1, 3, 1))
+        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
+        print(x_input)
+        print(self.testX)
+        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
 
         train_predict = self.regressor.predict(self.trainX, verbose=verbose)
         test_predict = self.regressor.predict(self.testX, verbose=verbose)
