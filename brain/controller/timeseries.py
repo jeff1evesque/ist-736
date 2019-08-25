@@ -31,7 +31,7 @@ class Timeseries():
         lstm_dropout=0.2,
         lstm_batch_size=32,
         lstm_validation_split=0,
-        lstm_activation='linear'
+        lstm_activation='linear',
         auto_scale=False,
         rolling_grid_search=False,
         catch_grid_search=False

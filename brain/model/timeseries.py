@@ -15,7 +15,7 @@ def model(
     dropout=0.2,
     batch_size=32,
     validation_split=0,
-    activation='linear'
+    activation='linear',
     log_transform=0,
     auto_scale=False,
     rolling_grid_search=False,
