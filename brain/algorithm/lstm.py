@@ -283,6 +283,7 @@ class Lstm():
     def train(
         self,
         epochs=100,
+        dropout=0.2,
         batch_size=32,
         validation_split=0,
         activation='linear'
@@ -324,7 +325,7 @@ class Lstm():
                 self.n_features
             )
         ))
-        self.regressor.add(Dropout(0.2))
+        self.regressor.add(Dropout(dropout))
 
         # second LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
@@ -332,7 +333,7 @@ class Lstm():
             activation = activation,
             return_sequences = True
         ))
-        self.regressor.add(Dropout(0.2))
+        self.regressor.add(Dropout(dropout))
 
         # third LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
@@ -340,7 +341,7 @@ class Lstm():
             activation = activation,
             return_sequences = True
         ))
-        self.regressor.add(Dropout(0.2))
+        self.regressor.add(Dropout(dropout))
 
         # fourth LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
@@ -348,7 +349,7 @@ class Lstm():
             activation = activation,
             return_sequences = False
         ))
-        self.regressor.add(Dropout(0.2))
+        self.regressor.add(Dropout(dropout))
 
         #
         # output layer: only one neuron, since only one value predicted.
