@@ -8,7 +8,7 @@ from collections import defaultdict
 from brain.view.plot import plot_bar
 from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
-from brain.controller.timeseries import timeseries
+from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
 from brain.controller.peak_detection import peak_detection
 
@@ -74,17 +74,24 @@ def analyze(
         #
         data[sn] = data[sn].groupby([
             'created_at',
-            'screen_name',
-            'positive',
-            'neutral',
-            'negative'
+            'screen_name'
         ]).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
         if analysis_ts_sentiment:
+            #
+            # sentiment scores
+            #
+            s = Sentiment(data[sn], classify_index)
+            data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
+            data[sn].replace('\s+', ' ', regex=True, inplace=True)
+
+            #
+            # timeseries model on sentiment
+            #
             for sentiment in sentiments:
-                ts_results_sentiment[sn] = timeseries(
+                ts_sentiment = Timeseries(
                     df=data[sn],
                     normalize_key=sentiment,
                     date_index='created_at',
@@ -93,37 +100,53 @@ def analyze(
                         sn=sn
                     ),
                     suffix=sentiment,
-                    lstm_epochs=50
+                    lstm_epochs=1000,
+                    catch_grid_search=True
                 )
+                ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
 
-                with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                    directory=directory_report,
-                    sn=sn,
-                    sent=sentiment
-                ), 'w') as fp:
-                    print(
-                        ts_results_sentiment[sn]['arima']['adf'],
-                        file=fp
-                    )
+                if 'arima' in ts_results_sentiment[sn]:
+                    with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                        directory=directory_report,
+                        sn=sn,
+                        sent=sentiment
+                    ), 'w') as fp:
+                        print(
+                            ts_results_sentiment[sn]['arima']['adf'],
+                            file=fp
+                        )
 
+    #
+    # plot sentiment scores
+    #
     if analysis_ts_sentiment:
-        s1 = [v['arima']['mse'] for k,v in ts_results_sentiment.items()]
-        plot_bar(
-            labels=screen_name,
-            performance=s1,
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_arima_sentiment.png',
-            rotation=90
-        )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v for k,v in ts_results_sentiment.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in ts_results_sentiment.items() if 'arima' in v],
+                performance=[v['arima']['mse']
+                    for k,v in ts_results_sentiment.items() if 'arima' in v],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_arima_sentiment.png',
+                rotation=90
+            )
 
-        s2 = [v['lstm']['mse'][1] for k,v in ts_results_sentiment.items()]
-        plot_bar(
-            labels=screen_name,
-            performance=s2,
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_lstm_sentiment.png',
-            rotation=90
-        )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v for k,v in ts_results_sentiment.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in ts_results_sentiment.items() if 'lstm' in v],
+                performance=[v['lstm']['mse'][1]
+                    for k,v in ts_results_sentiment.items() if 'lstm' in v],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm_sentiment.png',
+                rotation=90
+            )
 
     #
     # preprocess: left join on twitter dataset(s).
@@ -187,9 +210,10 @@ def analyze(
         #
         # index data: conditionally use z-score threshold to relabel index.
         #
+        threshold = [0.5]
         signals = peak_detection(
             data=data[sn][ts_index],
-            threshold=[0.5],
+            threshold=threshold,
             directory='{a}/{b}'.format(a=directory, b=sn),
             suffix=sn
         )
@@ -259,8 +283,37 @@ def analyze(
                 for i,x in enumerate(data[sn][ts_index])]
 
         #
+        # timeseries analysis: if dataset not 50 elements or more (x), use the
+        #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
+        #     is determined by 0.15x:
+        #
+        #     (p,q,d) = (range(0, 0.15x), range(0, 0.15x), range(0, 0.15x))
+        #
+        # Note: if arima does not converge, or the adf test does not satisfy
+        #       p < 0.05, the corresponding model is thrown out.
+        #
+        if analysis_ts:
+            ts_stock = Timeseries(
+                df=data[sn],
+                normalize_key=ts_index,
+                date_index='created_at',
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn),
+                suffix=ts_index,
+                auto_scale=(50, 0.15)
+            )
+            ts_results[sn] = ts_stock.get_model_scores()
+
+            if 'arima' in ts_results[sn]:
+                with open('{directory}/adf_{sn}_{type}.txt'.format(
+                    directory=directory_report,
+                    sn=sn,
+                    type=ts_index
+                ), 'w') as fp:
+                    print(ts_results[sn]['arima']['adf'], file=fp)
+
+        #
         # outlier class: remove class if training distribution is less than
-        #     50%, or greater than 150% all other class distribution(s).
+        #     50%, or greater than 150% of all other class distribution(s).
         #
         counter = defaultdict(lambda :0)
         for k in data[sn]['trend']:
@@ -285,86 +338,86 @@ def analyze(
                     break
 
         #
-        # sentiment scores
+        # sufficient data: analysis performed if adequate amount of data.
         #
-        s = Sentiment(data[sn], classify_index)
-        data[sn] = pd.concat([s.vader_analysis(), data[sn]], axis=1)
-        data[sn].replace('\s+', ' ', regex=True, inplace=True)
+        # Note: 3 classes are utilized as a base case, while an outlier class
+        #       can reduce the default to 2 classes. Each additional threshold
+        #       adds two additional classes.
+        #
+        if data[sn].shape[0] > (3 + ((len(threshold) - 1) * 2)) * 20:
+            #
+            # granger causality
+            #
+            if analysis_granger:
+                for sentiment in sentiments:
+                    if any(x in data[sn] for x in [ts_index, sentiment]):
+                        granger(
+                            data[sn][[ts_index, sentiment]],
+                            maxlag=3,
+                            directory='{directory}/{sn}/granger'.format(
+                                directory=directory,
+                                sn=sn
+                            ),
+                            suffix=sentiment
+                        )
 
-        #
-        # granger causality
-        #
-        if analysis_granger:
-            for sentiment in sentiments:
-                granger(
-                    data[sn][[ts_index, sentiment]],
-                    maxlag=3,
-                    directory='{directory}/{sn}/granger'.format(
-                        directory=directory,
-                        sn=sn
-                    ),
-                    suffix=sentiment
-                )
-
-        #
-        # classify
-        #
-        if analysis_classify:
-            classify_results[sn] = classify(
-                data[sn],
-                key_class='trend',
-                key_text=classify_index,
-                directory='{directory}/{sn}'.format(
-                    directory=directory,
-                    sn=sn
-                ),
-                top_words=25,
-                stopwords=stopwords,
-                k=500
-            )
-
-        #
-        # timeseries analysis
-        #
-        if analysis_ts:
-            ts_results[sn] = timeseries(
-                df=data[sn],
-                normalize_key=ts_index,
-                date_index='created_at',
-                directory='{directory}/{sn}'.format(directory=directory, sn=sn)
-            )
-
-            with open('{directory}/adf_{sn}.txt'.format(
-                directory=directory_report,
-                sn=sn
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
+            #
+            # classify
+            #
+            if analysis_classify:
+                if any(x in data[sn] for x in ['trend', classify_index]):
+                    classify_results[sn] = classify(
+                        data[sn],
+                        key_class='trend',
+                        key_text=classify_index,
+                        directory='{directory}/{sn}'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        top_words=25,
+                        stopwords=stopwords,
+                        k=500
+                    )
 
     #
     # ensembled scores
     #
     if analysis_classify:
-        plot_bar(
-            labels=screen_name,
-            performance=[v[0] for k,v in classify_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='accuracy_overall.png',
-            rotation=90
-        )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            isinstance(v, tuple) for k,v in classify_results.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in classify_results.items() if pd.notnull(k)],
+                performance=[v[0] for k,v in classify_results.items()
+                    if pd.notnull(v) and isinstance(v, tuple)],
+                directory='{directory}'.format(directory=directory),
+                filename='accuracy_overall.png',
+                rotation=90
+            )
 
     if analysis_ts:
-        plot_bar(
-            labels=screen_name,
-            performance=[v['arima']['mse'] for k,v in ts_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_arima.png',
-            rotation=90
-        )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v for k,v in ts_results.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in ts_results.items() if 'arima' in v],
+                performance=[v['arima']['mse']
+                    for k,v in ts_results.items() if 'arima' in v],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_arima.png',
+                rotation=90
+            )
 
-        plot_bar(
-            labels=screen_name,
-            performance=[v['lstm']['mse'][1] for k,v in ts_results.items()],
-            directory='{directory}'.format(directory=directory),
-            filename='mse_overall_lstm.png',
-            rotation=90
-        )
+        if any('lstm' in v for k,v in ts_results.items()):
+            plot_bar(
+                labels=[k for k,v in ts_results.items() if 'lstm' in v],
+                performance=[v['lstm']['mse'][1]
+                    for k,v in ts_results.items() if 'lstm' in v],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm.png',
+                rotation=90
+            )

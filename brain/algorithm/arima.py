@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
+from math import log, ceil
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -20,8 +21,7 @@ class Arima():
         self,
         data,
         train=False,
-        normalize_key=None,
-        date_index='date',
+        log_transform=0,
         iterations=1
     ):
         '''
@@ -30,21 +30,14 @@ class Arima():
 
         '''
 
-        if isinstance(data, dict):
-            self.data = pd.DataFrame(data)
-        else:
-            self.data = data
+        self.data = data
+        if log_transform:
+            self.data = self.data.map(
+                lambda a: log(a + log_transform)
+            )
 
         # replace 'nan' with overall average
-        self.data[normalize_key] = [x if str(x) != 'nan'
-            else np.nanmean(self.data[normalize_key])
-                for x in self.data[normalize_key]]
-
-        self.normalize_key = normalize_key
-        self.row_length = len(self.data)
-
-        # sort dataframe by date
-        self.data.sort_index(inplace=True)
+        self.data.fillna(self.data.mean(), inplace=True)
 
         # create train + test
         self.split_data()
@@ -68,24 +61,26 @@ class Arima():
             test_size=test_size,
             shuffle=False
         )
-        self.df_train = pd.DataFrame(self.X_train)
-        self.df_test = pd.DataFrame(self.y_test)
+        self.df_train = self.X_train
+        self.df_test = self.y_test
+        self.history = self.df_train
 
-    def get_data(self, key=None, key_to_list=False):
+    def get_data(self):
         '''
 
         get current train and test data.
 
         '''
 
-        if key:
-            if key_to_list:
-                return(self.df_train[key].tolist(), self.df_test[key].tolist())
-            return(self.df_train[key], self.df_test[key])
-        else:
-            return(self.df_train, self.df_test)
+        return(self.df_train, self.df_test)
 
-    def train(self, iterations=1, order=[1,0,0]):
+    def train(
+        self,
+        iterations=1,
+        order=[1,0,0],
+        rolling_grid_search=False,
+        catch_grid_search=False
+    ):
         '''
 
         train arima model.
@@ -93,12 +88,20 @@ class Arima():
         @order, (p,q,d) arguments can be defined using acf (MA), and pacf (AR)
             implementation. Corresponding large significant are indicators.
 
+        @rolling_grid_search, implement default grid-search when 'True',
+            otherwise implement 'auto_scale' grid search when 'auto'.
+
+        @catch_grid_search, implement grid-search if exception raised during
+            'model.fit'.
+
+        @history_idx, create DatetimeIndex by last value of index and remove
+            first value by indexing.
+
         Note: requires 'split_data' to be executed.
 
         '''
 
         actuals, predicted, rolling, differences = [], [], [], []
-        self.history = self.df_train[self.normalize_key].tolist()
 
         #
         # @order, if supplied through R, elements will be interpretted as float.
@@ -106,10 +109,49 @@ class Arima():
         #     python, which breaks iterable indices.
         #
         self.order = [int(i) for i in order]
-
         for t in range(iterations):
-            model = ARIMA(self.history, order=self.order)
-            model_fit = model.fit(disp=0)
+            if (
+                isinstance(rolling_grid_search, (list, set, tuple)) and
+                len(rolling_grid_search) == 2
+            ):
+                self.order = self.grid_search(auto_scale=rolling_grid_search)[2]
+
+            elif rolling_grid_search:
+                self.order = self.grid_search()[2]
+
+
+            model = ARIMA(self.history.tolist(), order=self.order)
+
+            try:
+                model_fit = model.fit(disp=0)
+                fit_success = True
+
+            except Exception as e:
+                print('\n\n')
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print('Warning: exception raised fitting model.')
+                print('Message: {e}'.format(e=e))
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                fit_success = False
+
+            try:
+                if not fit_success and catch_grid_search:
+                    self.order = self.grid_search()[2]
+                    model = ARIMA(self.history, order=self.order)
+                    model_fit = model.fit(disp=0)
+                    fit_success = True
+
+                elif not fit_success:
+                    raise ValueError('No model fit, try setting catch_grid_search.')
+
+            except Exception as e:
+                print('\n\n')
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print('Warning: cannot accomodate exception with grid-search.')
+                print('Message: {e}'.format(e=e))
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                return(False)
+
             output = model_fit.forecast()
             yhat = float(output[0])
             predicted.append(yhat)
@@ -122,7 +164,7 @@ class Arima():
             #     which defines the rolling predictions.
             #
             try:
-                obs = float(self.df_test[self.normalize_key].tolist()[t])
+                obs = float(self.df_test[t])
                 actuals.append(obs)
                 differences.append(abs(1-(yhat/obs)))
 
@@ -131,23 +173,55 @@ class Arima():
                 rolling.append(obs)
 
             # rolling prediction data
-            self.history.append(obs)
+            history_idx = pd.date_range(
+                self.history.tail(1).index[-1],
+                periods=2,
+                freq='D'
+            )[1:]
+
+            self.history = self.history.append(
+                pd.Series(obs, index=history_idx)
+            )
 
         self.differences = (actuals, predicted, differences)
         self.mse = mean_squared_error(actuals, predicted)
         self.rolling = rolling
 
+        return(True)
+
     def grid_search(
         self,
-        p_values=(0,1,2),
+        p_values=range(0,3),
         d_values=range(0,3),
-        q_values=range(0,3)
+        q_values=range(0,3),
+        auto_scale=None
     ):
         '''
 
         determine optimal arima arguments using (p,q,d) range.
 
+        @auto_scale, dynamically generate (p,q,d) based on data length.
+            [0], minimum threshold required for auto-scaling
+            [1], scaling factor, determines the (p,q,d) range
+
         '''
+
+        try:
+            data = self.history
+
+        except:
+            data = self.data
+
+        if (
+            auto_scale and
+            len(auto_scale) == 2 and
+            all(isinstance(x, (int, float)) for x in auto_scale) and
+            len(data) > auto_scale[0]
+        ):
+            auto_range = ceil(len(data) * auto_scale[1])
+            p_value=range(0, auto_range)
+            d_value=range(0, auto_range)
+            q_value=range(0, auto_range)
 
         best_adf, best_score, best_pqd = float('inf'), float('inf'), None
         for p in p_values:
@@ -157,11 +231,23 @@ class Arima():
                     try:
                         model = self.train(order=order)
                         mse = self.get_mse()
-                        if mse < best_score:
-                            best_adf = self.get_adf()
+                        adf = self.get_adf()
+
+                        if (
+                            mse < best_score and
+                            np.isfinite(adf[0]) and
+                            np.isfinite(adf[1])
+                         ):
+                            best_adf = adf
                             best_score = mse
                             best_pqd = order
-                    except:
+
+                    except Exception as e:
+                        print('\n\n')
+                        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                        print('Warning: exception raised running grid-search.')
+                        print('Message: {e}'.format(e=e))
+                        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                         continue
 
         return(best_adf, best_score, best_pqd)
@@ -201,7 +287,7 @@ class Arima():
         if data:
             original = data
         else:
-            original = self.df_test[self.normalize_key].values
+            original = self.df_test
 
         # determine difference
         if int(diff) > 0:
@@ -229,15 +315,15 @@ class Arima():
 
         '''
 
-        if not data and self.normalize_key:
+        if not data:
             # ensure adf matches arima integrated difference
             if self.order:
                 data = self.get_difference()
 
             else:
-                data = self.df_test[self.normalize_key].values
+                data = self.df_test
 
-        elif not data and not self.normalize_key:
+        elif not data:
             data = 'Provide valid list'
 
         try:
@@ -276,15 +362,6 @@ class Arima():
 
         return(self.history)
 
-    def get_index(self):
-        '''
-
-        get dataframe row index.
-
-        '''
-
-        return(self.data.index.values)
-
     def get_decomposed(self, series=None, model='additive', freq=1):
         '''
 
@@ -293,7 +370,7 @@ class Arima():
         '''
 
         if not series:
-            series = self.data[self.normalize_key]
+            series = self.data
 
         result = seasonal_decompose(series, model=model, freq=freq)
 
