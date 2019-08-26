@@ -350,7 +350,7 @@ def analyze(
             #
             if analysis_granger:
                 for sentiment in sentiments:
-                    if sentiment in data[sn]:
+                    if any(x in data[sn] for x in [ts_index, sentiment]):
                         granger(
                             data[sn][[ts_index, sentiment]],
                             maxlag=3,
@@ -365,18 +365,19 @@ def analyze(
             # classify
             #
             if analysis_classify:
-                classify_results[sn] = classify(
-                    data[sn],
-                    key_class='trend',
-                    key_text=classify_index,
-                    directory='{directory}/{sn}'.format(
-                        directory=directory,
-                        sn=sn
-                    ),
-                    top_words=25,
-                    stopwords=stopwords,
-                    k=500
-                )
+                if any(x in data[sn] for x in ['trend', classify_index]):
+                    classify_results[sn] = classify(
+                        data[sn],
+                        key_class='trend',
+                        key_text=classify_index,
+                        directory='{directory}/{sn}'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        top_words=25,
+                        stopwords=stopwords,
+                        k=500
+                    )
 
     #
     # ensembled scores
