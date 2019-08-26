@@ -350,7 +350,7 @@ def analyze(
             #
             if analysis_granger:
                 for sentiment in sentiments:
-                    if any(x in data[sn] for x in [ts_index, sentiment]):
+                    if all(x in data[sn] for x in [ts_index, sentiment]):
                         granger(
                             data[sn][[ts_index, sentiment]],
                             maxlag=3,
