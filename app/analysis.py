@@ -91,7 +91,7 @@ def analyze(
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                if all(x in data[sn] for x in [normalize_key, 'created_at']):
+                if all(x in data[sn] for x in [sentiment, 'created_at']):
                     ts_sentiment = Timeseries(
                         df=data[sn],
                         normalize_key=sentiment,
