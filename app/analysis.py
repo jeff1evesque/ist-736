@@ -121,7 +121,7 @@ def analyze(
     # plot sentiment scores
     #
     if analysis_ts_sentiment:
-        if any(
+        if all(
             pd.notnull(k) and
             pd.notnull(v) and
             'arima' in v for k,v in ts_results_sentiment.items()
@@ -135,7 +135,7 @@ def analyze(
                 rotation=90
             )
 
-        if any(
+        if all(
             pd.notnull(k) and
             pd.notnull(v) and
             'lstm' in v for k,v in ts_results_sentiment.items()
@@ -366,7 +366,7 @@ def analyze(
             # classify
             #
             if analysis_classify:
-                if any(x in data[sn] for x in ['trend', classify_index]):
+                if all(x in data[sn] for x in ['trend', classify_index]):
                     classify_results[sn] = classify(
                         data[sn],
                         key_class='trend',
@@ -384,7 +384,7 @@ def analyze(
     # ensembled scores
     #
     if analysis_classify:
-        if any(
+        if all(
             pd.notnull(k) and
             pd.notnull(v) and
             isinstance(v, tuple) for k,v in classify_results.items()
@@ -399,7 +399,7 @@ def analyze(
             )
 
     if analysis_ts:
-        if any(
+        if all(
             pd.notnull(k) and
             pd.notnull(v) and
             'arima' in v for k,v in ts_results.items()
@@ -413,7 +413,11 @@ def analyze(
                 rotation=90
             )
 
-        if any('lstm' in v for k,v in ts_results.items()):
+        if all(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v for k,v in ts_results.items()
+        ):
             plot_bar(
                 labels=[k for k,v in ts_results.items() if 'lstm' in v],
                 performance=[v['lstm']['mse'][1]
