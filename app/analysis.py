@@ -91,30 +91,31 @@ def analyze(
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                ts_sentiment = Timeseries(
-                    df=data[sn],
-                    normalize_key=sentiment,
-                    date_index='created_at',
-                    directory='{directory}/{sn}'.format(
-                        directory=directory,
-                        sn=sn
-                    ),
-                    suffix=sentiment,
-                    lstm_epochs=1000,
-                    catch_grid_search=True
-                )
-                ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
+                if all(x in data[sn] for x in [normalize_key, 'created_at']):
+                    ts_sentiment = Timeseries(
+                        df=data[sn],
+                        normalize_key=sentiment,
+                        date_index='created_at',
+                        directory='{directory}/{sn}'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        suffix=sentiment,
+                        lstm_epochs=1000,
+                        catch_grid_search=True
+                    )
+                    ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
 
-                if 'arima' in ts_results_sentiment[sn]:
-                    with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                        directory=directory_report,
-                        sn=sn,
-                        sent=sentiment
-                    ), 'w') as fp:
-                        print(
-                            ts_results_sentiment[sn]['arima']['adf'],
-                            file=fp
-                        )
+                    if 'arima' in ts_results_sentiment[sn]:
+                        with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                            directory=directory_report,
+                            sn=sn,
+                            sent=sentiment
+                        ), 'w') as fp:
+                            print(
+                                ts_results_sentiment[sn]['arima']['adf'],
+                                file=fp
+                            )
 
     #
     # plot sentiment scores
