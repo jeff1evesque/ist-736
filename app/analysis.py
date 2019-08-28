@@ -121,7 +121,7 @@ def analyze(
     # plot sentiment scores
     #
     if analysis_ts_sentiment:
-        if all(
+        if any(
             pd.notnull(k) and
             pd.notnull(v) and
             'arima' in v for k,v in ts_results_sentiment.items()
@@ -135,7 +135,7 @@ def analyze(
                 rotation=90
             )
 
-        if all(
+        if any(
             pd.notnull(k) and
             pd.notnull(v) and
             'lstm' in v for k,v in ts_results_sentiment.items()
@@ -384,7 +384,7 @@ def analyze(
     # ensembled scores
     #
     if analysis_classify:
-        if all(
+        if any(
             pd.notnull(k) and
             pd.notnull(v) and
             isinstance(v, tuple) for k,v in classify_results.items()
@@ -399,7 +399,7 @@ def analyze(
             )
 
     if analysis_ts:
-        if all(
+        if any(
             pd.notnull(k) and
             pd.notnull(v) and
             'arima' in v for k,v in ts_results.items()
@@ -413,7 +413,7 @@ def analyze(
                 rotation=90
             )
 
-        if all(
+        if any(
             pd.notnull(k) and
             pd.notnull(v) and
             'lstm' in v for k,v in ts_results.items()
