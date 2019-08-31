@@ -101,7 +101,7 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=1000,
+                        lstm_epochs=500,
                         catch_grid_search=True
                     )
                     ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
@@ -162,13 +162,15 @@ def analyze(
         # convert to string
         data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
+        
         #
         # some screen_name text multiple times a day, yet quandl only provides
         #     daily prices.
         #
         data[sn] = data[sn].groupby([
             'created_at',
-            'screen_name'
+            'screen_name',
+            sentiment
         ]).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
@@ -300,6 +302,7 @@ def analyze(
                 date_index='created_at',
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                 suffix=ts_index,
+                lstm_epochs=500,
                 auto_scale=(50, 0.15)
             )
             ts_results[sn] = ts_stock.get_model_scores()
