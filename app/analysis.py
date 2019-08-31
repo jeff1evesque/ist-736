@@ -101,7 +101,7 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=500,
+                        lstm_epochs=750,
                         catch_grid_search=True
                     )
                     ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
@@ -302,7 +302,7 @@ def analyze(
                 date_index='created_at',
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                 suffix=ts_index,
-                lstm_epochs=500,
+                lstm_epochs=750,
                 auto_scale=(50, 0.15)
             )
             ts_results[sn] = ts_stock.get_model_scores()
@@ -380,7 +380,7 @@ def analyze(
                         ),
                         top_words=25,
                         stopwords=stopwords,
-                        k=500
+                        k=750
                     )
 
     #
