@@ -49,12 +49,15 @@ class Lstm():
         self.history = self.data
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
-        self.data = [x[0] for x in self.scale(
-            data.values.reshape(
-                len(data.values),
-                1
+        self.data = [x[0] if isinstance(x, (list, set, tuple, np.ndarray))
+            else x
+            for x in self.scale(
+                data.values.reshape(
+                    len(data.values),
+                    1
+                )
             )
-        )]
+        ]
 
         #
         # split sequence
@@ -162,7 +165,7 @@ class Lstm():
         inverted = self.scaler.inverse_transform(array)
         return(inverted[0, -1])
 
-    def split_data(self, test_size=0.2):
+    def split_data(self, data=None, test_size=0.2):
         '''
 
         split data into train and test.
@@ -172,11 +175,21 @@ class Lstm():
         '''
 
         # split without shuffling timeseries
-        self.df_train, self.df_test = train_test_split(
-            self.data,
-            test_size=test_size,
-            shuffle=False
-        )
+        if data:
+            return(
+                train_test_split(
+                    self.data,
+                    test_size=test_size,
+                    shuffle=False
+                )
+            )
+
+        else:
+            self.df_train, self.df_test = train_test_split(
+                self.data,
+                test_size=test_size,
+                shuffle=False
+            )
 
     def get_data(self, type=None):
         '''

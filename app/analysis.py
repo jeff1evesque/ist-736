@@ -91,30 +91,31 @@ def analyze(
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                ts_sentiment = Timeseries(
-                    df=data[sn],
-                    normalize_key=sentiment,
-                    date_index='created_at',
-                    directory='{directory}/{sn}'.format(
-                        directory=directory,
-                        sn=sn
-                    ),
-                    suffix=sentiment,
-                    lstm_epochs=1000,
-                    catch_grid_search=True
-                )
-                ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
+                if all(x in data[sn] for x in [sentiment, 'created_at']):
+                    ts_sentiment = Timeseries(
+                        df=data[sn],
+                        normalize_key=sentiment,
+                        date_index='created_at',
+                        directory='{directory}/{sn}'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        suffix=sentiment,
+                        lstm_epochs=750,
+                        catch_grid_search=True
+                    )
+                    ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
 
-                if 'arima' in ts_results_sentiment[sn]:
-                    with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                        directory=directory_report,
-                        sn=sn,
-                        sent=sentiment
-                    ), 'w') as fp:
-                        print(
-                            ts_results_sentiment[sn]['arima']['adf'],
-                            file=fp
-                        )
+                    if 'arima' in ts_results_sentiment[sn]:
+                        with open('{directory}/adf_{sn}_{sent}.txt'.format(
+                            directory=directory_report,
+                            sn=sn,
+                            sent=sentiment
+                        ), 'w') as fp:
+                            print(
+                                ts_results_sentiment[sn]['arima']['adf'],
+                                file=fp
+                            )
 
     #
     # plot sentiment scores
@@ -161,13 +162,15 @@ def analyze(
         # convert to string
         data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
+        
         #
         # some screen_name text multiple times a day, yet quandl only provides
         #     daily prices.
         #
         data[sn] = data[sn].groupby([
             'created_at',
-            'screen_name'
+            'screen_name',
+            sentiment
         ]).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
@@ -299,6 +302,7 @@ def analyze(
                 date_index='created_at',
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                 suffix=ts_index,
+                lstm_epochs=750,
                 auto_scale=(50, 0.15)
             )
             ts_results[sn] = ts_stock.get_model_scores()
@@ -350,7 +354,7 @@ def analyze(
             #
             if analysis_granger:
                 for sentiment in sentiments:
-                    if any(x in data[sn] for x in [ts_index, sentiment]):
+                    if all(x in data[sn] for x in [ts_index, sentiment]):
                         granger(
                             data[sn][[ts_index, sentiment]],
                             maxlag=3,
@@ -365,7 +369,7 @@ def analyze(
             # classify
             #
             if analysis_classify:
-                if any(x in data[sn] for x in ['trend', classify_index]):
+                if all(x in data[sn] for x in ['trend', classify_index]):
                     classify_results[sn] = classify(
                         data[sn],
                         key_class='trend',
@@ -376,7 +380,7 @@ def analyze(
                         ),
                         top_words=25,
                         stopwords=stopwords,
-                        k=500
+                        k=750
                     )
 
     #
@@ -412,7 +416,11 @@ def analyze(
                 rotation=90
             )
 
-        if any('lstm' in v for k,v in ts_results.items()):
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v for k,v in ts_results.items()
+        ):
             plot_bar(
                 labels=[k for k,v in ts_results.items() if 'lstm' in v],
                 performance=[v['lstm']['mse'][1]
