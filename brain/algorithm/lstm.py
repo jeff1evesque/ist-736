@@ -49,30 +49,19 @@ class Lstm():
         self.history = self.data
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
+
         self.data = [x[0] if isinstance(x, (list, set, tuple, np.ndarray))
             else x
-            for x in self.scale(
-                data.values.reshape(
-                    len(data.values),
-                    1
-                )
+            for x in data.values.reshape(
+                len(data.values),
+                1
             )
         ]
 
         #
         # split sequence
         #
-        self.split_data()
-        X1, self.trainY = self.split_sequence(
-            self.df_train,
-            n=self.n_steps_in,
-            m=self.n_steps_out
-        )
-        X2, self.testY = self.split_sequence(
-            self.df_test,
-            n=self.n_steps_in,
-            m=self.n_steps_out
-        )
+        self.split_data(scale=True)
 
         #
         # conditionally define uni/multi-variate
@@ -91,27 +80,21 @@ class Lstm():
             #
             # normalize data
             #
-            self.train_scaled = self.scale(X1)
-            self.trainY = self.scale(
-                self.trainY.reshape(
-                    len(self.trainY),
-                    self.n_features
-                )
+            self.trainY = self.trainY.reshape(
+                len(self.trainY),
+                self.n_features
             )
 
-            self.test_scaled = self.scale(X2)
-            self.testY = self.scale(
-                np.array(self.testY).reshape(
-                    len(self.testY),
-                    self.n_features
-                )
+            self.testY = np.array(self.testY).reshape(
+                len(self.testY),
+                self.n_features
             )
 
             #
             # reshape
             #
-            X1 = np.array([[[a] for a in x] for x in self.train_scaled])
-            X2 = np.array([[[a] for a in x] for x in self.test_scaled])
+            X1 = np.array([[[a] for a in x] for x in self.trainX])
+            X2 = np.array([[[a] for a in x] for x in self.testX])
 
             self.trainX = X1.reshape(
                 X1.shape[0],
@@ -165,7 +148,7 @@ class Lstm():
         inverted = self.scaler.inverse_transform(array)
         return(inverted[0, -1])
 
-    def split_data(self, data=None, test_size=0.2):
+    def split_data(self, data=None, test_size=0.2, scale=False):
         '''
 
         split data into train and test.
@@ -176,20 +159,56 @@ class Lstm():
 
         # split without shuffling timeseries
         if data:
-            return(
-                train_test_split(
-                    self.data,
-                    test_size=test_size,
-                    shuffle=False
-                )
+            train, test = train_test_split(
+                data,
+                test_size=test_size,
+                shuffle=False
             )
 
+            if scale:
+                X, y = self.split_sequence(
+                    train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+                return(self.scale(X), self.scaler.transform(test))
+
+            return(train, test)
+
         else:
-            self.df_train, self.df_test = train_test_split(
+            train, test = train_test_split(
                 self.data,
                 test_size=test_size,
                 shuffle=False
             )
+
+            if scale:
+                X1, self.trainY = self.split_sequence(
+                    train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+                self.trainX = self.scale(X1)
+
+                X2, self.testY = self.split_sequence(
+                    test,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+                self.testX = self.scaler.transform(X2)
+
+            else:
+                self.trainX, self.trainY = self.split_sequence(
+                    train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+                self.testX, self.testY = self.split_sequence(
+                    test,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
 
     def get_data(self, type=None):
         '''
