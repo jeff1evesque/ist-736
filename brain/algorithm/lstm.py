@@ -176,7 +176,7 @@ class Lstm():
             return(train, test)
 
         else:
-            train, test = train_test_split(
+            self.df_train, self.df_test = train_test_split(
                 self.data,
                 test_size=test_size,
                 shuffle=False
@@ -184,14 +184,14 @@ class Lstm():
 
             if scale:
                 X1, self.trainY = self.split_sequence(
-                    train,
+                    self.df_train,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
                 self.trainX = self.scale(X1)
 
                 X2, self.testY = self.split_sequence(
-                    test,
+                    self.df_test,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
@@ -218,23 +218,23 @@ class Lstm():
         '''
 
         if type == 'train_index':
-            return(self.history[:len(self.trainX)].index)
+            return(self.history[:len(self.df_train)].index)
 
         elif type == 'test_index':
-            return(self.history[:len(self.testX)].index)
+            return(self.history[-len(self.df_test):].index)
 
         elif type == 'train_data':
-            return(self.history[:len(self.trainX)].index)
+            return(self.df_train)
 
         elif type == 'test_data':
-            return(self.history[:len(self.testX)].index)
+            return(self.df_test)
 
         else:
             return({
-                'train_index': self.history[:len(self.trainX)].index,
-                'test_index': self.history[-len(self.testX):].index,
-                'train_data': self.trainX,
-                'test_data': self.testX
+                'train_index': self.history[:len(self.df_train)].index,
+                'test_index': self.history[-len(self.df_test):].index,
+                'train_data': self.df_train,
+                'test_data': self.df_test
             })
 
     def get_predict_test(self):
@@ -266,7 +266,11 @@ class Lstm():
             let n = 4, m = 2
 
         Therefore,
+
             [5, 10, 15, 20] [25, 30]
+            [10, 15, 20, 25] [30, 35]
+            [15, 20, 25, 30] [35, 40]
+            [20, 25, 30, 35] [40, 45]
             [25, 30, 35, 40] [45, 50]
 
         '''
