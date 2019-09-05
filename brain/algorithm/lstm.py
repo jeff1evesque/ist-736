@@ -218,23 +218,23 @@ class Lstm():
         '''
 
         if type == 'train_index':
-            return(self.history[:len(self.df_train)].index)
+            return(self.history[:len(self.trainX)].index)
 
         elif type == 'test_index':
-            return(self.history[:len(self.df_test)].index)
+            return(self.history[:len(self.testX)].index)
 
         elif type == 'train_data':
-            return(self.history[:len(self.df_train)].index)
+            return(self.history[:len(self.trainX)].index)
 
         elif type == 'test_data':
-            return(self.history[:len(self.df_test)].index)
+            return(self.history[:len(self.testX)].index)
 
         else:
             return({
-                'train_index': self.history[:len(self.df_train)].index,
-                'test_index': self.history[-len(self.df_test):].index,
-                'train_data': self.df_train,
-                'test_data': self.df_test
+                'train_index': self.history[:len(self.trainX)].index,
+                'test_index': self.history[-len(self.testX):].index,
+                'train_data': self.trainX,
+                'test_data': self.testX
             })
 
     def get_predict_test(self):
@@ -421,18 +421,32 @@ class Lstm():
 
         generate prediction using hold out sample.
 
-        @inverse_transform, convert prediction back to normal scale.
+        Note: since train X is scaled, and target y is not, prediction is not
+              invert-transformed.
 
         '''
 
-        train_predict = self.regressor.predict(self.trainX, verbose=verbose)
-        test_predict = self.regressor.predict(self.testX, verbose=verbose)
+        self.train_predict = []
+        for data in self.trainX:
+            train_input = np.array([x[0] for x in data])
+            train_reshaped = train_input.reshape((
+                1,
+                self.n_steps_in,
+                self.n_features
+            ))
+            predicted = self.regressor.predict(train_reshaped, verbose=verbose)
+            self.train_predict.append(predicted[0][0])
 
-        #
-        # @inverse_transform, convert prediction back to normal scale.
-        #
-        self.train_predict = self.scaler.inverse_transform(train_predict)
-        self.test_predict = self.scaler.inverse_transform(test_predict)
+        self.test_predict = []
+        for data in self.testX:
+            test_input = np.array([x[0] for x in data])
+            test_reshaped = test_input.reshape((
+                1,
+                self.n_steps_in,
+                self.n_features
+            ))
+            predicted = self.regressor.predict(test_reshaped, verbose=verbose)
+            self.test_predict.append(predicted[0][0])
 
         return(self.train_predict, self.test_predict)
 
