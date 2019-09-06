@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, LSTM, Dropout
+from keras.layers import Dense, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
@@ -321,8 +321,8 @@ class Lstm():
         epochs=100,
         dropout=0.2,
         batch_size=32,
-        validation_split=0,
-        activation='linear'
+        validation_split=0.2,
+        activation='sigmoid'
     ):
         '''
 
@@ -337,8 +337,9 @@ class Lstm():
             size parameter, (8, time_steps, num_input_units).
 
         @Dropout, each layer ignores 20% of neurons to reduce overfitting.
-        @activation, 'linear' is generally preferred for regression, while
-            'softmax' is better for classification.
+        @activation, 'linear' is generally preferred for linear regression,
+            'sigmoid' for nonlinear regression, and 'softmax' is better for
+            classification.
 
         '''
 
@@ -354,7 +355,6 @@ class Lstm():
         #
         self.regressor.add(LSTM(
             units = 50,
-            activation = activation,
             return_sequences = True,
             input_shape = (
                 self.n_steps_in,
@@ -366,7 +366,6 @@ class Lstm():
         # second LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation = activation,
             return_sequences = True
         ))
         self.regressor.add(Dropout(dropout))
@@ -374,7 +373,6 @@ class Lstm():
         # third LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation = activation,
             return_sequences = True
         ))
         self.regressor.add(Dropout(dropout))
@@ -382,7 +380,6 @@ class Lstm():
         # fourth LSTM layer with Dropout regularisation
         self.regressor.add(LSTM(
             units = 50,
-            activation = activation,
             return_sequences = False
         ))
         self.regressor.add(Dropout(dropout))
