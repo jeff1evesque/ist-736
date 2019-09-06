@@ -102,6 +102,7 @@ def analyze(
                         ),
                         suffix=sentiment,
                         lstm_epochs=750,
+                        lstm_dropout=0,
                         catch_grid_search=True
                     )
                     ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
@@ -303,6 +304,7 @@ def analyze(
                 directory='{directory}/{sn}'.format(directory=directory, sn=sn),
                 suffix=ts_index,
                 lstm_epochs=750,
+                lstm_dropout=0,
                 auto_scale=(50, 0.15)
             )
             ts_results[sn] = ts_stock.get_model_scores()
