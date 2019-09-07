@@ -425,7 +425,7 @@ def analyze(
         ):
             plot_bar(
                 labels=[k for k,v in ts_results.items() if 'lstm' in v],
-                performance=[v['lstm']['mse'][1]
+                performance=[v['lstm']['mse']
                     for k,v in ts_results.items() if 'lstm' in v],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',

@@ -226,7 +226,7 @@ class Timeseries():
         # predict
         l.predict()
         self.model_scores['lstm'] = {
-            'mse': l.get_mse(),
+            'mse': l.get_mse('test'),
             'history': l.get_fit_history()
         }
 

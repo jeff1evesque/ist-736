@@ -455,7 +455,7 @@ class Lstm():
 
         return(self.train_predict, self.test_predict)
 
-    def get_mse(self):
+    def get_mse(self, type=None):
         '''
 
         return mean squared error.
@@ -471,6 +471,13 @@ class Lstm():
             test_score = math.sqrt(
                 mean_squared_error(actual_test[0], self.test_predict)
             )
+
+            if type == 'train':
+                return(train_score)
+
+            elif type == 'test':
+                return(test_score)
+
             return(train_score, test_score)
 
         except:
