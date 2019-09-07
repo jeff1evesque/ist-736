@@ -360,6 +360,9 @@ class Lstm():
             'sigmoid' for nonlinear regression, and 'softmax' is better for
             classification.
 
+        @num_cells: number of lstm cells, with last cell not return_sequences.
+            Therefore, a minimum of two cells is required.
+
         '''
 
         # class variables
@@ -370,18 +373,35 @@ class Lstm():
         self.regressor = Sequential()
 
         #
-        # lstm cell with dropout regularization
+        # lstm cell: with dropout regularization
         #
-        for cell in range(num_cells):
-            self.regressor.add(LSTM(
-                units = 50,
-                return_sequences = True,
-                input_shape = (
-                    self.n_steps_in,
-                    self.n_features
-                )
-            ))
+        for cell in range(num_cells - 1):
+            if cell == 0:
+                self.regressor.add(LSTM(
+                    units = 50,
+                    return_sequences = True,
+                    input_shape = (
+                        self.n_steps_in,
+                        self.n_features
+                    )
+                ))
+
+            else:
+                self.regressor.add(LSTM(
+                    units = 50,
+                    return_sequences = True
+                ))
+
             self.regressor.add(Dropout(dropout))
+
+        #
+        # lstm cell (last): with dropout regularization
+        #
+        self.regressor.add(LSTM(
+            units = 50,
+            return_sequences = False
+        ))
+        self.regressor.add(Dropout(dropout))
 
         #
         # output layer: only one neuron, since only one value predicted.
@@ -400,11 +420,11 @@ class Lstm():
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
             self.trainX,
-            self.trainY,
+            [x[0] for x in self.trainY],
             epochs = self.epochs,
             batch_size = self.batch_size,
-            verbose = 1,
-            validation_split = validation_split
+            validation_split = validation_split,
+            verbose = 1
         )
 
     def get_lstm_params(self):
