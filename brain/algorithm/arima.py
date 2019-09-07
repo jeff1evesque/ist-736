@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
-from math import log, ceil
+from math import log, exp, ceil
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -31,6 +31,7 @@ class Arima():
         '''
 
         self.data = data
+        self.log_transform = log_transform
         if log_transform:
             self.data = self.data.map(
                 lambda a: log(a + log_transform)
@@ -184,8 +185,15 @@ class Arima():
             )
 
         self.differences = (actuals, predicted, differences)
-        self.mse = mean_squared_error(actuals, predicted)
         self.rolling = rolling
+
+        #
+        # mean square error: compute error using rescaled value(s).
+        #
+        self.mse = mean_squared_error(
+            [exp(x) - self.log_transform for x in actuals],
+            [exp(x) - self.log_transform for x in predicted]
+        )
 
         return(True)
 
