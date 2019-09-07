@@ -73,7 +73,10 @@ class Arima():
 
         '''
 
-        return(self.df_train, self.df_test)
+        return(
+            [exp(x) - self.log_transform for x in self.df_train],
+            [exp(x) - self.log_transform for x in self.df_test]
+        )
 
     def train(
         self,
@@ -350,7 +353,10 @@ class Arima():
 
         '''
 
-        return(self.differences)
+        return(
+            [exp(x) - self.log_transform for x in self.differences[0]],
+            [exp(x) - self.log_transform for x in self.differences[1]]
+        )
 
     def get_rolling(self):
         '''
