@@ -465,11 +465,13 @@ class Lstm():
         actual_train, actual_test = self.get_actual()
 
         try:
-            train_score = math.sqrt(
-                mean_squared_error(actual_train[0], self.train_predict)
+            train_score = mean_squared_error(
+                actual_train[0],
+                self.train_predict
             )
-            test_score = math.sqrt(
-                mean_squared_error(actual_test[0], self.test_predict)
+            test_score = mean_squared_error(
+                actual_test[0],
+                self.test_predict
             )
 
             if type == 'train':
