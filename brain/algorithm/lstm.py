@@ -124,7 +124,7 @@ class Lstm():
 
         return(scaler, scaled)
 
-    def invert_scale(self, scaler, X):
+    def invert_scale(self, scaler, data):
         '''
 
         inverse scale predicted value
@@ -133,7 +133,11 @@ class Lstm():
 
         '''
 
-        return([scaler.inverse_transform(X)])
+        if isinstance(data, np.ndarray):
+            return(scaler.inverse_transform([[x[0] for x in data]]))
+
+        else:
+            return(scaler.inverse_transform([data]))
 
     def split_data(self, data=None, test_size=0.2, scale=False):
         '''
