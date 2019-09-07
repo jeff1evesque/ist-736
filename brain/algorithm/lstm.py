@@ -109,7 +109,7 @@ class Lstm():
 
         @feature_range, range of transformed scale, with zero mean.
 
-        Note: this requires split_data to have run.
+        Note: scaler requires 2D array.
 
         '''
 
@@ -120,9 +120,10 @@ class Lstm():
         # fit scaler: return fitted scaler with data transformed.
         #
         scaler = MinMaxScaler(feature_range=feature_range)
-        scaled = scaler.fit_transform(data)
+        scaler_fit = scaler.fit([[x] for x in data])
+        transformed = scaler_fit.transform([[x] for x in data])
 
-        return(scaler, scaled)
+        return(scaler_fit, [x[0] for x in transformed])
 
     def invert_scale(self, scaler, data):
         '''
@@ -134,10 +135,10 @@ class Lstm():
         '''
 
         if isinstance(data, np.ndarray):
-            return(scaler.inverse_transform([[x[0] for x in data]]))
+            return(scaler.inverse_transform([[x[0] for x in data]])[0])
 
         else:
-            return(scaler.inverse_transform([data]))
+            return(scaler.inverse_transform([data])[0])
 
     def split_data(self, data=None, test_size=0.2, scale=False):
         '''
@@ -150,6 +151,7 @@ class Lstm():
 
         # split without shuffling timeseries
         if data:
+            self.scaler, self.data = self.scale(self.data)
             train, test = train_test_split(
                 data,
                 test_size=test_size,
@@ -157,57 +159,39 @@ class Lstm():
             )
 
             if scale:
-                X1, self.trainY = self.split_sequence(
+                self.trainX, self.trainY = self.split_sequence(
                     train,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
-                scalerX = self.scale(X1)
-                scalerY = self.scale(self.trainY)
-                self.scalerX = scalerX[0]
-                self.scalerY = scalerY[0]
 
-                self.trainX = scalerX[1]
-                self.trainY = scalerY[1]
-
-                X2, self.testY = self.split_sequence(
+                self.testX, self.testY = self.split_sequence(
                     test,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
 
-                self.testX = self.scalerX.transform(X2)
-                self.testY = self.scalerY.transform(self.testY)
-
         else:
-            self.df_train, self.df_test = train_test_split(
-                self.data,
-                test_size=test_size,
-                shuffle=False
-            )
-
             if scale:
-                X1, self.trainY = self.split_sequence(
+                self.scaler, self.data = self.scale(self.data)
+
+                self.df_train, self.df_test = train_test_split(
+                    self.data,
+                    test_size=test_size,
+                    shuffle=False
+                )
+
+                self.trainX, self.trainY = self.split_sequence(
                     self.df_train,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
-                scalerX = self.scale(X1)
-                scalerY = self.scale(self.trainY)
-                self.scalerX = scalerX[0]
-                self.scalerY = scalerY[0]
 
-                self.trainX = scalerX[1]
-                self.trainY = scalerY[1]
-
-                X2, self.testY = self.split_sequence(
+                self.testX, self.testY = self.split_sequence(
                     self.df_test,
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
-
-                self.testX = self.scalerX.transform(X2)
-                self.testY = self.scalerY.transform(self.testY)
 
             else:
                 self.trainX, self.trainY = self.split_sequence(
@@ -236,17 +220,17 @@ class Lstm():
             return(self.history[-len(self.df_test):].index)
 
         elif type == 'train_data':
-            return(self.df_train)
+            return(self.invert_scale(self.scaler, self.df_train))
 
         elif type == 'test_data':
-            return(self.df_test)
+            return(self.invert_scale(self.scaler, self.df_test))
 
         else:
             return({
                 'train_index': self.history[:len(self.df_train)].index,
                 'test_index': self.history[-len(self.df_test):].index,
-                'train_data': self.df_train,
-                'test_data': self.df_test
+                'train_data': self.invert_scale(self.scaler, self.df_train),
+                'test_data': self.invert_scale(self.scaler, self.df_test)
             })
 
     def get_predict_test(self):
@@ -259,8 +243,8 @@ class Lstm():
         '''
 
         return(
-            self.invert_scale(self.scalerX, self.train_predict),
-            self.invert_scale(self.scalerY, self.test_predict)
+            self.invert_scale(self.scaler, self.train_predict),
+            self.invert_scale(self.scaler, self.test_predict)
         )
 
     def get_actual(self):
@@ -273,8 +257,8 @@ class Lstm():
         '''
 
         return(
-            [self.invert_scale(self.scalerY, self.trainY)],
-            [self.invert_scale(self.scalerY, self.testY)]
+            self.invert_scale(self.scaler, [x[0] for x in self.trainY]),
+            self.invert_scale(self.scaler, [x[0] for x in self.testY])
         )
 
     def split_sequence(self, sequence, n, m=1):
@@ -444,9 +428,6 @@ class Lstm():
         '''
 
         generate prediction using hold out sample.
-
-        Note: since train X is scaled, and target y is not, prediction is not
-              invert-transformed.
 
         '''
 
