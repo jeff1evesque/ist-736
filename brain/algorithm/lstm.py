@@ -119,8 +119,6 @@ class Lstm():
         #
         # fit scaler: return fitted scaler with data transformed.
         #
-        # Note: scaler requires 2D array
-        #
         scaler = MinMaxScaler(feature_range=feature_range)
         scaled = scaler.fit_transform(data)
 
@@ -131,9 +129,11 @@ class Lstm():
 
         inverse scale predicted value
 
+        Note: scaler requires 2D array
+
         '''
 
-        return(scaler.inverse_transform(X))
+        return([scaler.inverse_transform(X)])
 
     def split_data(self, data=None, test_size=0.2, scale=False):
         '''
