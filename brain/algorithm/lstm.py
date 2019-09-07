@@ -462,10 +462,10 @@ class Lstm():
 
         try:
             train_score = math.sqrt(
-                mean_squared_error(actual_train[0], self.train_predict[:,0])
+                mean_squared_error(actual_train[0], self.train_predict)
             )
             test_score = math.sqrt(
-                mean_squared_error(actual_test[0], self.test_predict[:,0])
+                mean_squared_error(actual_test[0], self.test_predict)
             )
             return(train_score, test_score)
 
