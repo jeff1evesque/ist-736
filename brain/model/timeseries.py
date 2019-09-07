@@ -16,6 +16,7 @@ def model(
     batch_size=32,
     validation_split=0,
     activation='linear',
+    num_cells=4,
     log_transform=0,
     auto_scale=False,
     rolling_grid_search=False,
@@ -92,7 +93,8 @@ def model(
             dropout=dropout,
             batch_size=batch_size,
             validation_split=validation_split,
-            activation=activation
+            activation=activation,
+            num_cells=num_cells
         )
 
         return(model)

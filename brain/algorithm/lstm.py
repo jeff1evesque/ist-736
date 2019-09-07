@@ -353,7 +353,8 @@ class Lstm():
         dropout=0.2,
         batch_size=32,
         validation_split=0.2,
-        activation='sigmoid'
+        activation='sigmoid',
+        num_cells=4
     ):
         '''
 
@@ -382,38 +383,18 @@ class Lstm():
         self.regressor = Sequential()
 
         #
-        # first LSTM layer with Dropout regularisation
+        # lstm cell with dropout regularization
         #
-        self.regressor.add(LSTM(
-            units = 50,
-            return_sequences = True,
-            input_shape = (
-                self.n_steps_in,
-                self.n_features
-            )
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # second LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            return_sequences = True
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # third LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            return_sequences = True
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # fourth LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            return_sequences = False
-        ))
-        self.regressor.add(Dropout(dropout))
+        for cell in range(num_cells):
+            self.regressor.add(LSTM(
+                units = 50,
+                return_sequences = True,
+                input_shape = (
+                    self.n_steps_in,
+                    self.n_features
+                )
+            ))
+            self.regressor.add(Dropout(dropout))
 
         #
         # output layer: only one neuron, since only one value predicted.

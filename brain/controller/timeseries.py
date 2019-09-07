@@ -32,6 +32,7 @@ class Timeseries():
         lstm_batch_size=32,
         lstm_validation_split=0,
         lstm_activation='linear',
+        lstm_num_cells=4,
         auto_scale=False,
         rolling_grid_search=False,
         catch_grid_search=False
@@ -67,6 +68,7 @@ class Timeseries():
                 dropout=lstm_dropout,
                 batch_size=lstm_batch_size,
                 validation_split=lstm_validation_split,
+                num_cells=lstm_num_cells,
                 activation='linear',
                 directory=directory,
                 suffix=suffix
@@ -200,6 +202,7 @@ class Timeseries():
         batch_size=32,
         validation_split=0,
         activation='linear',
+        num_cells=4,
         xticks=True
     ):
 
