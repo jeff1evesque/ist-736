@@ -78,19 +78,6 @@ class Lstm():
             self.n_features = 1
 
             #
-            # normalize data
-            #
-            self.trainY = self.trainY.reshape(
-                len(self.trainY),
-                self.n_features
-            )
-
-            self.testY = np.array(self.testY).reshape(
-                len(self.testY),
-                self.n_features
-            )
-
-            #
             # reshape
             #
             X1 = np.array([[[a] for a in x] for x in self.trainX])
