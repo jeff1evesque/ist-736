@@ -63,7 +63,7 @@ def model(
             result[0][1] <= 0.05
         ):
 
-            iterations = len(model.get_data()[1])
+            iterations = len(model.get_data('test'))
             success = model.train(
                 iterations=iterations,
                 order=result[2],

@@ -66,17 +66,31 @@ class Arima():
         self.df_test = self.y_test
         self.history = self.df_train
 
-    def get_data(self):
+    def get_data(self, type=None):
         '''
 
         get current train and test data.
 
         '''
 
-        return(
-            [exp(x) - self.log_transform for x in self.df_train],
-            [exp(x) - self.log_transform for x in self.df_test]
-        )
+        if type == 'train_index':
+            return(self.df_train.index.values)
+
+        elif type == 'test_index':
+            return(self.df_test.index.values)
+
+        elif type == 'train':
+            return([exp(x) - self.log_transform for x in self.df_train])
+
+        elif type == 'test':
+            return([exp(x) - self.log_transform for x in self.df_train])
+
+        return({
+            'train_index': self.df_train.index.values,
+            'test_index': self.df_test.index.values,
+            'train': [exp(x) - self.log_transform for x in self.df_train],
+            'test': [exp(x) - self.log_transform for x in self.df_test]
+        })
 
     def train(
         self,
@@ -195,7 +209,7 @@ class Arima():
         #
         self.mse = mean_squared_error(
             [exp(x) - self.log_transform for x in actuals],
-            [exp(x) - self.log_transform for x in predicted]
+            [exp(x) - self.log_transform for x in predicted[:len(actuals)]]
         )
 
         return(True)
@@ -346,12 +360,18 @@ class Arima():
 
         return(result)
 
-    def get_differences(self):
+    def get_differences(self, type=None):
         '''
 
         return differences between prediction against corresponding actual.
 
         '''
+
+        if type == 'test':
+            return([exp(x) - self.log_transform for x in self.differences[0]])
+
+        elif type == 'predicted':
+            return([exp(x) - self.log_transform for x in self.differences[1]])
 
         return(
             [exp(x) - self.log_transform for x in self.differences[0]],
