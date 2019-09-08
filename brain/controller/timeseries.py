@@ -32,6 +32,7 @@ class Timeseries():
         lstm_batch_size=32,
         lstm_validation_split=0,
         lstm_activation='linear',
+        lstm_num_cells=4,
         auto_scale=False,
         rolling_grid_search=False,
         catch_grid_search=False
@@ -67,6 +68,7 @@ class Timeseries():
                 dropout=lstm_dropout,
                 batch_size=lstm_batch_size,
                 validation_split=lstm_validation_split,
+                num_cells=lstm_num_cells,
                 activation='linear',
                 directory=directory,
                 suffix=suffix
@@ -118,28 +120,26 @@ class Timeseries():
 
             if plot:
                 #
-                # @dates, full date range
                 # @train_actual, entire train values
                 # @test_actual, entire train values
                 # @predicted, only predicted values
                 #
-                dates = a[0].get_data()
                 if diff > 1:
                     train_actual = a[0].get_difference(
-                        data=a[0].get_data()[0],
+                        data=a[0].get_data('train'),
                         diff=diff
                     )
 
                 else:
-                    train_actual = a[0].get_data()[0]
+                    train_actual = a[0].get_data('train')
 
-                test_actual = a[0].get_differences()[0]
-                predicted = a[0].get_differences()[1]
+                test_actual = a[0].get_differences('test')
+                predicted = a[0].get_differences('predicted')
 
                 test_predicted_df = pd.DataFrame({
                     'actual': test_actual,
-                    'predicted': predicted,
-                    'dates': a[0].get_data()[1].index
+                    'predicted': predicted[:len(test_actual)],
+                    'dates': a[0].get_data('test_index')
                 })
                 test_predicted_df_long = pd.melt(
                     test_predicted_df,
@@ -151,7 +151,7 @@ class Timeseries():
                 plot_ts(
                     data=pd.DataFrame({
                         'values': train_actual,
-                        'dates': dates[0].index.values
+                        'dates': a[0].get_data('train_index')
                     }),
                     xlab='dates',
                     ylab='values',
@@ -200,6 +200,7 @@ class Timeseries():
         batch_size=32,
         validation_split=0,
         activation='linear',
+        num_cells=4,
         xticks=True
     ):
 
@@ -225,7 +226,7 @@ class Timeseries():
         # predict
         l.predict()
         self.model_scores['lstm'] = {
-            'mse': l.get_mse(),
+            'mse': l.get_mse('test'),
             'history': l.get_fit_history()
         }
 
