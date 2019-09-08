@@ -466,11 +466,11 @@ class Lstm():
 
         try:
             train_score = mean_squared_error(
-                actual_train[0],
+                actual_train,
                 self.train_predict
             )
             test_score = mean_squared_error(
-                actual_test[0],
+                actual_test,
                 self.test_predict
             )
 
@@ -482,7 +482,7 @@ class Lstm():
 
             return(train_score, test_score)
 
-        except:
+        except Exception as e:
             return('No score available')
 
     def get_model(self):
