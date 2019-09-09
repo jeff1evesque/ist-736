@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, LSTM, Dropout
+from keras.layers import Dense, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
@@ -49,30 +49,19 @@ class Lstm():
         self.history = self.data
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
+
         self.data = [x[0] if isinstance(x, (list, set, tuple, np.ndarray))
             else x
-            for x in self.scale(
-                data.values.reshape(
-                    len(data.values),
-                    1
-                )
+            for x in data.values.reshape(
+                len(data.values),
+                1
             )
         ]
 
         #
         # split sequence
         #
-        self.split_data()
-        X1, self.trainY = self.split_sequence(
-            self.df_train,
-            n=self.n_steps_in,
-            m=self.n_steps_out
-        )
-        X2, self.testY = self.split_sequence(
-            self.df_test,
-            n=self.n_steps_in,
-            m=self.n_steps_out
-        )
+        self.split_data(scale=True)
 
         #
         # conditionally define uni/multi-variate
@@ -89,29 +78,10 @@ class Lstm():
             self.n_features = 1
 
             #
-            # normalize data
-            #
-            self.train_scaled = self.scale(X1)
-            self.trainY = self.scale(
-                self.trainY.reshape(
-                    len(self.trainY),
-                    self.n_features
-                )
-            )
-
-            self.test_scaled = self.scale(X2)
-            self.testY = self.scale(
-                np.array(self.testY).reshape(
-                    len(self.testY),
-                    self.n_features
-                )
-            )
-
-            #
             # reshape
             #
-            X1 = np.array([[[a] for a in x] for x in self.train_scaled])
-            X2 = np.array([[[a] for a in x] for x in self.test_scaled])
+            X1 = np.array([[[a] for a in x] for x in self.trainX])
+            X2 = np.array([[[a] for a in x] for x in self.testX])
 
             self.trainX = X1.reshape(
                 X1.shape[0],
@@ -139,7 +109,7 @@ class Lstm():
 
         @feature_range, range of transformed scale, with zero mean.
 
-        Note: this requires split_data to have run.
+        Note: scaler requires 2D array.
 
         '''
 
@@ -147,25 +117,30 @@ class Lstm():
             data = self.data
 
         #
-        # fit scaler: scaler requires 2D array
+        # fit scaler: return fitted scaler with data transformed.
         #
-        self.scaler = MinMaxScaler(feature_range=feature_range)
-        return(self.scaler.fit_transform(data))
+        scaler = MinMaxScaler(feature_range=feature_range)
+        scaler_fit = scaler.fit([[x] for x in data])
+        transformed = scaler_fit.transform([[x] for x in data])
 
-    def invert_scale(self, X, y_hat):
+        return(scaler_fit, [x[0] for x in transformed])
+
+    def invert_scale(self, scaler, data):
         '''
 
         inverse scale predicted value
 
+        Note: scaler requires 2D array
+
         '''
 
-        new_row = [x for x in X] + [yhat]
-        array = numpy.array(new_row)
-        array = array.reshape(1, len(array))
-        inverted = self.scaler.inverse_transform(array)
-        return(inverted[0, -1])
+        if isinstance(data, np.ndarray):
+            return(scaler.inverse_transform([[x[0] for x in data]])[0])
 
-    def split_data(self, data=None, test_size=0.2):
+        else:
+            return(scaler.inverse_transform([data])[0])
+
+    def split_data(self, data=None, test_size=0.2, scale=False):
         '''
 
         split data into train and test.
@@ -176,20 +151,60 @@ class Lstm():
 
         # split without shuffling timeseries
         if data:
-            return(
-                train_test_split(
+            self.scaler, self.data = self.scale(self.data)
+            train, test = train_test_split(
+                data,
+                test_size=test_size,
+                shuffle=False
+            )
+
+            if scale:
+                self.trainX, self.trainY = self.split_sequence(
+                    train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+                self.testX, self.testY = self.split_sequence(
+                    test,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+        else:
+            if scale:
+                self.scaler, self.data = self.scale(self.data)
+
+                self.df_train, self.df_test = train_test_split(
                     self.data,
                     test_size=test_size,
                     shuffle=False
                 )
-            )
 
-        else:
-            self.df_train, self.df_test = train_test_split(
-                self.data,
-                test_size=test_size,
-                shuffle=False
-            )
+                self.trainX, self.trainY = self.split_sequence(
+                    self.df_train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+                self.testX, self.testY = self.split_sequence(
+                    self.df_test,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+            else:
+                self.trainX, self.trainY = self.split_sequence(
+                    train,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
+
+                self.testX, self.testY = self.split_sequence(
+                    test,
+                    n=self.n_steps_in,
+                    m=self.n_steps_out
+                )
 
     def get_data(self, type=None):
         '''
@@ -202,20 +217,20 @@ class Lstm():
             return(self.history[:len(self.df_train)].index)
 
         elif type == 'test_index':
-            return(self.history[:len(self.df_test)].index)
+            return(self.history[-len(self.df_test):].index)
 
         elif type == 'train_data':
-            return(self.history[:len(self.df_train)].index)
+            return(self.invert_scale(self.scaler, self.df_train))
 
         elif type == 'test_data':
-            return(self.history[:len(self.df_test)].index)
+            return(self.invert_scale(self.scaler, self.df_test))
 
         else:
             return({
                 'train_index': self.history[:len(self.df_train)].index,
                 'test_index': self.history[-len(self.df_test):].index,
-                'train_data': self.df_train,
-                'test_data': self.df_test
+                'train_data': self.invert_scale(self.scaler, self.df_train),
+                'test_data': self.invert_scale(self.scaler, self.df_test)
             })
 
     def get_predict_test(self):
@@ -223,18 +238,28 @@ class Lstm():
 
         return previous prediction result.
 
+        Note: original data was scaled using minmaxscaler.
+
         '''
 
-        return(self.train_predict, self.test_predict)
+        return(
+            self.invert_scale(self.scaler, self.train_predict),
+            self.invert_scale(self.scaler, self.test_predict)
+        )
 
     def get_actual(self):
         '''
 
         get lagged values.
 
+        Note: original data was scaled using minmaxscaler.
+
         '''
 
-        return([self.trainY], [self.testY])
+        return(
+            self.invert_scale(self.scaler, [x[0] for x in self.trainY]),
+            self.invert_scale(self.scaler, [x[0] for x in self.testY])
+        )
 
     def split_sequence(self, sequence, n, m=1):
         '''
@@ -247,7 +272,11 @@ class Lstm():
             let n = 4, m = 2
 
         Therefore,
+
             [5, 10, 15, 20] [25, 30]
+            [10, 15, 20, 25] [30, 35]
+            [15, 20, 25, 30] [35, 40]
+            [20, 25, 30, 35] [40, 45]
             [25, 30, 35, 40] [45, 50]
 
         '''
@@ -298,8 +327,9 @@ class Lstm():
         epochs=100,
         dropout=0.2,
         batch_size=32,
-        validation_split=0,
-        activation='linear'
+        validation_split=0.2,
+        activation='sigmoid',
+        num_cells=4
     ):
         '''
 
@@ -314,8 +344,12 @@ class Lstm():
             size parameter, (8, time_steps, num_input_units).
 
         @Dropout, each layer ignores 20% of neurons to reduce overfitting.
-        @activation, 'linear' is generally preferred for regression, while
-            'softmax' is better for classification.
+        @activation, 'linear' is generally preferred for linear regression,
+            'sigmoid' for nonlinear regression, and 'softmax' is better for
+            classification.
+
+        @num_cells: number of lstm cells, with last cell not return_sequences.
+            Therefore, a minimum of two cells is required.
 
         '''
 
@@ -327,39 +361,32 @@ class Lstm():
         self.regressor = Sequential()
 
         #
-        # first LSTM layer with Dropout regularisation
+        # lstm cell: with dropout regularization
+        #
+        for cell in range(num_cells - 1):
+            if cell == 0:
+                self.regressor.add(LSTM(
+                    units = 50,
+                    return_sequences = True,
+                    input_shape = (
+                        self.n_steps_in,
+                        self.n_features
+                    )
+                ))
+
+            else:
+                self.regressor.add(LSTM(
+                    units = 50,
+                    return_sequences = True
+                ))
+
+            self.regressor.add(Dropout(dropout))
+
+        #
+        # lstm cell (last): with dropout regularization
         #
         self.regressor.add(LSTM(
             units = 50,
-            activation = activation,
-            return_sequences = True,
-            input_shape = (
-                self.n_steps_in,
-                self.n_features
-            )
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # second LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            activation = activation,
-            return_sequences = True
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # third LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            activation = activation,
-            return_sequences = True
-        ))
-        self.regressor.add(Dropout(dropout))
-
-        # fourth LSTM layer with Dropout regularisation
-        self.regressor.add(LSTM(
-            units = 50,
-            activation = activation,
             return_sequences = False
         ))
         self.regressor.add(Dropout(dropout))
@@ -381,11 +408,11 @@ class Lstm():
         # fit RNN to train data
         self.fit_history = self.regressor.fit(
             self.trainX,
-            self.trainY,
+            [x[0] for x in self.trainY],
             epochs = self.epochs,
             batch_size = self.batch_size,
-            verbose = 1,
-            validation_split = validation_split
+            validation_split = validation_split,
+            verbose = 1
         )
 
     def get_lstm_params(self):
@@ -402,22 +429,33 @@ class Lstm():
 
         generate prediction using hold out sample.
 
-        @inverse_transform, convert prediction back to normal scale.
-
         '''
 
-        train_predict = self.regressor.predict(self.trainX, verbose=verbose)
-        test_predict = self.regressor.predict(self.testX, verbose=verbose)
+        self.train_predict = []
+        for data in self.trainX:
+            train_input = np.array([x[0] for x in data])
+            train_reshaped = train_input.reshape((
+                1,
+                self.n_steps_in,
+                self.n_features
+            ))
+            predicted = self.regressor.predict(train_reshaped, verbose=verbose)
+            self.train_predict.append(predicted[0][0])
 
-        #
-        # @inverse_transform, convert prediction back to normal scale.
-        #
-        self.train_predict = self.scaler.inverse_transform(train_predict)
-        self.test_predict = self.scaler.inverse_transform(test_predict)
+        self.test_predict = []
+        for data in self.testX:
+            test_input = np.array([x[0] for x in data])
+            test_reshaped = test_input.reshape((
+                1,
+                self.n_steps_in,
+                self.n_features
+            ))
+            predicted = self.regressor.predict(test_reshaped, verbose=verbose)
+            self.test_predict.append(predicted[0][0])
 
         return(self.train_predict, self.test_predict)
 
-    def get_mse(self):
+    def get_mse(self, type=None):
         '''
 
         return mean squared error.
@@ -427,15 +465,24 @@ class Lstm():
         actual_train, actual_test = self.get_actual()
 
         try:
-            train_score = math.sqrt(
-                mean_squared_error(actual_train[0], self.train_predict[:,0])
+            train_score = mean_squared_error(
+                actual_train,
+                self.train_predict
             )
-            test_score = math.sqrt(
-                mean_squared_error(actual_test[0], self.test_predict[:,0])
+            test_score = mean_squared_error(
+                actual_test,
+                self.test_predict
             )
+
+            if type == 'train':
+                return(train_score)
+
+            elif type == 'test':
+                return(test_score)
+
             return(train_score, test_score)
 
-        except:
+        except Exception as e:
             return('No score available')
 
     def get_model(self):

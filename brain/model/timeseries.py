@@ -16,6 +16,7 @@ def model(
     batch_size=32,
     validation_split=0,
     activation='linear',
+    num_cells=4,
     log_transform=0,
     auto_scale=False,
     rolling_grid_search=False,
@@ -62,7 +63,7 @@ def model(
             result[0][1] <= 0.05
         ):
 
-            iterations = len(model.get_data()[1])
+            iterations = len(model.get_data('test'))
             success = model.train(
                 iterations=iterations,
                 order=result[2],
@@ -92,7 +93,8 @@ def model(
             dropout=dropout,
             batch_size=batch_size,
             validation_split=validation_split,
-            activation=activation
+            activation=activation,
+            num_cells=num_cells
         )
 
         return(model)

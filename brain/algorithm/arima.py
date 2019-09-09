@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
-from math import log, ceil
+from math import log, exp, ceil
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
@@ -31,6 +31,7 @@ class Arima():
         '''
 
         self.data = data
+        self.log_transform = log_transform
         if log_transform:
             self.data = self.data.map(
                 lambda a: log(a + log_transform)
@@ -65,14 +66,31 @@ class Arima():
         self.df_test = self.y_test
         self.history = self.df_train
 
-    def get_data(self):
+    def get_data(self, type=None):
         '''
 
         get current train and test data.
 
         '''
 
-        return(self.df_train, self.df_test)
+        if type == 'train_index':
+            return(self.df_train.index.values)
+
+        elif type == 'test_index':
+            return(self.df_test.index.values)
+
+        elif type == 'train':
+            return([exp(x) - self.log_transform for x in self.df_train])
+
+        elif type == 'test':
+            return([exp(x) - self.log_transform for x in self.df_train])
+
+        return({
+            'train_index': self.df_train.index.values,
+            'test_index': self.df_test.index.values,
+            'train': [exp(x) - self.log_transform for x in self.df_train],
+            'test': [exp(x) - self.log_transform for x in self.df_test]
+        })
 
     def train(
         self,
@@ -184,8 +202,15 @@ class Arima():
             )
 
         self.differences = (actuals, predicted, differences)
-        self.mse = mean_squared_error(actuals, predicted)
         self.rolling = rolling
+
+        #
+        # mean square error: compute error using rescaled value(s).
+        #
+        self.mse = mean_squared_error(
+            [exp(x) - self.log_transform for x in actuals],
+            [exp(x) - self.log_transform for x in predicted[:len(actuals)]]
+        )
 
         return(True)
 
@@ -335,14 +360,23 @@ class Arima():
 
         return(result)
 
-    def get_differences(self):
+    def get_differences(self, type=None):
         '''
 
         return differences between prediction against corresponding actual.
 
         '''
 
-        return(self.differences)
+        if type == 'test':
+            return([exp(x) - self.log_transform for x in self.differences[0]])
+
+        elif type == 'predicted':
+            return([exp(x) - self.log_transform for x in self.differences[1]])
+
+        return(
+            [exp(x) - self.log_transform for x in self.differences[0]],
+            [exp(x) - self.log_transform for x in self.differences[1]]
+        )
 
     def get_rolling(self):
         '''
