@@ -345,20 +345,17 @@ def analyze(
         if len(counter) > 2:
             for key, val in counter.items():
                 if all(val < 0.5 * v for k,v in counter.items() if v != val):
-                    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-                    pritn(data[sn].index)
-                    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
                     data[sn].drop(
-                        data[sn][data[sn]['trend'] == key].index,
+                        data[sn][data[sn]['trend'] == key].index.values,
                         inplace=True
-                    ).reset_index(inplace=True)
+                    )
                     break
 
                 elif all(val > 1.5 * v for k,v in counter.items() if v != val):
                     data[sn].drop(
-                        data[sn][data[sn]['trend'] == key].index,
+                        data[sn][data[sn]['trend'] == key].index,values,
                         inplace=True
-                    ).reset_index(inplace=True)
+                    )
                     break
 
         #
