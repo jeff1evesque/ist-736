@@ -23,10 +23,10 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=True,
-    analysis_ts_sentiment=True,
+    analysis_ts=False,
+    analysis_ts_sentiment=False,
     analysis_granger=True,
-    analysis_classify=True
+    analysis_classify=False
 ):
     '''
 
@@ -37,6 +37,7 @@ def analyze(
     classify_results = {}
     ts_results = {}
     ts_results_sentiment = {}
+    g = ['created_at', 'screen_name'] + sentiments
     this_file = os.path.basename(__file__)
 
     #
@@ -46,6 +47,13 @@ def analyze(
         os.makedirs(directory_report)
 
     for i,sn in enumerate(screen_name):
+        #
+        # rename column: prevent collision with 'reset_index'
+        #
+        if 'index' in data[sn]:
+            data[sn].rename(columns={'index': 'index_val'}, inplace=True)
+
+        # create directories
         if not os.path.exists('{directory}/{sn}/granger'.format(
             directory=directory,
             sn=sn
@@ -55,10 +63,6 @@ def analyze(
                 sn=sn
             ))
 
-    #
-    # timeseries analysis: sentiment
-    #
-    for i,sn in enumerate(screen_name):
         # consistent datetime
         data[sn]['created_at'] = [datetime.strptime(
             x.split()[0],
@@ -72,13 +76,13 @@ def analyze(
         # some screen_name text multiple times a day, yet quandl only provides
         #     daily prices.
         #
-        data[sn] = data[sn].groupby([
-            'created_at',
-            'screen_name'
-        ]).agg({
+        data[sn] = data[sn].groupby(g).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
+        #
+        # timeseries analysis: sentiment
+        #
         if analysis_ts_sentiment:
             #
             # sentiment scores
@@ -163,16 +167,11 @@ def analyze(
         # convert to string
         data[sn]['created_at'] = data[sn]['created_at'].astype(str)
 
-        
         #
         # some screen_name text multiple times a day, yet quandl only provides
         #     daily prices.
         #
-        data[sn] = data[sn].groupby([
-            'created_at',
-            'screen_name',
-            sentiment
-        ]).agg({
+        data[sn] = data[sn].groupby(g).agg({
             classify_index: lambda a: ''.join(map(str, a))
         }).reset_index()
 
@@ -180,6 +179,24 @@ def analyze(
             df_quandl.set_index('date'),
             how='left'
         ).reset_index()
+
+        #
+        # granger causality
+        #
+        # Note: this requires the above quandl join.
+        #
+        if analysis_granger:
+            for sentiment in sentiments:
+                if all(x in data[sn] for x in [ts_index, sentiment]):
+                    granger(
+                        data[sn][[ts_index, sentiment]],
+                        maxlag=3,
+                        directory='{directory}/{sn}/granger'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        suffix=sentiment
+                    )
 
         # column names: used below
         col_names = data[sn].columns.tolist()
@@ -328,19 +345,20 @@ def analyze(
         if len(counter) > 2:
             for key, val in counter.items():
                 if all(val < 0.5 * v for k,v in counter.items() if v != val):
+                    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+                    pritn(data[sn].index)
+                    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
                     data[sn].drop(
                         data[sn][data[sn]['trend'] == key].index,
                         inplace=True
-                    )
-                    data[sn].reset_index(inplace=True)
+                    ).reset_index(inplace=True)
                     break
 
                 elif all(val > 1.5 * v for k,v in counter.items() if v != val):
                     data[sn].drop(
                         data[sn][data[sn]['trend'] == key].index,
                         inplace=True
-                    )
-                    data[sn].reset_index(inplace=True)
+                    ).reset_index(inplace=True)
                     break
 
         #
@@ -351,22 +369,6 @@ def analyze(
         #       adds two additional classes.
         #
         if data[sn].shape[0] > (3 + ((len(threshold) - 1) * 2)) * 20:
-            #
-            # granger causality
-            #
-            if analysis_granger:
-                for sentiment in sentiments:
-                    if all(x in data[sn] for x in [ts_index, sentiment]):
-                        granger(
-                            data[sn][[ts_index, sentiment]],
-                            maxlag=3,
-                            directory='{directory}/{sn}/granger'.format(
-                                directory=directory,
-                                sn=sn
-                            ),
-                            suffix=sentiment
-                        )
-
             #
             # classify
             #
@@ -431,3 +433,4 @@ def analyze(
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
+
