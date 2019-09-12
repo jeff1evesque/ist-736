@@ -32,36 +32,41 @@ def join_data(
     # preprocess: left join on twitter dataset(s).
     #
     for i,sn in enumerate(screen_name):
-        # merge with consistent date format
-        data[sn]['created_at'] = [datetime.strptime(
-            x.split()[0],
-            '%Y-%m-%d'
-        ) for x in data[sn]['created_at']]
-
-        # convert to string
-        data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-
-        #
-        # some screen_name text multiple times a day, yet quandl only provides
-        #     daily prices.
-        #
-        data[sn] = data[sn].groupby(g).agg({
-            classify_index: lambda a: ''.join(map(str, a))
-        }).reset_index()
 
         if 'created_at' in data[sn]:
+            # merge with consistent date format
+            data[sn]['created_at'] = [datetime.strptime(
+                x.split()[0],
+                '%Y-%m-%d'
+            ) for x in data[sn]['created_at']]
+
+            # convert to string
+            data[sn]['created_at'] = data[sn]['created_at'].astype(str)
+
+            # set index
             data[sn].set_index('created_at', inplace=True)
+            data[sn].index.name = 'created_at'
+
+            #
+            # some screen_name text multiple times a day, yet quandl only provides
+            #     daily prices.
+            #
+            data[sn] = data[sn].groupby(g).agg({
+                classify_index: lambda a: ''.join(map(str, a))
+            }).reset_index()
+
+            # set index
+            data[sn].set_index('created_at', inplace=True)
+            data[sn].index.name = 'created_at'
 
         if 'date' in df_quandl:
             df_quandl.set_index('date', inplace=True)
+            df_quandl.index.name = 'created_at'
 
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa')
-        print(df_quandl.index.name)
-        print(list(df_quandl))
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa')
-
-        data[sn] = data[sn].join(df_quandl, how='left')
-        data[sn].index.name = 'created_at'
+        #
+        # merge dataset: twitter and quandl
+        #
+        data[sn] = data[sn].merge(df_quandl, on='created_at', how='left')
 
         # column names: used below
         col_names = data[sn].columns.tolist()
