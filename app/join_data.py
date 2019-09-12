@@ -100,6 +100,11 @@ def join_data(
         # drop rows: rows with no tickers and empty classify_index.
         #
         drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
-        data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
+
+        if (
+            len(drop_indices) > 0 and
+            any(x in data[sn].index for x in drop_indices)
+        ):
+            data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
 
     return(data)
