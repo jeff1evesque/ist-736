@@ -93,8 +93,9 @@ def analyze(
                 classify_index: lambda a: ''.join(map(str, a))
             }).reset_index()
 
-            initialized_data[sn] = initialized_data[sn].set_index('created_at').join(
-                df_quandl.set_index('date'),
+            initialized_data[sn].set_index('created_at', inplace=True)
+            initialized_data[sn] = initialized_data[sn].join(
+                df_quandl,
                 how='left'
             ).reset_index()
 
