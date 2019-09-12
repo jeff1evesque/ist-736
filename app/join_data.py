@@ -14,7 +14,8 @@ def join_data(
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
-    ts_index='value'
+    ts_index='value',
+    threshold = [0.5]
 ):
     '''
 
@@ -100,80 +101,5 @@ def join_data(
         #
         drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
         data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
-
-        #
-        # index data: conditionally use z-score threshold to relabel index.
-        #
-        threshold = [0.5]
-        signals = peak_detection(
-            data=data[sn][ts_index],
-            threshold=threshold,
-            directory='{a}/{b}'.format(a=directory, b=sn),
-            suffix=sn
-        )
-
-        #
-        # case 1: z-score threshold determines trend index
-        #
-        if signals:
-            signal_result = []
-            for z in range(1, len(signals) + 1):
-                signal = signals[z-1]
-                for i,s in enumerate(signal):
-                    if (len(signal_result) == 0 or len(signal_result) == i):
-                        if s < 0:
-                            signal_result.append(-z)
-                        elif s > 0:
-                            signal_result.append(z)
-                        else:
-                            signal_result.append(0)
-
-                    elif (
-                        i < len(signal_result) and
-                        s < 0 and
-                        s < signal_result[i]
-                    ):
-                        signal_result[i] = -z
-
-                    elif (
-                        i < len(signal_result) and
-                        s > 0 and
-                        s > signal_result[i]
-                    ):
-                        signal_result[i] = z
-
-                    elif (
-                        i < len(signal_result) and
-                        s == 0 and
-                        s > signal_result[i]
-                    ):
-                        signal_result[i] = 0
-
-                    else:
-                        print('Error ({f}): {m}.'.format(
-                            f=this_file,
-                            m='distorted signal_result shape'
-                        ))
-
-            # monotic: if all same values use non z-score.
-            first = signal_result[0]
-            if all(x == first for x in signal_result):
-                data[sn]['trend'] = [0
-                    if data[sn][ts_index].values[i] > data[sn][ts_index].get(i-1, 0)
-                    else 1
-                    for i,x in enumerate(data[sn][ts_index])]
-
-            # not monotonic
-            else:
-                data[sn]['trend'] = signal_result
-
-        #
-        # case 2: previous index value determines trend index
-        #
-        else:
-            data[sn]['trend'] = [0
-                if data[sn][ts_index].values[i] > data[sn][ts_index].get(i-1, 0)
-                else 1
-                for i,x in enumerate(data[sn][ts_index])]
 
     return(data)

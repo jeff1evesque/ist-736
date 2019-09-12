@@ -10,6 +10,7 @@ from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
+from brain.controller.peak_detection import peak_detection
 from app.join_data import join_data
 
 
@@ -25,8 +26,8 @@ def analyze(
     ts_index='value',
     analysis_ts=False,
     analysis_ts_sentiment=False,
-    analysis_granger=True,
-    analysis_classify=False
+    analysis_granger=False,
+    analysis_classify=True
 ):
     '''
 
@@ -193,124 +194,136 @@ def analyze(
     # timeseries analysis: overall stock index/volume
     #
     if analysis_ts:
-        #
-        # timeseries analysis: if dataset not 50 elements or more (x), use the
-        #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
-        #     is determined by 0.15x:
-        #
-        #     (p,q,d) = (range(0, 0.15x), range(0, 0.15x), range(0, 0.15x))
-        #
-        # Note: if arima does not converge, or the adf test does not satisfy
-        #       p < 0.05, the corresponding model is thrown out.
-        #
-        ts_stock = Timeseries(
-            df=joined_data[sn],
-            normalize_key=ts_index,
-            date_index='created_at',
-            directory='{directory}/{sn}'.format(directory=directory, sn=sn),
-            suffix=ts_index,
-            lstm_epochs=1500,
-            lstm_dropout=0,
-            auto_scale=(50, 0.15)
-        )
-        ts_results[sn] = ts_stock.get_model_scores()
-
-        if 'arima' in ts_results[sn]:
-            with open('{directory}/adf_{sn}_{type}.txt'.format(
-                directory=directory_report,
-                sn=sn,
-                type=ts_index
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
-
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'arima' in v for k,v in ts_results.items()
-        ):
-            plot_bar(
-                labels=[k for k,v in ts_results.items() if 'arima' in v],
-                performance=[v['arima']['mse']
-                    for k,v in ts_results.items() if 'arima' in v],
-                directory='{directory}'.format(directory=directory),
-                filename='mse_overall_arima.png',
-                rotation=90
+        for i,sn in enumerate(screen_name):
+            #
+            # timeseries analysis: if dataset not 50 elements or more (x), use the
+            #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
+            #     is determined by 0.15x:
+            #
+            #     (p,q,d) = (range(0, 0.15x), range(0, 0.15x), range(0, 0.15x))
+            #
+            # Note: if arima does not converge, or the adf test does not satisfy
+            #       p < 0.05, the corresponding model is thrown out.
+            #
+            ts_stock = Timeseries(
+                df=joined_data[sn],
+                normalize_key=ts_index,
+                date_index='created_at',
+                directory='{directory}/{sn}'.format(directory=directory, sn=sn),
+                suffix=ts_index,
+                lstm_epochs=1500,
+                lstm_dropout=0,
+                auto_scale=(50, 0.15)
             )
+            ts_results[sn] = ts_stock.get_model_scores()
 
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'lstm' in v for k,v in ts_results.items()
-        ):
-            plot_bar(
-                labels=[k for k,v in ts_results.items() if 'lstm' in v],
-                performance=[v['lstm']['mse']
-                    for k,v in ts_results.items() if 'lstm' in v],
-                directory='{directory}'.format(directory=directory),
-                filename='mse_overall_lstm.png',
-                rotation=90
-            )
+            if 'arima' in ts_results[sn]:
+                with open('{directory}/adf_{sn}_{type}.txt'.format(
+                    directory=directory_report,
+                    sn=sn,
+                    type=ts_index
+                ), 'w') as fp:
+                    print(ts_results[sn]['arima']['adf'], file=fp)
+
+            if any(
+                pd.notnull(k) and
+                pd.notnull(v) and
+                'arima' in v for k,v in ts_results.items()
+            ):
+                plot_bar(
+                    labels=[k for k,v in ts_results.items() if 'arima' in v],
+                    performance=[v['arima']['mse']
+                        for k,v in ts_results.items() if 'arima' in v],
+                    directory='{directory}'.format(directory=directory),
+                    filename='mse_overall_arima.png',
+                    rotation=90
+                )
+
+            if any(
+                pd.notnull(k) and
+                pd.notnull(v) and
+                'lstm' in v for k,v in ts_results.items()
+            ):
+                plot_bar(
+                    labels=[k for k,v in ts_results.items() if 'lstm' in v],
+                    performance=[v['lstm']['mse']
+                        for k,v in ts_results.items() if 'lstm' in v],
+                    directory='{directory}'.format(directory=directory),
+                    filename='mse_overall_lstm.png',
+                    rotation=90
+                )
 
     #
     # classification analysis: twitter corpus (X), with stock index (y)
     #
     if analysis_classify:
-        #
-        # outlier class: remove class if training distribution is less than
-        #     50%, or greater than 150% of all other class distribution(s).
-        #
-        counter = defaultdict(lambda :0)
-        for k in joined_data[sn]['trend']:
-            counter[k] += 1
+        kfold = 750
+        classify_threshold = [0.5]
 
-        if len(counter) > 2:
-            for key, val in counter.items():
-                if all(val < 0.5 * v for k,v in counter.items() if v != val):
-                    joined_data[sn].drop(
-                        joined_data[sn][joined_data[sn]['trend'] == key].index.values,
-                        inplace=True
-                    )
-                    break
-
-                elif all(val > 1.5 * v for k,v in counter.items() if v != val):
-                    joined_data[sn].drop(
-                        joined_data[sn][joined_data[sn]['trend'] == key].index,values,
-                        inplace=True
-                    )
-                    break
-
-        #
-        # sufficient data: analysis performed if adequate amount of data.
-        #
-        # Note: 3 classes are utilized as a base case, while an outlier class
-        #       can reduce the default to 2 classes. Each additional threshold
-        #       adds two additional classes.
-        #
-        if joined_data[sn].shape[0] > (3 + ((len(threshold) - 1) * 2)) * 20:
-            if all(x in joined_data[sn] for x in ['trend', classify_index]):
-                classify_results[sn] = classify(
-                    joined_data[sn],
-                    key_class='trend',
-                    key_text=classify_index,
-                    directory='{directory}/{sn}'.format(
-                        directory=directory,
-                        sn=sn
-                    ),
-                    top_words=25,
-                    stopwords=stopwords,
-                    k=750
-                )
-
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            isinstance(v, tuple) for k,v in classify_results.items()
-        ):
-            plot_bar(
-                labels=[k for k,v in classify_results.items() if pd.notnull(k)],
-                performance=[v[0] for k,v in classify_results.items()
-                    if pd.notnull(v) and isinstance(v, tuple)],
-                directory='{directory}'.format(directory=directory),
-                filename='accuracy_overall.png',
-                rotation=90
+        for i,sn in enumerate(screen_name):
+            data = peak_detection(
+                data=joined_data[sn],
+                ts_index=ts_index,
+                directory='{a}/{b}'.format(a=directory, b=sn),
+                threshold=classify_threshold
             )
+
+            #
+            # outlier class: remove class if training distribution is less than
+            #     50%, or greater than 150% of all other class distribution(s).
+            #
+            counter = defaultdict(lambda :0)
+            for k in data['trend']:
+                counter[k] += 1
+
+            if len(counter) > 2:
+                for key, val in counter.items():
+                    if all(val < 0.5 * v for k,v in counter.items() if v != val):
+                        data.drop(
+                            data[data['trend'] == key].index.values,
+                            inplace=True
+                        )
+                        break
+
+                    elif all(val > 1.5 * v for k,v in counter.items() if v != val):
+                        data.drop(
+                            data[data['trend'] == key].index.values,
+                            inplace=True
+                        )
+                        break
+
+            #
+            # sufficient data: analysis performed if adequate amount of data.
+            #
+            # Note: 3 classes are utilized as a base case, while an outlier class
+            #       can reduce the default to 2 classes. Each additional threshold
+            #       adds two additional classes.
+            #
+            if data.shape[0] > (3 + ((len(classify_threshold) - 1) * 2)) * 20:
+                if all(x in data for x in ['trend', classify_index]):
+                    classify_results[sn] = classify(
+                        data,
+                        key_class='trend',
+                        key_text=classify_index,
+                        directory='{directory}/{sn}'.format(
+                            directory=directory,
+                            sn=sn
+                        ),
+                        top_words=25,
+                        stopwords=stopwords,
+                        k=kfold
+                    )
+
+            if any(
+                pd.notnull(k) and
+                pd.notnull(v) and
+                isinstance(v, tuple) for k,v in classify_results.items()
+            ):
+                plot_bar(
+                    labels=[k for k,v in classify_results.items() if pd.notnull(k)],
+                    performance=[v[0] for k,v in classify_results.items()
+                        if pd.notnull(v) and isinstance(v, tuple)],
+                    directory='{directory}'.format(directory=directory),
+                    filename='accuracy_overall.png',
+                    rotation=90
+                )
