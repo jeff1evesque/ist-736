@@ -60,7 +60,7 @@ def analyze(
     #
     # join data: twitter and quandl
     #
-    joined_data = join_data(
+    joined_data, joined_data_agg = join_data(
         data=data,
         df_quandl=df_quandl,
         screen_name=screen_name,
@@ -121,14 +121,17 @@ def analyze(
     # timeseries analysis: sentiment
     #
     if analysis_ts_sentiment:
-        initialized_data = joined_data
-
         for i,sn in enumerate(screen_name):
+            initialized_data = joined_data_agg
+
             #
             # sentiment scores
             #
             s = Sentiment(initialized_data[sn], classify_index)
-            initialized_data[sn] = pd.concat([s.vader_analysis(), initialized_data[sn]], axis=1)
+            initialized_data[sn] = pd.concat([
+                s.vader_analysis(),
+                initialized_data[sn]
+             ], axis=1)
             initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
             #
@@ -145,7 +148,7 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=1500,
+                        lstm_epochs=5000,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -194,64 +197,63 @@ def analyze(
     # timeseries analysis: overall stock index/volume
     #
     if analysis_ts:
-        for i,sn in enumerate(screen_name):
-            #
-            # timeseries analysis: if dataset not 50 elements or more (x), use the
-            #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
-            #     is determined by 0.15x:
-            #
-            #     (p,q,d) = (range(0, 0.15x), range(0, 0.15x), range(0, 0.15x))
-            #
-            # Note: if arima does not converge, or the adf test does not satisfy
-            #       p < 0.05, the corresponding model is thrown out.
-            #
-            ts_stock = Timeseries(
-                df=df_quandl,
-                normalize_key=ts_index,
-                date_index='created_at',
+        #
+        # timeseries analysis: if dataset not 50 elements or more (x), use the
+        #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
+        #     is determined by 0.15x:
+        #
+        #     (p,q,d) = (range(0, 0.15x), range(0, 0.15x), range(0, 0.15x))
+        #
+        # Note: if arima does not converge, or the adf test does not satisfy
+        #       p < 0.05, the corresponding model is thrown out.
+        #
+        ts_stock = Timeseries(
+            df=df_quandl,
+            normalize_key=ts_index,
+            date_index='created_at',
+            directory='{directory}'.format(directory=directory),
+            suffix=ts_index,
+            lstm_epochs=5000,
+            lstm_dropout=0,
+            auto_scale=(50, 0.15)
+        )
+        ts_results[sn] = ts_stock.get_model_scores()
+
+        if 'arima' in ts_results[sn]:
+            with open('{directory}/adf_{sn}_{type}.txt'.format(
+                directory=directory_report,
+                sn=sn,
+                type=ts_index
+            ), 'w') as fp:
+                print(ts_results[sn]['arima']['adf'], file=fp)
+
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v for k,v in ts_results.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in ts_results.items() if 'arima' in v],
+                performance=[v['arima']['mse']
+                    for k,v in ts_results.items() if 'arima' in v],
                 directory='{directory}'.format(directory=directory),
-                suffix=ts_index,
-                lstm_epochs=1500,
-                lstm_dropout=0,
-                auto_scale=(50, 0.15)
+                filename='mse_overall_arima.png',
+                rotation=90
             )
-            ts_results[sn] = ts_stock.get_model_scores()
 
-            if 'arima' in ts_results[sn]:
-                with open('{directory}/adf_{sn}_{type}.txt'.format(
-                    directory=directory_report,
-                    sn=sn,
-                    type=ts_index
-                ), 'w') as fp:
-                    print(ts_results[sn]['arima']['adf'], file=fp)
-
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'arima' in v for k,v in ts_results.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results.items() if 'arima' in v],
-                    performance=[v['arima']['mse']
-                        for k,v in ts_results.items() if 'arima' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_arima.png',
-                    rotation=90
-                )
-
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'lstm' in v for k,v in ts_results.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results.items() if 'lstm' in v],
-                    performance=[v['lstm']['mse']
-                        for k,v in ts_results.items() if 'lstm' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_lstm.png',
-                    rotation=90
-                )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v for k,v in ts_results.items()
+        ):
+            plot_bar(
+                labels=[k for k,v in ts_results.items() if 'lstm' in v],
+                performance=[v['lstm']['mse']
+                    for k,v in ts_results.items() if 'lstm' in v],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm.png',
+                rotation=90
+            )
 
     #
     # classification analysis: twitter corpus (X), with stock index (y)

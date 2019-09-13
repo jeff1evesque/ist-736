@@ -23,6 +23,7 @@ def join_data(
 
     '''
 
+    data_agg = data
     classify_results = {}
     ts_results = {}
     ts_results_sentiment = {}
@@ -43,18 +44,6 @@ def join_data(
 
             # convert to string
             data[sn]['created_at'] = data[sn]['created_at'].astype(str)
-
-            # set index
-            data[sn].set_index('created_at', inplace=True)
-            data[sn].index.name = 'created_at'
-
-            #
-            # some screen_name text multiple times a day, yet quandl only provides
-            #     daily prices.
-            #
-            data[sn] = data[sn].groupby(g).agg({
-                classify_index: lambda a: ''.join(map(str, a))
-            }).reset_index()
 
             # set index
             data[sn].set_index('created_at', inplace=True)
@@ -122,4 +111,14 @@ def join_data(
                     data[sn].drop(x, inplace=True)
             data[sn].reset_index(inplace=True)
 
-    return(data)
+        #
+        # aggregate records: combine records by 'classify_index'
+        #
+        data_agg[sn] = data[sn].groupby([
+                'created_at',
+                'screen_name'
+            ]).agg({
+                classify_index: lambda a: ''.join(map(str, a))
+            }).reset_index()
+
+    return(data, data_agg)
