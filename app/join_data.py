@@ -67,6 +67,10 @@ def join_data(
         #
         # merge dataset: twitter and quandl
         #
+        for x in df_quandl.columns:
+            if x in data[sn]:
+                data[sn].drop([x], axis = 1, inplace=True)
+
         data[sn] = data[sn].merge(df_quandl, on='created_at', how='left')
 
         # column names: used below
