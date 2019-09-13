@@ -19,7 +19,7 @@ class Timeseries():
         df,
         normalize_key,
         directory='viz',
-        flag_arima=True,
+        flag_arima=False,
         flag_lstm=True,
         plot=True,
         show=False,

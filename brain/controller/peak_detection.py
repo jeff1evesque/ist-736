@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
 import math
-from brain.algorithm.peak_detection import PeakDetection
-from brain.view.peak_detection import peak_detection as plot_pd
+from brain.model.peak_detection import peak_detection as pk_detect
 
 
 def peak_detection(
     data,
+    ts_index,
     directory='viz',
-    suffix='',
     plot=True,
     threshold=None,
     auto=True
@@ -20,35 +19,79 @@ def peak_detection(
     '''
 
     #
-    # threshold: autogenerate if not provided, cancel if not enough data.
+    # index data: conditionally use z-score threshold to relabel index.
     #
-    if not threshold and auto:
-        lim = math.ceil(math.log(len(data), 10))
-        if lim > 0:
-            lim = lim if lim < 3 else 3
-            threshold = [2**x for x in range(lim)]
+    signals = None
+    if ts_index in data:
+        signals = pk_detect(
+            data=data[ts_index],
+            threshold=threshold,
+            directory=directory,
+            plot=plot
+        )
+
+    #
+    # case 1: z-score threshold determines trend index
+    #
+    if signals:
+        signal_result = []
+        for z in range(1, len(signals) + 1):
+            signal = signals[z-1]
+            for i,s in enumerate(signal):
+                if (len(signal_result) == 0 or len(signal_result) == i):
+                    if s < 0:
+                        signal_result.append(-z)
+                    elif s > 0:
+                        signal_result.append(z)
+                    else:
+                        signal_result.append(0)
+
+                elif (
+                    i < len(signal_result) and
+                    s < 0 and
+                    s < signal_result[i]
+                ):
+                    signal_result[i] = -z
+
+                elif (
+                    i < len(signal_result) and
+                    s > 0 and
+                    s > signal_result[i]
+                ):
+                    signal_result[i] = z
+
+                elif (
+                    i < len(signal_result) and
+                    s == 0 and
+                    s > signal_result[i]
+                ):
+                    signal_result[i] = 0
+
+                else:
+                    print('Error ({f}): {m}.'.format(
+                        f=this_file,
+                        m='distorted signal_result shape'
+                    ))
+
+        # monotic: if all same values use non z-score.
+        first = signal_result[0]
+        if all(x == first for x in signal_result):
+            data['trend'] = [0
+                if data[ts_index].values[i] > data[ts_index].get(i-1, 0)
+                else 1
+                for i,x in enumerate(data[ts_index])]
+
+        # not monotonic
         else:
-            return(False)
+            data['trend'] = signal_result
 
     #
-    # initialize: instantiate and create z-score model
+    # case 2: previous index value determines trend index
     #
-    peaks = PeakDetection(data=data, threshold=threshold)
-    data = peaks.get_data()
-    signals = peaks.get_signals()
-    std_filter = peaks.get_std_filter()
-    avg_filter = peaks.get_avg_filter()
+    else:
+        data['trend'] = [0
+            if data[ts_index].values[i] > data[ts_index].get(i-1, 0)
+            else 1
+            for i,x in enumerate(data[ts_index])]
 
-    if plot:
-        for i,x in enumerate(threshold):
-            plot_pd(
-                data=data,
-                threshold=x,
-                signals=signals[i],
-                std_filter=std_filter[i],
-                avg_filter=avg_filter[i],
-                directory=directory,
-                suffix=x
-            )
-
-    return(signals)
+    return(data)
