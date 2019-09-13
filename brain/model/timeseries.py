@@ -26,6 +26,8 @@ def model(
 
     return trained classifier.
 
+    Note: this class requires the dataframe index values to be datetime format.
+
     '''
 
 
@@ -37,7 +39,7 @@ def model(
         model = Arima(
             data=pd.Series(
                 df[normalize_key].values,
-                [pd.Timestamp(x) for x in df[date_index].values]
+                [pd.Timestamp(x) for x in df.index.values]
             ),
             log_transform=log_transform
         )
@@ -85,7 +87,7 @@ def model(
         model = Lstm(
             data=pd.Series(
                 df[normalize_key].values,
-                [pd.Timestamp(x) for x in df[date_index].values]
+                [pd.Timestamp(x) for x in df.index.values]
             )
         )
         model.train(
