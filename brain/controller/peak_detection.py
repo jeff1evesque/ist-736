@@ -21,12 +21,14 @@ def peak_detection(
     #
     # index data: conditionally use z-score threshold to relabel index.
     #
-    signals = pk_detect(
-        data=data[ts_index],
-        threshold=threshold,
-        directory=directory,
-        plot=plot
-    )
+    signals = None
+    if ts_index in data:
+        signals = pk_detect(
+            data=data[ts_index],
+            threshold=threshold,
+            directory=directory,
+            plot=plot
+        )
 
     #
     # case 1: z-score threshold determines trend index

@@ -361,7 +361,15 @@ class Model():
 
         '''
 
-        if k and k > 0:
+        if isinstance(k, int) and k > 0:
+            #
+            # feature selection
+            #
+            # Note: the restriction 0 <= k <= n_features must be satisfied.
+            #
+            if k > X.shape[1]:
+                k = 'all'
+
             self.chi2 = SelectKBest(chi2, k=k)
             self.chi2.fit(X, y)
             names = self.chi2.get_support(indices=True)
@@ -650,7 +658,7 @@ class Model():
         model_type=None,
         multiclass=False,
         ngram=(1,1),
-        k=1000
+        k=100
     ):
         '''
 
@@ -667,6 +675,15 @@ class Model():
         @multiclass, svm indicator of greater than binary classification.
 
         '''
+
+        #
+        # feature selection
+        #
+        # Note: the restriction 0 <= k <= n_features must be satisfied.
+        #
+        print(self.df[self.key_text].shape)
+        if k > self.df[self.key_text].shape[0]:
+            k = 'all'
 
         # conditionally select model
         if (model_type == 'svm'):

@@ -257,7 +257,7 @@ def analyze(
     # classification analysis: twitter corpus (X), with stock index (y)
     #
     if analysis_classify:
-        kfold = 750
+        chi2 = 100
         classify_threshold = [0.5]
 
         for i,sn in enumerate(screen_name):
@@ -316,7 +316,7 @@ def analyze(
                             ),
                             top_words=25,
                             stopwords=stopwords,
-                            k=kfold
+                            k=chi2
                         )
 
             if any(
