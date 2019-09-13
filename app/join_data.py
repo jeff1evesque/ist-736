@@ -77,10 +77,18 @@ def join_data(
         #
         drop_indices = []
         for i,(idx,row) in enumerate(data[sn].iterrows()):
-            if (i == 0 and pd.isnull(data[sn][ts_index].values[i])):
+            if (
+                i == 0 and
+                ts_index in data[sn] and
+                pd.isnull(data[sn][ts_index].values[i])
+            ):
                 drop_indices.append(i)
 
-            elif (i > 0 and pd.isnull(data[sn][ts_index].values[i])):
+            elif (
+                i > 0 and
+                ts_index in data[sn] and
+                pd.isnull(data[sn][ts_index].values[i])
+            ):
                 if not pd.isnull(data[sn][ts_index].values[i-1]):
                     for x in col_names:
                         if x == classify_index:
@@ -103,8 +111,11 @@ def join_data(
 
         if (
             len(drop_indices) > 0 and
-            any(x in data[sn].index for x in drop_indices)
+            any(x in data[sn].index.values for x in drop_indices)
         ):
-            data[sn] = data[sn].drop(data[sn].index[drop_indices]).reset_index()
+            for x in drop_indices:
+                if x in data[sn].index.values:
+                    data[sn].drop(x, inplace=True)
+            data[sn].reset_index(inplace=True)
 
     return(data)
