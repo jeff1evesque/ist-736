@@ -24,10 +24,10 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=False,
+    analysis_ts=True,
     analysis_ts_sentiment=False,
     analysis_granger=False,
-    analysis_classify=True
+    analysis_classify=False
 ):
     '''
 
@@ -206,10 +206,10 @@ def analyze(
             #       p < 0.05, the corresponding model is thrown out.
             #
             ts_stock = Timeseries(
-                df=joined_data[sn],
+                df=df_quandl,
                 normalize_key=ts_index,
                 date_index='created_at',
-                directory='{directory}/{sn}'.format(directory=directory, sn=sn),
+                directory='{directory}'.format(directory=directory),
                 suffix=ts_index,
                 lstm_epochs=1500,
                 lstm_dropout=0,
