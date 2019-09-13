@@ -301,18 +301,23 @@ def analyze(
             #
             if data.shape[0] > (3 + ((len(classify_threshold) - 1) * 2)) * 20:
                 if all(x in data for x in ['trend', classify_index]):
-                    classify_results[sn] = classify(
-                        data,
-                        key_class='trend',
-                        key_text=classify_index,
-                        directory='{directory}/{sn}'.format(
-                            directory=directory,
-                            sn=sn
-                        ),
-                        top_words=25,
-                        stopwords=stopwords,
-                        k=kfold
-                    )
+                    #
+                    # target vector: requires a minimum of 2 unique classes to
+                    #     train a classifier.
+                    #
+                    if len(data['trend'].unique().tolist()) > 1:
+                        classify_results[sn] = classify(
+                            data,
+                            key_class='trend',
+                            key_text=classify_index,
+                            directory='{directory}/{sn}'.format(
+                                directory=directory,
+                                sn=sn
+                            ),
+                            top_words=25,
+                            stopwords=stopwords,
+                            k=kfold
+                        )
 
             if any(
                 pd.notnull(k) and
