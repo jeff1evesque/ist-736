@@ -10,8 +10,6 @@ def join_data(
     data,
     df_quandl,
     screen_name,
-    directory='viz',
-    directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
@@ -24,9 +22,6 @@ def join_data(
     '''
 
     data_agg = data
-    classify_results = {}
-    ts_results = {}
-    ts_results_sentiment = {}
     g = ['created_at', 'screen_name'] + sentiments
     this_file = os.path.basename(__file__)
 
@@ -34,7 +29,6 @@ def join_data(
     # preprocess: left join on twitter dataset(s).
     #
     for i,sn in enumerate(screen_name):
-
         if 'created_at' in data[sn]:
             # merge with consistent date format
             data[sn]['created_at'] = [datetime.strptime(

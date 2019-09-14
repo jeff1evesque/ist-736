@@ -19,7 +19,7 @@ class Timeseries():
         df,
         normalize_key,
         directory='viz',
-        flag_arima=False,
+        flag_arima=True,
         flag_lstm=True,
         plot=True,
         show=False,
@@ -224,13 +224,14 @@ class Timeseries():
         )
 
         # predict
-        l.predict()
-        self.model_scores['lstm'] = {
-            'mse': l.get_mse('test'),
-            'history': l.get_fit_history()
-        }
+        if l.get_status(type='train_flag'):
+            l.predict()
+            self.model_scores['lstm'] = {
+                'mse': l.get_mse('test'),
+                'history': l.get_fit_history()
+            }
 
-        if plot:
+        if plot and l.get_status(type='train_flag'):
             #
             # @train_actual, entire train values
             # @test_actual, entire train values

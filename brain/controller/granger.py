@@ -12,6 +12,7 @@ def granger(df, maxlag=1, directory='viz', suffix='', plot=True):
 
     '''
 
+    result = None
     if suffix:
         suffix = '_{s}'.format(s=suffix)
 
@@ -28,9 +29,21 @@ def granger(df, maxlag=1, directory='viz', suffix='', plot=True):
         else np.nanmean(df.ix[:,1])
             for x in df.ix[:,1]]
 
-    result = [(k,v) for k,v in gr(df, maxlag=maxlag).items() if v]
+    #
+    # ensure each proposed lag has 15x observations
+    #
+    for lag in reversed(range(maxlag+1)):
+        if len(df.index) > 15 * lag:
+            maxlag = lag
+            break
 
-    if plot:
+        else:
+            maxlag = 0
+
+    if maxlag > 0:
+        result = [(k,v) for k,v in gr(df, maxlag=maxlag).items() if v]
+
+    if result and plot:
         #
         # ssr based F test
         #

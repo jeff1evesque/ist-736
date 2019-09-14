@@ -216,9 +216,9 @@ class Arima():
 
     def grid_search(
         self,
-        p_values=range(0,3),
-        d_values=range(0,3),
-        q_values=range(0,3),
+        p_values=range(0,4),
+        d_values=range(0,4),
+        q_values=range(0,4),
         auto_scale=None
     ):
         '''

@@ -64,7 +64,6 @@ def analyze(
         data=data,
         df_quandl=df_quandl,
         screen_name=screen_name,
-        directory=directory,
         sentiments=sentiments,
         classify_index=classify_index,
         ts_index=ts_index
@@ -107,7 +106,7 @@ def analyze(
                 if all(x in initialized_data[sn] for x in [ts_index, sentiment]):
                     granger(
                         initialized_data[sn][[ts_index, sentiment]],
-                        maxlag=3,
+                        maxlag=4,
                         directory='{directory}/{sn}/granger'.format(
                             directory=directory,
                             sn=sn
@@ -120,33 +119,21 @@ def analyze(
     #
     if analysis_ts_sentiment:
         for i,sn in enumerate(screen_name):
-            initialized_data = joined_data_agg
-
-            #
-            # sentiment scores
-            #
-            s = Sentiment(initialized_data[sn], classify_index)
-            initialized_data[sn] = pd.concat([
-                s.vader_analysis(),
-                initialized_data[sn]
-             ], axis=1)
-            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
-
             #
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                if all(x in initialized_data[sn] for x in [sentiment, 'created_at']):
+                if all(x in joined_data_agg[sn] for x in [sentiment, 'created_at']):
                     ts_sentiment = Timeseries(
-                        df=initialized_data[sn],
+                        df=joined_data_agg[sn],
                         normalize_key=sentiment,
-                        date_index='created_at',
+                        date_index=None,
                         directory='{directory}/{sn}'.format(
                             directory=directory,
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=5000,
+                        lstm_epochs=7500,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -208,10 +195,10 @@ def analyze(
         ts_stock = Timeseries(
             df=df_quandl,
             normalize_key=ts_index,
-            date_index='created_at',
+            date_index='date',
             directory='{directory}'.format(directory=directory),
             suffix=ts_index,
-            lstm_epochs=5000,
+            lstm_epochs=7500,
             lstm_dropout=0,
             auto_scale=(50, 0.15)
         )
