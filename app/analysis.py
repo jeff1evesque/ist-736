@@ -118,14 +118,26 @@ def analyze(
     # timeseries analysis: sentiment
     #
     if analysis_ts_sentiment:
+        initialized_data = joined_data_agg
+
         for i,sn in enumerate(screen_name):
+            #
+            # sentiment scores
+            #
+            s = Sentiment(initialized_data[sn], classify_index)
+            initialized_data[sn] = pd.concat([
+                s.vader_analysis(),
+                initialized_data[sn]
+             ], axis=1)
+            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
+
             #
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
                 if all(x in joined_data_agg[sn] for x in [sentiment, 'created_at']):
                     ts_sentiment = Timeseries(
-                        df=joined_data_agg[sn],
+                        df=initialized_data[sn],
                         normalize_key=sentiment,
                         date_index=None,
                         directory='{directory}/{sn}'.format(
