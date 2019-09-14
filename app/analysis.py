@@ -24,10 +24,10 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=False,
-    analysis_ts_sentiment=False,
+    analysis_ts=True,
+    analysis_ts_sentiment=True,
     analysis_granger=True,
-    analysis_classify=False
+    analysis_classify=True
 ):
     '''
 
