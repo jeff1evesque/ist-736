@@ -31,9 +31,13 @@ class Lstm():
 
         define class variables.
 
+        @self.train_flag, conditionally determine based on supplied data, if
+            prerequisite for train satisfied.
+
         '''
 
         self.type = type
+        self.banner_border = '#' * 75
 
         #
         # cleanse data: sort univariate, and replace 'nan' with average.
@@ -78,22 +82,29 @@ class Lstm():
             self.n_features = 1
 
             #
-            # reshape
+            # reshape: when not enough data is provided, either the trainX
+            #     or testX may not be created.
             #
-            X1 = np.array([[[a] for a in x] for x in self.trainX])
-            X2 = np.array([[[a] for a in x] for x in self.testX])
+            if len(self.trainX) > 0 and len(self.testX) > 0:
+                X1 = np.array([[[a] for a in x] for x in self.trainX])
+                X2 = np.array([[[a] for a in x] for x in self.testX])
 
-            self.trainX = X1.reshape(
-                X1.shape[0],
-                X1.shape[1],
-                self.n_features
-            )
+                self.trainX = X1.reshape(
+                    X1.shape[0],
+                    X1.shape[1],
+                    self.n_features
+                )
 
-            self.testX = X2.reshape(
-                X2.shape[0],
-                X2.shape[1],
-                self.n_features
-            )
+                self.testX = X2.reshape(
+                    X2.shape[0],
+                    X2.shape[1],
+                    self.n_features
+                )
+
+                self.train_flag = True
+
+            else:
+                self.train_flag = False
 
         # train
         if train:
@@ -125,6 +136,19 @@ class Lstm():
 
         return(scaler_fit, [x[0] for x in transformed])
 
+    def get_status(self, type=None):
+        '''
+
+        return status whether model train has sufficient data.
+
+        '''
+
+        if type == 'train_flag':
+            return(self.train_flag)
+
+        else:
+            return({'train_flag': self.train_flag})
+
     def invert_scale(self, scaler, data):
         '''
 
@@ -140,7 +164,7 @@ class Lstm():
         else:
             return(scaler.inverse_transform([data])[0])
 
-    def split_data(self, data=None, test_size=0.2, scale=False):
+    def split_data(self, test_size=0.2, scale=False):
         '''
 
         split data into train and test.
@@ -150,61 +174,53 @@ class Lstm():
         '''
 
         # split without shuffling timeseries
-        if data:
+        if scale:
             self.scaler, self.data = self.scale(self.data)
-            train, test = train_test_split(
-                data,
-                test_size=test_size,
-                shuffle=False
+
+        self.df_train, self.df_test = train_test_split(
+            self.data,
+            test_size=test_size,
+            shuffle=False
+        )
+
+        self.trainX, self.testX = [], []
+        if (len(self.df_train) > self.n_steps_in + self.n_steps_out):
+            self.trainX, self.trainY = self.split_sequence(
+                self.df_train,
+                n=self.n_steps_in,
+                m=self.n_steps_out
             )
 
-            if scale:
-                self.trainX, self.trainY = self.split_sequence(
-                    train,
+        else:
+            print(self.banner_border)
+            print('{t}: number of train elements >= {c}'.format(
+                t='Error',
+                c='(n_steps_in = {n} + {m} = n_steps_out)'.format(
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
+            ))
+            print(self.banner_border)
+            return(False)
 
-                self.testX, self.testY = self.split_sequence(
-                    test,
-                    n=self.n_steps_in,
-                    m=self.n_steps_out
-                )
+        if (len(self.df_test) > self.n_steps_in + self.n_steps_out):
+            self.testX, self.testY = self.split_sequence(
+                self.df_test,
+                n=self.n_steps_in,
+                m=self.n_steps_out
+            )
 
         else:
-            if scale:
-                self.scaler, self.data = self.scale(self.data)
-
-                self.df_train, self.df_test = train_test_split(
-                    self.data,
-                    test_size=test_size,
-                    shuffle=False
-                )
-
-                self.trainX, self.trainY = self.split_sequence(
-                    self.df_train,
+            print(self.banner_border)
+            print('{t}: number of test elements >= {c}'.format(
+                t='Error',
+                c='(n_steps_in = {n} + {m} = n_steps_out)'.format(
                     n=self.n_steps_in,
                     m=self.n_steps_out
                 )
-
-                self.testX, self.testY = self.split_sequence(
-                    self.df_test,
-                    n=self.n_steps_in,
-                    m=self.n_steps_out
-                )
-
-            else:
-                self.trainX, self.trainY = self.split_sequence(
-                    train,
-                    n=self.n_steps_in,
-                    m=self.n_steps_out
-                )
-
-                self.testX, self.testY = self.split_sequence(
-                    test,
-                    n=self.n_steps_in,
-                    m=self.n_steps_out
-                )
+            ))
+            print(self.banner_border)
+            return(False)
 
     def get_data(self, type=None):
         '''

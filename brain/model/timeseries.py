@@ -87,16 +87,18 @@ def model(
         model = Lstm(
             data=pd.Series(
                 df[normalize_key].values,
-                [pd.Timestamp(x) for x in df.index.values]
+                [pd.Timestamp(x) for x in df[date_index].values]
             )
         )
-        model.train(
-            epochs=epochs,
-            dropout=dropout,
-            batch_size=batch_size,
-            validation_split=validation_split,
-            activation=activation,
-            num_cells=num_cells
-        )
+
+        if model.get_status(type='train_flag'):
+            model.train(
+                epochs=epochs,
+                dropout=dropout,
+                batch_size=batch_size,
+                validation_split=validation_split,
+                activation=activation,
+                num_cells=num_cells
+            )
 
         return(model)
