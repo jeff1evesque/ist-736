@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 from datetime import datetime
+from brain.exploratory.sentiment import Sentiment
 from brain.controller.peak_detection import peak_detection
 
 
@@ -104,6 +105,19 @@ def join_data(
                 if x in data[sn].index.values:
                     data[sn].drop(x, inplace=True)
             data[sn].reset_index(inplace=True)
+
+        #
+        # merge sentiment scores
+        #
+        data[sn]['created_at'] = data[sn].index.values
+        s = Sentiment(data[sn], classify_index)
+        data[sn] = data[sn].merge(
+            s.vader_analysis(),
+            how='left'
+        )
+        data[sn].replace('\s+', ' ', regex=True, inplace=True)
+        data[sn].set_index('created_at', inplace=True)
+        data[sn].index.name = 'created_at'
 
         #
         # aggregate records: combine records by 'classify_index'

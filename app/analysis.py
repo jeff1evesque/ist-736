@@ -6,7 +6,6 @@ import pandas as pd
 from datetime import datetime
 from collections import defaultdict
 from brain.view.plot import plot_bar
-from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
@@ -88,16 +87,6 @@ def analyze(
             initialized_data[sn]['created_at'] = initialized_data[sn]['created_at'].astype(str)
 
             #
-            # sentiment scores
-            #
-            s = Sentiment(initialized_data[sn], classify_index)
-            initialized_data[sn] = pd.concat([
-                s.vader_analysis(),
-                initialized_data[sn]
-             ], axis=1)
-            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
-
-            #
             # granger causality
             #
             # Note: this requires the above quandl join.
@@ -117,25 +106,17 @@ def analyze(
     #
     # timeseries analysis: sentiment
     #
+    # Note: requires vader sentiment scores.
+    #
     if analysis_ts_sentiment:
         initialized_data = joined_data_agg
 
         for i,sn in enumerate(screen_name):
             #
-            # sentiment scores
-            #
-            s = Sentiment(initialized_data[sn], classify_index)
-            initialized_data[sn] = pd.concat([
-                s.vader_analysis(),
-                initialized_data[sn]
-             ], axis=1)
-            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
-
-            #
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                if all(x in joined_data_agg[sn] for x in [sentiment, 'created_at']):
+                if all(x in initialized_data[sn] for x in [sentiment, 'created_at']):
                     ts_sentiment = Timeseries(
                         df=initialized_data[sn],
                         normalize_key=sentiment,
