@@ -116,7 +116,8 @@ def join_data(
         #
         data_agg[sn] = data[sn].groupby([
                 'created_at',
-                'screen_name'
+                'screen_name',
+                ts_index
             ]).agg({
                 classify_index: lambda a: ''.join(map(str, a))
             }).reset_index()

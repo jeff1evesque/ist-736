@@ -24,9 +24,9 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=True,
+    analysis_ts=False,
     analysis_ts_sentiment=False,
-    analysis_granger=False,
+    analysis_granger=True,
     analysis_classify=False
 ):
     '''
@@ -71,7 +71,9 @@ def analyze(
     )
 
     #
-    # granger analysis
+    # granger analysis:
+    #
+    # Note: requires vader sentiment scores.
     #
     if analysis_granger:
         initialized_data = joined_data
@@ -87,18 +89,14 @@ def analyze(
             initialized_data[sn]['created_at'] = initialized_data[sn]['created_at'].astype(str)
 
             #
-            # some screen_name text multiple times a day, yet quandl only provides
-            #     daily prices.
+            # sentiment scores
             #
-            initialized_data[sn] = initialized_data[sn].groupby(g).agg({
-                classify_index: lambda a: ''.join(map(str, a))
-            }).reset_index()
-
-            initialized_data[sn].set_index('created_at', inplace=True)
-            initialized_data[sn] = initialized_data[sn].join(
-                df_quandl,
-                how='left'
-            ).reset_index()
+            s = Sentiment(initialized_data[sn], classify_index)
+            initialized_data[sn] = pd.concat([
+                s.vader_analysis(),
+                initialized_data[sn]
+             ], axis=1)
+            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
             #
             # granger causality
