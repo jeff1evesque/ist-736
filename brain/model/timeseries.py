@@ -26,7 +26,8 @@ def model(
 
     return trained classifier.
 
-    Note: this class requires the dataframe index values to be datetime format.
+    @date_index, when provided the model will use this as the timeseries
+        index. If not provided, the current dataframe index will be used.
 
     '''
 
@@ -36,13 +37,23 @@ def model(
 
     # initialize classifier
     if model_type == 'arima':
-        model = Arima(
-            data=pd.Series(
-                df[normalize_key].values,
-                [pd.Timestamp(x) for x in df.index.values]
-            ),
-            log_transform=log_transform
-        )
+        if date_index and date_index in df:
+            model = Arima(
+                data=pd.Series(
+                    df[normalize_key].values,
+                    [pd.Timestamp(x) for x in df[date_index].tolist()]
+                ),
+                log_transform=log_transform
+            )
+
+        else:
+            model = Arima(
+                data=pd.Series(
+                    df[normalize_key].values,
+                    [pd.Timestamp(x) for x in df.index.values]
+                ),
+                log_transform=log_transform
+            )
 
         # induce stationarity
         result = model.grid_search(auto_scale=auto_scale)
@@ -84,12 +95,21 @@ def model(
             return(False)
 
     elif model_type == 'lstm':
-        model = Lstm(
-            data=pd.Series(
-                df[normalize_key].values,
-                [pd.Timestamp(x) for x in df[date_index].values]
+        if date_index and date_index in df:
+            model = Lstm(
+                data=pd.Series(
+                    df[normalize_key].values,
+                    [pd.Timestamp(x) for x in df[date_index].tolist()]
+                )
             )
-        )
+
+        else:
+            model = Lstm(
+                data=pd.Series(
+                    df[normalize_key].values,
+                    [pd.Timestamp(x) for x in df.index.values]
+                )
+            )
 
         if model.get_status(type='train_flag'):
             model.train(
