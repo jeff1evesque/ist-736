@@ -64,7 +64,6 @@ def analyze(
         data=data,
         df_quandl=df_quandl,
         screen_name=screen_name,
-        directory=directory,
         sentiments=sentiments,
         classify_index=classify_index,
         ts_index=ts_index
@@ -120,16 +119,6 @@ def analyze(
     #
     if analysis_ts_sentiment:
         for i,sn in enumerate(screen_name):
-            #
-            # sentiment scores
-            #
-            s = Sentiment(joined_data_agg[sn], classify_index)
-            joined_data_agg[sn] = pd.concat([
-                s.vader_analysis(),
-                joined_data_agg[sn]
-             ], axis=1)
-            joined_data_agg[sn].replace('\s+', ' ', regex=True, inplace=True)
-
             #
             # timeseries model on sentiment
             #
