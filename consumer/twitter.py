@@ -78,7 +78,8 @@ def tweet_sn(
 
         end = data[screen_name[i]]['created_at'].iloc[-1]
         temp_end = datetime.strptime(end.split()[0], '%Y-%m-%d')
-        if temp_end > end_date:
+
+        if temp_end > datetime.strptime(end_date, '%Y-%m-%d'):
             end_date = temp_end
 
     return(data, start_date, end_date)
