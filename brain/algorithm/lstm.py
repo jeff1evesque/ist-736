@@ -193,7 +193,7 @@ class Lstm():
 
         else:
             print(self.banner_border)
-            print('{t}: number of train elements >= {c}'.format(
+            print('{t}: number of train elements <= {c}'.format(
                 t='Error',
                 c='(n_steps_in = {n} + {m} = n_steps_out)'.format(
                     n=self.n_steps_in,
@@ -212,7 +212,7 @@ class Lstm():
 
         else:
             print(self.banner_border)
-            print('{t}: number of test elements >= {c}'.format(
+            print('{t}: number of test elements <= {c}'.format(
                 t='Error',
                 c='(n_steps_in = {n} + {m} = n_steps_out)'.format(
                     n=self.n_steps_in,

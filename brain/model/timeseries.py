@@ -35,7 +35,7 @@ def model(
     # sort dataframe by date
     df.sort_index(inplace=True)
 
-    # initialize classifier
+    # initialize model
     if model_type == 'arima':
         if date_index and date_index in df:
             model = Arima(
