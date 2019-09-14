@@ -106,7 +106,7 @@ def analyze(
                 if all(x in initialized_data[sn] for x in [ts_index, sentiment]):
                     granger(
                         initialized_data[sn][[ts_index, sentiment]],
-                        maxlag=3,
+                        maxlag=4,
                         directory='{directory}/{sn}/granger'.format(
                             directory=directory,
                             sn=sn
