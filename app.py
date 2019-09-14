@@ -12,7 +12,8 @@
 import re
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
+from datetime import date, datetime
+import dateutil.relativedelta
 from consumer.twitter import tweet_sn
 from consumer.quandl import quandl
 from app.analysis import analyze
@@ -44,8 +45,9 @@ codes = [
     ('WFC', 'PR_CON_15YFIXED_IR'),
     ('WFC', 'PR_CON_30YFIXED_APR')
 ]
-start_date = datetime(3000, 12, 25)
-end_date = datetime(1000, 12, 25)
+end_date = date.today()
+start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
+
 stopwords.extend([x.lower() for x in screen_name])
 stopwords_topics.extend(stopwords)
 
@@ -54,8 +56,8 @@ stopwords_topics.extend(stopwords)
 #
 data, start_date, end_date = tweet_sn(
     screen_name,
-    start_date,
-    end_date
+    start_date.strftime('%Y-%m-%d'),
+    end_date.strftime('%Y-%m-%d')
 )
 
 #
@@ -74,8 +76,8 @@ explore(
 #
 df_quandl = quandl(
     codes=codes,
-    start_date=start_date.strftime('%Y-%m-%d'),
-    end_date=end_date.strftime('%Y-%m-%d')
+    start_date=start_date,
+    end_date=end_date
 )
 
 #

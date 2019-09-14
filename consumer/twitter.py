@@ -73,7 +73,7 @@ def tweet_sn(
         start = data[screen_name[i]]['created_at'].iloc[0]
         temp_start = datetime.strptime(start.split()[0], '%Y-%m-%d')
 
-        if temp_start < start_date:
+        if temp_start < datetime.strptime(start_date, '%Y-%m-%d'):
             start_date = temp_start
 
         end = data[screen_name[i]]['created_at'].iloc[-1]
