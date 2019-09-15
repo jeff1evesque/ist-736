@@ -130,7 +130,7 @@ def analyze(
                     ts_sentiment = Timeseries(
                         df=initialized_data[sn],
                         normalize_key=sentiment,
-                        date_index=None,
+                        date_index='created_at',
                         directory='{directory}/{sn}'.format(
                             directory=directory,
                             sn=sn

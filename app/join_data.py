@@ -25,7 +25,7 @@ def join_data(
     '''
 
     data_agg = data
-    g = ['created_at', 'screen_name'] + sentiments
+    group_ts = ['created_at', 'screen_name', ts_index] + sentiments
     this_file = os.path.basename(__file__)
 
     #
@@ -156,11 +156,7 @@ def join_data(
         #
         # aggregate records: combine records by 'classify_index'
         #
-        data_agg[sn] = data[sn].groupby([
-                'created_at',
-                'screen_name',
-                ts_index
-            ]).agg({
+        data_agg[sn] = data[sn].groupby(group_ts).agg({
                 classify_index: lambda a: ' '.join(map(str, a))
             }).reset_index()
 
