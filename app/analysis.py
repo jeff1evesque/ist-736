@@ -91,7 +91,7 @@ def analyze(
             initialized_data[sn]['created_at'] = [datetime.strptime(
                 x.split()[0],
                 '%Y-%m-%d'
-            ) for x in initialized_data[sn]['created_at']]
+            ) for x in initialized_data[sn].index.tolist()]
 
             # convert to string
             initialized_data[sn]['created_at'] = initialized_data[sn]['created_at'].astype(str)
