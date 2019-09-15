@@ -38,6 +38,13 @@ def analyze(
     ts_results = {}
     ts_results_sentiment = {}
     g = ['created_at', 'screen_name'] + sentiments
+    drop_cols = [
+        'compound',
+        'retweet_count',
+        'favorite_count',
+        'user_mentions',
+        'Short Volume'
+    ]
     this_file = os.path.basename(__file__)
 
     #
@@ -59,10 +66,13 @@ def analyze(
     #
     # join data: twitter and quandl
     #
+    # Note: memory footprint reduced by removing unused columns.
+    #
     joined_data, joined_data_agg = join_data(
         data=data,
         df_quandl=df_quandl,
         screen_name=screen_name,
+        drop_cols=drop_cols,
         sentiments=sentiments,
         classify_index=classify_index,
         ts_index=ts_index

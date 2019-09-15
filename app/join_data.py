@@ -11,6 +11,8 @@ def join_data(
     data,
     df_quandl,
     screen_name,
+    drop_cols=None,
+    drop_cols_regex=['^Unnamed'],
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
@@ -120,6 +122,24 @@ def join_data(
         data[sn].index.name = 'created_at'
 
         #
+        # drop columns: help reduce memory footprint
+        #
+        if drop_cols:
+            data[sn].drop(drop_cols, axis=1, inplace=True)
+
+        if drop_cols_regex:
+            if isinstance(drop_cols_regex, (list, set, tuple)):
+                for x in drop_cols_regex:
+                    data[sn] = data[sn][data[sn].columns.drop(
+                        list(data[sn].filter(regex=x))
+                    )]
+
+            else:
+                data[sn] = data[sn][data[sn].columns.drop(
+                    list(data[sn].filter(regex=drop_cols_regex))
+                )]
+
+        #
         # aggregate records: combine records by 'classify_index'
         #
         data_agg[sn] = data[sn].groupby([
@@ -127,7 +147,7 @@ def join_data(
                 'screen_name',
                 ts_index
             ]).agg({
-                classify_index: lambda a: ''.join(map(str, a))
+                classify_index: lambda a: ' '.join(map(str, a))
             }).reset_index()
 
     return(data, data_agg)
