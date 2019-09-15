@@ -99,33 +99,47 @@ def join_data(
         #
         drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
 
-        if (
-            len(drop_indices) > 0 and
-            any(x in data[sn].index.values for x in drop_indices)
-        ):
-            for x in drop_indices:
-                if x in data[sn].index.values:
-                    data[sn].drop(x, inplace=True)
-            data[sn].reset_index(inplace=True)
+        if len(drop_indices) > 0:
+            target_indices = [data[sn].iloc[[i]].index.values[0]
+                for i in drop_indices if i < len(data[sn].index)]
+
+            for x in target_indices:
+                data[sn].drop(x, inplace=True)
+
+        #
+        # ensure no duplicate columns
+        #
+        # Note: reset_index workaround implemented for below concat
+        #
+        #     - https://stackoverflow.com/a/47991762
+        #
+        duplicates = sentiments + ['compound']
+        for x in duplicates:
+            if x in data[sn]:
+                data[sn].drop(x, inplace=True, axis=1)
+
+        data[sn]['created_at'] = data[sn].index.values
+        data[sn].reset_index(drop=True, inplace=True)
 
         #
         # merge sentiment scores
         #
-        data[sn]['created_at'] = data[sn].index.values
         s = Sentiment(data[sn], classify_index)
-        data[sn] = data[sn].merge(
-            s.vader_analysis(),
-            how='left'
+        data[sn] = pd.concat(
+            [data[sn], s.vader_analysis()],
+            axis=1, sort=False, verify_integrity=True
         )
+
         data[sn].replace('\s+', ' ', regex=True, inplace=True)
         data[sn].set_index('created_at', inplace=True)
         data[sn].index.name = 'created_at'
 
         #
-        # drop columns: help reduce memory footprint
+        # drop columns: remove unused columns to reduce memory footprint
         #
         if drop_cols:
-            data[sn].drop(drop_cols, axis=1, inplace=True)
+            cols = [c for c in drop_cols if c in data[sn]]
+            data[sn].drop(cols, axis=1, inplace=True)
 
         if drop_cols_regex:
             if isinstance(drop_cols_regex, (list, set, tuple)):
