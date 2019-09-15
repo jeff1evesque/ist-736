@@ -136,7 +136,7 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=7500,
+                        lstm_epochs=15000,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -201,7 +201,7 @@ def analyze(
             date_index='date',
             directory='{directory}'.format(directory=directory),
             suffix=ts_index,
-            lstm_epochs=7500,
+            lstm_epochs=15000,
             lstm_dropout=0,
             auto_scale=(50, 0.15)
         )
