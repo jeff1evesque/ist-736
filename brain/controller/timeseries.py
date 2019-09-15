@@ -51,7 +51,7 @@ class Timeseries():
         if flag_arima:
             self.arima(
                 normalize_key=normalize_key,
-                log_transform=0.01,
+                log_delta=0.01,
                 date_index=date_index,
                 auto_scale=auto_scale,
                 rolling_grid_search=rolling_grid_search,
@@ -85,7 +85,7 @@ class Timeseries():
         diff=1,
         xticks=True,
         auto_scale=False,
-        log_transform=0.01,
+        log_delta=0.01,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -99,7 +99,7 @@ class Timeseries():
         a = model(
             df=self.df,
             normalize_key=normalize_key,
-            log_transform=log_transform,
+            log_delta=log_delta,
             model_type='arima',
             date_index=date_index,
             auto_scale=auto_scale,
