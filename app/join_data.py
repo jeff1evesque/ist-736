@@ -101,7 +101,8 @@ def join_data(
 
         if len(drop_indices) > 0:
             target_indices = [data[sn].iloc[[i]].index.values[0]
-                for i in drop_indices if i < len(data[sn].index)]
+                for i in drop_indices
+                    if isinstance(i, int) and i < len(data[sn].index)]
 
             for x in target_indices:
                 data[sn].drop(x, inplace=True)
