@@ -73,6 +73,7 @@ class Model():
         self.wscores = None
         stopwords.extend(stop_english)
         self.stopwords = stopwords
+        self.banner_border = '#' * 75
 
         if df is not None:
             self.df = df
@@ -727,11 +728,17 @@ class Model():
         )
 
         # random kfolds
-        return(
-            cross_val_score(
-                p,
-                self.df[self.key_text],
-                y=self.df[self.key_class],
-                cv=KFold(n_splits, shuffle=True)
+        try:
+            return(
+                cross_val_score(
+                    p,
+                    self.df[self.key_text],
+                    y=self.df[self.key_class],
+                    cv=KFold(n_splits, shuffle=True)
+                )
             )
-        )
+
+        except Exception as e:
+            print(self.banner_border)
+            print('Error: insufficient data --- {e}'.format(e=e))
+            print(self.banner_border)
