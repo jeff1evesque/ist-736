@@ -252,7 +252,7 @@ def analyze(
 
         for i,sn in enumerate(screen_name):
             data = peak_detection(
-                data=joined_data[sn],
+                data=joined_data_agg[sn],
                 ts_index=ts_index,
                 directory='{a}/{b}'.format(a=directory, b=sn),
                 threshold=classify_threshold
