@@ -57,7 +57,7 @@ def join_data(
         data_agg[sn] = data[sn]
         data_agg[sn] = data[sn].groupby(group_ts).agg({
                 classify_index: lambda a: ' '.join(map(str, a))
-            }).reset_index()
+            })
 
         #
         # merge dataset: twitter and quandl

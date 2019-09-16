@@ -23,10 +23,10 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=True,
+    analysis_ts=False,
     analysis_ts_sentiment=True,
-    analysis_granger=True,
-    analysis_classify=True
+    analysis_granger=False,
+    analysis_classify=False
 ):
     '''
 
@@ -84,12 +84,12 @@ def analyze(
     # Note: requires vader sentiment scores.
     #
     if analysis_granger:
-        initialized_data = joined_data
+        initialized_data = joined_data_agg
 
         for i,sn in enumerate(screen_name):
             # merge with consistent date format
             initialized_data[sn]['created_at'] = [datetime.strptime(
-                x.split()[0],
+                x,
                 '%Y-%m-%d'
             ) for x in initialized_data[sn].index.tolist()]
 
@@ -126,11 +126,14 @@ def analyze(
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                if all(x in initialized_data[sn] for x in [sentiment, 'created_at']):
+                if (
+                    'created_at' == initialized_data[sn].index.name and
+                    all(x in initialized_data[sn] for x in [sentiment])
+                ):
                     ts_sentiment = Timeseries(
                         df=initialized_data[sn],
                         normalize_key=sentiment,
-                        date_index='created_at',
+                        date_index=None,
                         directory='{directory}/{sn}'.format(
                             directory=directory,
                             sn=sn
