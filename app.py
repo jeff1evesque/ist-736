@@ -99,7 +99,10 @@ for x in df_quandl:
             b=x['database'].lower(),
             c=x['dataset'].lower()
         ),
-        directory_report='reports/{a}/{b}'.format(a=lstm_epochs, x=x['dataset']),
+        directory_report='reports/{a}/{b}'.format(
+            a=lstm_epochs,
+            b=x['dataset']
+        ),
         screen_name=screen_name,
         stopwords=stopwords
     )
