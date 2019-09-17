@@ -21,7 +21,7 @@ def analyze(
     directory='viz',
     arima_auto_scale=None,
     lstm_epochs=750,
-    auto_scale=None,
+    arima_auto_scale=None,
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
