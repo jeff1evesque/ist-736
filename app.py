@@ -87,11 +87,11 @@ for x in df_quandl:
     analyze(
         data=data,
         df_quandl=x['data'],
-        directory='viz/analysis/{a}--{b}'.format(
+        directory='viz.750/analysis/{a}--{b}'.format(
             a=x['database'].lower(),
             b=x['dataset'].lower()
         ),
-        directory_report='reports/{x}'.format(x=x['dataset']),
+        directory_report='reports.750/{x}'.format(x=x['dataset']),
         screen_name=screen_name,
         stopwords=stopwords
     )

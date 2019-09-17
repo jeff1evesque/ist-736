@@ -23,8 +23,8 @@ def analyze(
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=False,
-    analysis_ts_sentiment=True,
+    analysis_ts=True,
+    analysis_ts_sentiment=False,
     analysis_granger=False,
     analysis_classify=False
 ):
@@ -139,7 +139,7 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=15000,
+                        lstm_epochs=750,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -162,9 +162,9 @@ def analyze(
                 'arima' in v for k,v in ts_results_sentiment.items()
             ):
                 plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'arima' in v],
+                    labels=[k for k,v in ts_results_sentiment.items()],
                     performance=[v['arima']['mse']
-                        for k,v in ts_results_sentiment.items() if 'arima' in v],
+                        for k,v in ts_results_sentiment.items()],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_arima_sentiment.png',
                     rotation=90
@@ -176,9 +176,9 @@ def analyze(
                 'lstm' in v for k,v in ts_results_sentiment.items()
             ):
                 plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'lstm' in v],
+                    labels=[k for k,v in ts_results_sentiment.items()],
                     performance=[v['lstm']['mse']
-                        for k,v in ts_results_sentiment.items() if 'lstm' in v],
+                        for k,v in ts_results_sentiment.items()],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_lstm_sentiment.png',
                     rotation=90
@@ -204,43 +204,31 @@ def analyze(
             date_index='date',
             directory='{directory}'.format(directory=directory),
             suffix=ts_index,
-            lstm_epochs=15000,
+            lstm_epochs=750,
             lstm_dropout=0,
             auto_scale=(50, 0.15)
         )
-        ts_results[sn] = ts_stock.get_model_scores()
+        ts_results = ts_stock.get_model_scores()
 
-        if 'arima' in ts_results[sn]:
-            with open('{directory}/adf_{sn}_{type}.txt'.format(
-                directory=directory_report,
-                sn=sn,
-                type=ts_index
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
-
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'arima' in v for k,v in ts_results.items()
-        ):
+        if 'arima' in ts_results:
             plot_bar(
-                labels=[k for k,v in ts_results.items() if 'arima' in v],
-                performance=[v['arima']['mse']
-                    for k,v in ts_results.items() if 'arima' in v],
+                labels=['overall'],
+                performance=ts_results['arima']['mse'],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'lstm' in v for k,v in ts_results.items()
-        ):
+            with open('{directory}/adf_{type}.txt'.format(
+                directory=directory_report,
+                type=ts_index
+            ), 'w') as fp:
+                print(ts_results['arima']['adf'], file=fp)
+
+        if 'lstm' in ts_results:
             plot_bar(
-                labels=[k for k,v in ts_results.items() if 'lstm' in v],
-                performance=[v['lstm']['mse']
-                    for k,v in ts_results.items() if 'lstm' in v],
+                labels=['overall'],
+                performance=ts_results['lstm']['mse'],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',
                 rotation=90
