@@ -25,6 +25,12 @@ def explore(
     '''
 
     for i,sn in enumerate(screen_name):
+        #
+        # create directories
+        #
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # convert to string
         data[sn][target] = data[sn][target].astype(str)
 

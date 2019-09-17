@@ -21,20 +21,22 @@ class Arima():
         self,
         data,
         train=False,
-        log_transform=0,
+        log_delta=0.02,
         iterations=1
     ):
         '''
 
         define class variables.
 
+        @log_delta, delta factor to each value to prevent log(0).
+
         '''
 
         self.data = data
-        self.log_transform = log_transform
-        if log_transform:
+        self.log_delta = log_delta
+        if self.log_delta:
             self.data = self.data.map(
-                lambda a: log(a + log_transform)
+                lambda a: log(a + self.log_delta)
             )
 
         # replace 'nan' with overall average
@@ -66,7 +68,7 @@ class Arima():
         self.df_test = self.y_test
         self.history = self.df_train
 
-    def get_data(self, type=None):
+    def get_data(self, type=None, rescale=False):
         '''
 
         get current train and test data.
@@ -80,17 +82,34 @@ class Arima():
             return(self.df_test.index.values)
 
         elif type == 'train':
-            return([exp(x) - self.log_transform for x in self.df_train])
+            if rescale:
+                return([exp(x) - self.log_delta for x in self.df_train])
+
+            else:
+                return(self.df_train)
 
         elif type == 'test':
-            return([exp(x) - self.log_transform for x in self.df_train])
+            if rescale:
+                return([exp(x) - self.log_delta for x in self.df_test])
 
-        return({
-            'train_index': self.df_train.index.values,
-            'test_index': self.df_test.index.values,
-            'train': [exp(x) - self.log_transform for x in self.df_train],
-            'test': [exp(x) - self.log_transform for x in self.df_test]
-        })
+            else:
+                return(self.df_test)
+
+        if rescale:
+            return({
+                'train_index': self.df_train.index.values,
+                'test_index': self.df_test.index.values,
+                'train': [exp(x) - self.log_delta for x in self.df_train],
+                'test': [exp(x) - self.log_delta for x in self.df_test]
+            })
+
+        else:
+            return({
+                'train_index': self.df_train.index.values,
+                'test_index': self.df_test.index.values,
+                'train': self.df_train,
+                'test': self.df_test
+            })
 
     def train(
         self,
@@ -208,8 +227,8 @@ class Arima():
         # mean square error: compute error using rescaled value(s).
         #
         self.mse = mean_squared_error(
-            [exp(x) - self.log_transform for x in actuals],
-            [exp(x) - self.log_transform for x in predicted[:len(actuals)]]
+            [exp(x) - self.log_delta for x in actuals],
+            [exp(x) - self.log_delta for x in predicted[:len(actuals)]]
         )
 
         return(True)
@@ -368,14 +387,14 @@ class Arima():
         '''
 
         if type == 'test':
-            return([exp(x) - self.log_transform for x in self.differences[0]])
+            return([exp(x) - self.log_delta for x in self.differences[0]])
 
         elif type == 'predicted':
-            return([exp(x) - self.log_transform for x in self.differences[1]])
+            return([exp(x) - self.log_delta for x in self.differences[1]])
 
         return(
-            [exp(x) - self.log_transform for x in self.differences[0]],
-            [exp(x) - self.log_transform for x in self.differences[1]]
+            [exp(x) - self.log_delta for x in self.differences[0]],
+            [exp(x) - self.log_delta for x in self.differences[1]]
         )
 
     def get_rolling(self):

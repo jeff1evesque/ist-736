@@ -6,7 +6,6 @@ import pandas as pd
 from datetime import datetime
 from collections import defaultdict
 from brain.view.plot import plot_bar
-from brain.exploratory.sentiment import Sentiment
 from brain.controller.classifier import classify
 from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
@@ -20,14 +19,16 @@ def analyze(
     screen_name,
     stopwords=[],
     directory='viz',
+    arima_auto_scale=None,
+    lstm_epochs=750,
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
-    analysis_ts=True,
+    analysis_ts=False,
     analysis_ts_sentiment=True,
-    analysis_granger=True,
-    analysis_classify=True
+    analysis_granger=False,
+    analysis_classify=False
 ):
     '''
 
@@ -39,6 +40,13 @@ def analyze(
     ts_results = {}
     ts_results_sentiment = {}
     g = ['created_at', 'screen_name'] + sentiments
+    drop_cols = [
+        'compound',
+        'retweet_count',
+        'favorite_count',
+        'user_mentions',
+        'Short Volume'
+    ]
     this_file = os.path.basename(__file__)
 
     #
@@ -60,10 +68,13 @@ def analyze(
     #
     # join data: twitter and quandl
     #
+    # Note: memory footprint reduced by removing unused columns.
+    #
     joined_data, joined_data_agg = join_data(
         data=data,
         df_quandl=df_quandl,
         screen_name=screen_name,
+        drop_cols=drop_cols,
         sentiments=sentiments,
         classify_index=classify_index,
         ts_index=ts_index
@@ -75,27 +86,17 @@ def analyze(
     # Note: requires vader sentiment scores.
     #
     if analysis_granger:
-        initialized_data = joined_data
+        initialized_data = joined_data_agg
 
         for i,sn in enumerate(screen_name):
             # merge with consistent date format
             initialized_data[sn]['created_at'] = [datetime.strptime(
-                x.split()[0],
+                x,
                 '%Y-%m-%d'
-            ) for x in initialized_data[sn]['created_at']]
+            ) for x in initialized_data[sn].index.tolist()]
 
             # convert to string
             initialized_data[sn]['created_at'] = initialized_data[sn]['created_at'].astype(str)
-
-            #
-            # sentiment scores
-            #
-            s = Sentiment(initialized_data[sn], classify_index)
-            initialized_data[sn] = pd.concat([
-                s.vader_analysis(),
-                initialized_data[sn]
-             ], axis=1)
-            initialized_data[sn].replace('\s+', ' ', regex=True, inplace=True)
 
             #
             # granger causality
@@ -117,15 +118,22 @@ def analyze(
     #
     # timeseries analysis: sentiment
     #
+    # Note: requires vader sentiment scores.
+    #
     if analysis_ts_sentiment:
+        initialized_data = joined_data_agg
+
         for i,sn in enumerate(screen_name):
             #
             # timeseries model on sentiment
             #
             for sentiment in sentiments:
-                if all(x in joined_data_agg[sn] for x in [sentiment, 'created_at']):
+                if (
+                    'created_at' == initialized_data[sn].index.name and
+                    all(x in initialized_data[sn] for x in [sentiment])
+                ):
                     ts_sentiment = Timeseries(
-                        df=joined_data_agg[sn],
+                        df=initialized_data[sn],
                         normalize_key=sentiment,
                         date_index=None,
                         directory='{directory}/{sn}'.format(
@@ -133,7 +141,8 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=7500,
+                        arima_auto_scale=arima_auto_scale,
+                        lstm_epochs=lstm_epochs,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -198,43 +207,31 @@ def analyze(
             date_index='date',
             directory='{directory}'.format(directory=directory),
             suffix=ts_index,
-            lstm_epochs=7500,
-            lstm_dropout=0,
-            auto_scale=(50, 0.15)
+            arima_auto_scale=(50, 0.15),
+            lstm_epochs=lstm_epochs,
+            lstm_dropout=0
         )
-        ts_results[sn] = ts_stock.get_model_scores()
+        ts_results = ts_stock.get_model_scores()
 
-        if 'arima' in ts_results[sn]:
-            with open('{directory}/adf_{sn}_{type}.txt'.format(
-                directory=directory_report,
-                sn=sn,
-                type=ts_index
-            ), 'w') as fp:
-                print(ts_results[sn]['arima']['adf'], file=fp)
-
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'arima' in v for k,v in ts_results.items()
-        ):
+        if 'arima' in ts_results:
             plot_bar(
-                labels=[k for k,v in ts_results.items() if 'arima' in v],
-                performance=[v['arima']['mse']
-                    for k,v in ts_results.items() if 'arima' in v],
+                labels=['overall'],
+                performance=ts_results['arima']['mse'],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'lstm' in v for k,v in ts_results.items()
-        ):
+            with open('{directory}/adf_{type}.txt'.format(
+                directory=directory_report,
+                type=ts_index
+            ), 'w') as fp:
+                print(ts_results['arima']['adf'], file=fp)
+
+        if 'lstm' in ts_results:
             plot_bar(
-                labels=[k for k,v in ts_results.items() if 'lstm' in v],
-                performance=[v['lstm']['mse']
-                    for k,v in ts_results.items() if 'lstm' in v],
+                labels=['overall'],
+                performance=ts_results['lstm']['mse'],
                 directory='{directory}'.format(directory=directory),
                 filename='mse_overall_lstm.png',
                 rotation=90
@@ -249,7 +246,7 @@ def analyze(
 
         for i,sn in enumerate(screen_name):
             data = peak_detection(
-                data=joined_data[sn],
+                data=joined_data_agg[sn],
                 ts_index=ts_index,
                 directory='{a}/{b}'.format(a=directory, b=sn),
                 threshold=classify_threshold

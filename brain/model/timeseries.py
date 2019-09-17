@@ -17,8 +17,8 @@ def model(
     validation_split=0,
     activation='linear',
     num_cells=4,
-    log_transform=0,
-    auto_scale=False,
+    log_delta=0.01,
+    auto_scale=None,
     rolling_grid_search=False,
     catch_grid_search=False
 ):
@@ -43,7 +43,7 @@ def model(
                     df[normalize_key].values,
                     [pd.Timestamp(x) for x in df[date_index].tolist()]
                 ),
-                log_transform=log_transform
+                log_delta=log_delta
             )
 
         else:
@@ -52,7 +52,7 @@ def model(
                     df[normalize_key].values,
                     [pd.Timestamp(x) for x in df.index.values]
                 ),
-                log_transform=log_transform
+                log_delta=log_delta
             )
 
         # induce stationarity

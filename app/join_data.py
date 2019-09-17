@@ -3,13 +3,17 @@
 import os
 import pandas as pd
 from datetime import datetime
-from brain.controller.peak_detection import peak_detection
+from app.utility.merge_records import merge_records
+from app.utility.merge_sentiment import merge_sentiment
+from app.utility.drop_columns import drop_columns
 
 
 def join_data(
     data,
     df_quandl,
     screen_name,
+    drop_cols=None,
+    drop_cols_regex=['^Unnamed'],
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     ts_index='value',
@@ -21,8 +25,8 @@ def join_data(
 
     '''
 
-    data_agg = data
-    g = ['created_at', 'screen_name'] + sentiments
+    data_agg = {}
+    group_ts = ['created_at', 'screen_name']
     this_file = os.path.basename(__file__)
 
     #
@@ -48,72 +52,70 @@ def join_data(
             df_quandl.index.name = 'created_at'
 
         #
+        # aggregate records: combine records by 'classify_index'
+        #
+        data_agg[sn] = data[sn]
+        data_agg[sn] = data[sn].groupby(group_ts).agg({
+                classify_index: lambda a: ' '.join(map(str, a))
+            })
+
+        #
         # merge dataset: twitter and quandl
         #
         for x in df_quandl.columns:
             if x in data[sn]:
                 data[sn].drop([x], axis = 1, inplace=True)
+            if x in data_agg[sn]:
+                data_agg[sn].drop([x], axis = 1, inplace=True)
 
         data[sn] = data[sn].merge(df_quandl, on='created_at', how='left')
-
-        # column names: used below
-        col_names = data[sn].columns.tolist()
+        data_agg[sn] = data_agg[sn].merge(df_quandl, on='created_at', how='left')
 
         #
         # merge days (weekend, holidays) with no ticker value to previous day.
         #
-        drop_indices = []
-        for i,(idx,row) in enumerate(data[sn].iterrows()):
-            if (
-                i == 0 and
-                ts_index in data[sn] and
-                pd.isnull(data[sn][ts_index].values[i])
-            ):
-                drop_indices.append(i)
-
-            elif (
-                i > 0 and
-                ts_index in data[sn] and
-                pd.isnull(data[sn][ts_index].values[i])
-            ):
-                if not pd.isnull(data[sn][ts_index].values[i-1]):
-                    for x in col_names:
-                        if x == classify_index:
-                            data[sn][classify_index].replace(
-                                i,
-                                '{previous} {current}'.format(
-                                    previous=data[sn][classify_index].values[i-1],
-                                    current=data[sn][classify_index].values[i]
-                                )
-                            )
-                        else:
-                            data[sn][x].replace(i, data[sn][x].values[i-1])
-
-                    drop_indices.append(i-1)
+        data[sn] = merge_records(data[sn], ts_index, classify_index)
+        data_agg[sn] = merge_records(data_agg[sn], ts_index, classify_index)
 
         #
-        # drop rows: rows with no tickers and empty classify_index.
+        # ensure no duplicate columns
         #
-        drop_indices.extend(data[sn][data[sn][classify_index] == ''].index)
+        # Note: reset_index workaround implemented for below concat
+        #
+        #     - https://stackoverflow.com/a/47991762
+        #
+        duplicates = sentiments + ['compound']
+        for x in duplicates:
+            if x in data[sn]:
+                data[sn].drop(x, inplace=True, axis=1)
+            if x in data_agg[sn]:
+                data_agg[sn].drop(x, inplace=True, axis=1)
 
-        if (
-            len(drop_indices) > 0 and
-            any(x in data[sn].index.values for x in drop_indices)
-        ):
-            for x in drop_indices:
-                if x in data[sn].index.values:
-                    data[sn].drop(x, inplace=True)
-            data[sn].reset_index(inplace=True)
+        data[sn]['created_at'] = data[sn].index.values
+        data_agg[sn]['created_at'] = data_agg[sn].index.values
+
+        data[sn].reset_index(drop=True, inplace=True)
+        data_agg[sn].reset_index(drop=True, inplace=True)
 
         #
-        # aggregate records: combine records by 'classify_index'
+        # merge sentiment scores
         #
-        data_agg[sn] = data[sn].groupby([
-                'created_at',
-                'screen_name',
-                ts_index
-            ]).agg({
-                classify_index: lambda a: ''.join(map(str, a))
-            }).reset_index()
+        data[sn] = merge_sentiment(
+            data[sn],
+            classify_index,
+            df_index='created_at'
+        )
+
+        data_agg[sn] = merge_sentiment(
+            data_agg[sn],
+            classify_index,
+            df_index='created_at'
+        )
+
+        #
+        # drop columns: remove unused columns to reduce memory footprint
+        #
+        data[sn] = drop_columns(data[sn], drop_cols, drop_cols_regex)
+        data_agg[sn] = drop_columns(data_agg[sn], drop_cols, drop_cols_regex)
 
     return(data, data_agg)
