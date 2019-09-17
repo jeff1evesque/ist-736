@@ -26,9 +26,9 @@ def analyze(
     classify_index='full_text',
     ts_index='value',
     analysis_ts=False,
-    analysis_ts_sentiment=False,
+    analysis_ts_sentiment=True,
     analysis_granger=False,
-    analysis_classify=True
+    analysis_classify=False
 ):
     '''
 
@@ -165,9 +165,9 @@ def analyze(
                 'arima' in v for k,v in ts_results_sentiment.items()
             ):
                 plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items()],
+                    labels=[k for k,v in ts_results_sentiment.items() if 'arima' in v],
                     performance=[v['arima']['mse']
-                        for k,v in ts_results_sentiment.items()],
+                        for k,v in ts_results_sentiment.items() if 'arima' in v],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_arima_sentiment.png',
                     rotation=90
@@ -179,9 +179,9 @@ def analyze(
                 'lstm' in v for k,v in ts_results_sentiment.items()
             ):
                 plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items()],
+                    labels=[k for k,v in ts_results_sentiment.items() if 'lstm' in v],
                     performance=[v['lstm']['mse']
-                        for k,v in ts_results_sentiment.items()],
+                        for k,v in ts_results_sentiment.items() if 'lstm' in v],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_lstm_sentiment.png',
                     rotation=90
