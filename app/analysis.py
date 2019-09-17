@@ -19,6 +19,9 @@ def analyze(
     screen_name,
     stopwords=[],
     directory='viz',
+    arima_auto_scale=None,
+    lstm_epochs=750,
+    auto_scale=None,
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
@@ -139,7 +142,8 @@ def analyze(
                             sn=sn
                         ),
                         suffix=sentiment,
-                        lstm_epochs=750,
+                        arima_auto_scale=arima_auto_scale,
+                        lstm_epochs=lstm_epochs,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -204,9 +208,9 @@ def analyze(
             date_index='date',
             directory='{directory}'.format(directory=directory),
             suffix=ts_index,
-            lstm_epochs=750,
-            lstm_dropout=0,
-            auto_scale=(50, 0.15)
+            arima_auto_scale=(50, 0.15),
+            lstm_epochs=lstm_epochs,
+            lstm_dropout=0
         )
         ts_results = ts_stock.get_model_scores()
 

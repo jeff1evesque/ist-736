@@ -27,13 +27,13 @@ class Timeseries():
         date_index='date',
         diff=1,
         xticks=True,
+        arima_auto_scale=None,
         lstm_epochs=100,
         lstm_dropout=0.2,
         lstm_batch_size=32,
         lstm_validation_split=0,
         lstm_activation='linear',
         lstm_num_cells=4,
-        auto_scale=False,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -53,7 +53,7 @@ class Timeseries():
                 normalize_key=normalize_key,
                 log_delta=0.01,
                 date_index=date_index,
-                auto_scale=auto_scale,
+                auto_scale=arima_auto_scale,
                 rolling_grid_search=rolling_grid_search,
                 catch_grid_search=catch_grid_search,
                 directory=directory,
@@ -84,7 +84,7 @@ class Timeseries():
         date_index='date',
         diff=1,
         xticks=True,
-        auto_scale=False,
+        auto_scale=None,
         log_delta=0.01,
         rolling_grid_search=False,
         catch_grid_search=False

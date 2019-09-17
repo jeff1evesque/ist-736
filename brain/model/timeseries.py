@@ -18,7 +18,7 @@ def model(
     activation='linear',
     num_cells=4,
     log_delta=0.01,
-    auto_scale=False,
+    auto_scale=None,
     rolling_grid_search=False,
     catch_grid_search=False
 ):
