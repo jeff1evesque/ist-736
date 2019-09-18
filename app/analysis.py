@@ -24,6 +24,7 @@ def analyze(
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
+    classify_threshold=[0.5],
     ts_index='value',
     analysis_ts=False,
     analysis_ts_sentiment=True,
@@ -242,7 +243,6 @@ def analyze(
     #
     if analysis_classify:
         chi2 = 100
-        classify_threshold = [0.5]
 
         for i,sn in enumerate(screen_name):
             data = peak_detection(
