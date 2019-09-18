@@ -85,15 +85,17 @@ df_quandl = quandl(
 #
 # @arima_auto_scale, only applied to sentiment timeseries analysis.
 #
-lstm_epochs=750
 arima_auto_scale=None
+lstm_epochs=750
+classify_threshold=[0.5]
 
 for x in df_quandl:
     analyze(
         data=data,
         df_quandl=x['data'],
-        lstm_epochs=lstm_epochs,
         arima_auto_scale=arima_auto_scale,
+        lstm_epochs=lstm_epochs,
+        classify_threshold=classify_threshold,
         directory='viz/{a}/{b}--{c}'.format(
             a=lstm_epochs,
             b=x['database'].lower(),
