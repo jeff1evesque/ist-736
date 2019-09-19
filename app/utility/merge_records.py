@@ -29,19 +29,23 @@ def merge_records(df, col_1, col_2, drop_empty_col_2=True):
         elif (
             i > 0 and
             col_1 in df and
-            pd.isnull(df[col_1].values[i])
+            col_2 in df and
+            pd.isnull(df[col_1].values[i]) and
+            pd.notnull(df[col_1].values[i-1]) and
+            pd.notnull(df[col_2].values[i])
         ):
-            if not pd.notnull(df[col_1].values[i-1]):
-                for x in col_names:
-                    if x == col_2:
-                        df.iloc[[i], df.columns.get_loc(col_2)] = '{previous} {current}'.format(
-                            previous=df.iloc[[i-1], df.columns.get_loc(col_2)].values[0],
-                            current=df.iloc[[i], df.columns.get_loc(col_2)].values[0]
-                        )
-                    else:
-                        df.iloc[[i], df.columns.get_loc(x)] = df.iloc[[i-1], df.columns.get_loc(col_2)].values[0]
+            for x in col_names:
+                col_idx = df.columns.get_loc(x)
+                if x == col_2:
+                    df.iat[i, col_idx] = '{a} {b}'.format(
+                        a=df.iat[i-1, col_idx],
+                        b=df.iat[i, col_idx],
+                    )
 
-                drop_indices.append(i-1)
+                else:
+                    df.iat[i, col_idx] = df.iat[i-1, col_idx]
+
+            drop_indices.append(i-1)
 
     if drop_empty_col_2:
         drop_indices.extend(df[df[col_2] == ''].index)
