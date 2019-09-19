@@ -245,11 +245,6 @@ def analyze(
         chi2 = 100
 
         for i,sn in enumerate(screen_name):
-            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
-            print(joined_data_agg[sn][ts_index])
-            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
-            exit(999)
-
             data = peak_detection(
                 data=joined_data_agg[sn],
                 ts_index=ts_index,

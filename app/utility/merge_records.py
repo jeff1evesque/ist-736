@@ -43,9 +43,6 @@ def merge_records(df, col_1, col_2, drop_empty_col_2=True):
 
                 drop_indices.append(i-1)
 
-    print(df[['value']])
-    exit(999)
-
     if drop_empty_col_2:
         drop_indices.extend(df[df[col_2] == ''].index)
 
