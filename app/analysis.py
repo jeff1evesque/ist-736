@@ -27,9 +27,9 @@ def analyze(
     classify_threshold=[0.5],
     ts_index='value',
     analysis_ts=False,
-    analysis_ts_sentiment=True,
+    analysis_ts_sentiment=False,
     analysis_granger=False,
-    analysis_classify=False
+    analysis_classify=True
 ):
     '''
 
@@ -245,6 +245,11 @@ def analyze(
         chi2 = 100
 
         for i,sn in enumerate(screen_name):
+            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
+            print(joined_data_agg[sn][ts_index])
+            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
+            exit(999)
+
             data = peak_detection(
                 data=joined_data_agg[sn],
                 ts_index=ts_index,
