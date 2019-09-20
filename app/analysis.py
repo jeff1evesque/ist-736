@@ -28,8 +28,8 @@ def analyze(
     ts_index='value',
     analysis_ts=False,
     analysis_ts_sentiment=False,
-    analysis_granger=False,
-    analysis_classify=True
+    analysis_granger=True,
+    analysis_classify=False
 ):
     '''
 
@@ -260,15 +260,16 @@ def analyze(
 
             if len(counter) > 2:
                 for key, val in counter.items():
-                    if all(val < 0.5 * v for k,v in counter.items() if v != val):
-                        data.drop(
-                            data[data['trend'] == key].index.values,
-                            inplace=True
-                        )
-
                     if all(val > 1.5 * v for k,v in counter.items() if v != val):
                         data.drop(
                             data[data['trend'] == key].index.values[0],
+                            inplace=True
+                        )
+
+                for key, val in counter.items():
+                    if all(val < 0.5 * v for k,v in counter.items() if v != val):
+                        data.drop(
+                            data[data['trend'] == key].index.values,
                             inplace=True
                         )
 
