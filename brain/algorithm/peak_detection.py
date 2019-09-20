@@ -29,7 +29,7 @@ class PeakDetection():
 
         '''
 
-        self.data = list(data)
+        self.data = data
         self.lag = lag
         self.influence = influence
         self.filteredY = np.array(self.data)

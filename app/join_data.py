@@ -29,6 +29,10 @@ def join_data(
     group_ts = ['created_at', 'screen_name']
     this_file = os.path.basename(__file__)
 
+    if 'date' in df_quandl:
+        df_quandl.set_index('date', inplace=True)
+        df_quandl.index.name = 'created_at'
+
     #
     # preprocess: left join on twitter dataset(s).
     #
@@ -46,10 +50,6 @@ def join_data(
             # set index
             data[sn].set_index('created_at', inplace=True)
             data[sn].index.name = 'created_at'
-
-        if 'date' in df_quandl:
-            df_quandl.set_index('date', inplace=True)
-            df_quandl.index.name = 'created_at'
 
         #
         # aggregate records: combine records by 'classify_index'

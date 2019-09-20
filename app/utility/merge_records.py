@@ -9,9 +9,9 @@ def merge_records(df, col_1, col_2, drop_empty_col_2=True):
     merge records of a provided dfframe when a specified condition for
     'col_1' and 'col_2' is satisfied:
 
-    @col_1, if rows in this column is null, store the associated row index.
+    @col_1, current row in this column is null, and previous row notnull.
     @col_2, rows in this column conditionally get appended the previous
-        row value for the same column.
+        row value given condition for 'col_1'.
 
     '''
 
@@ -29,23 +29,23 @@ def merge_records(df, col_1, col_2, drop_empty_col_2=True):
         elif (
             i > 0 and
             col_1 in df and
-            pd.isnull(df[col_1].values[i])
+            col_2 in df and
+            pd.isnull(df[col_1].values[i]) and
+            pd.notnull(df[col_1].values[i-1]) and
+            pd.notnull(df[col_2].values[i])
         ):
-            if not pd.isnull(df[col_1].values[i-1]):
-                for x in col_names:
-                    if x == col_2:
-                        df[col_2].replace(
-                            i,
-                            '{previous} {current}'.format(
-                                previous=df[col_2].values[i-1],
-                                current=df[col_2].values[i]
-                            )
-                        )
-                    else:
-                        df[x].replace(i, df[x].values[i-1])
+            for x in col_names:
+                col_idx = df.columns.get_loc(x)
+                if x == col_2:
+                    df.iat[i, col_idx] = '{a} {b}'.format(
+                        a=df.iat[i-1, col_idx],
+                        b=df.iat[i, col_idx],
+                    )
 
-                drop_indices.append(i-1)
+                else:
+                    df.iat[i, col_idx] = df.iat[i-1, col_idx]
 
+            drop_indices.append(i-1)
 
     if drop_empty_col_2:
         drop_indices.extend(df[df[col_2] == ''].index)
@@ -59,6 +59,7 @@ def merge_records(df, col_1, col_2, drop_empty_col_2=True):
                 if isinstance(i, int) and i < len(df.index)]
 
         for x in target_indices:
-            df.drop(x, inplace=True)
+            if x in df:
+                df.drop(x, inplace=True)
 
     return(df)

@@ -682,7 +682,6 @@ class Model():
         #
         # Note: the restriction 0 <= k <= n_features must be satisfied.
         #
-        print(self.df[self.key_text].shape)
         if k > self.df[self.key_text].shape[0]:
             k = 'all'
 
