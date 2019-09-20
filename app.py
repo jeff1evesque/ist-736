@@ -31,19 +31,19 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-    ('BATS', 'BATS_AAPL'),
-    ('BATS', 'BATS_AMZN'),
+###    ('BATS', 'BATS_AAPL'),
+###    ('BATS', 'BATS_AMZN'),
     ('BATS', 'BATS_GOOGL'),
-    ('BATS', 'BATS_MMT'),
-    ('BATS', 'BATS_NFLX'),
-    ('CHRIS', 'CBOE_VX1'),
-    ('NASDAQOMX', 'COMP-NASDAQ'),
-    ('FINRA', 'FNYX_MMM'),
-    ('FINRA', 'FNSQ_SPY'),
-    ('FINRA', 'FNYX_QQQ'),
-    ('EIA', 'PET_RWTC_D'),
-    ('WFC', 'PR_CON_15YFIXED_IR'),
-    ('WFC', 'PR_CON_30YFIXED_APR')
+###    ('BATS', 'BATS_MMT'),
+###    ('BATS', 'BATS_NFLX'),
+###    ('CHRIS', 'CBOE_VX1'),
+###    ('NASDAQOMX', 'COMP-NASDAQ'),
+###    ('FINRA', 'FNYX_MMM'),
+###    ('FINRA', 'FNSQ_SPY'),
+###    ('FINRA', 'FNYX_QQQ'),
+###    ('EIA', 'PET_RWTC_D'),
+###    ('WFC', 'PR_CON_15YFIXED_IR'),
+###    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 end_date = date.today()
 start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
@@ -88,6 +88,7 @@ df_quandl = quandl(
 arima_auto_scale=None
 lstm_epochs=750
 classify_threshold=[0.5]
+classify_chi2=100
 
 for x in df_quandl:
     analyze(
