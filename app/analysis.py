@@ -265,14 +265,12 @@ def analyze(
                             data[data['trend'] == key].index.values,
                             inplace=True
                         )
-                        continue
 
-                    elif all(val > 1.5 * v for k,v in counter.items() if v != val):
+                    if all(val > 1.5 * v for k,v in counter.items() if v != val):
                         data.drop(
                             data[data['trend'] == key].index.values[0],
                             inplace=True
                         )
-                        continue
 
             #
             # sufficient data: analysis performed if adequate amount of data.
