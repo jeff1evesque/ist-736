@@ -24,11 +24,12 @@ def analyze(
     directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
+    classify_chi2=100,
     classify_threshold=[0.5],
     ts_index='value',
     analysis_ts=False,
-    analysis_ts_sentiment=False,
-    analysis_granger=True,
+    analysis_ts_sentiment=True,
+    analysis_granger=False,
     analysis_classify=False
 ):
     '''
@@ -240,8 +241,6 @@ def analyze(
     # classification analysis: twitter corpus (X), with stock index (y)
     #
     if analysis_classify:
-        chi2 = 100
-
         for i,sn in enumerate(screen_name):
             data = peak_detection(
                 data=joined_data_agg[sn],
@@ -297,7 +296,7 @@ def analyze(
                             ),
                             top_words=25,
                             stopwords=stopwords,
-                            k=chi2
+                            k=classify_chi2
                         )
 
             if any(
