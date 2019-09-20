@@ -105,16 +105,16 @@ def analyze(
             #
             # Note: this requires the above quandl join.
             #
-            for sentiment in sentiments:
-                if all(x in initialized_data[sn] for x in [ts_index, sentiment]):
+            for sent in sentiments:
+                if all(x in initialized_data[sn] for x in [ts_index, sent]):
                     granger(
-                        initialized_data[sn][[ts_index, sentiment]],
+                        initialized_data[sn][[ts_index, sent]],
                         maxlag=4,
                         directory='{directory}/{sn}/granger'.format(
                             directory=directory,
                             sn=sn
                         ),
-                        suffix=sentiment
+                        suffix=sent
                     )
 
     #
@@ -123,69 +123,86 @@ def analyze(
     if analysis_ts_sentiment:
         initialized_data = joined_data_agg
 
-        for i,sn in enumerate(screen_name):
+        for sn in screen_name:
+            ts_results_sentiment[sn] = {}
+
             #
             # timeseries model on sentiment
             #
-            for sentiment in sentiments:
+            for sent in sentiments:
+                ts_results_sentiment[sn][sent] = {}
+
                 if (
                     'created_at' == initialized_data[sn].index.name and
-                    all(x in initialized_data[sn] for x in [sentiment])
+                    sent in initialized_data[sn]
                 ):
                     ts_sentiment = Timeseries(
                         df=initialized_data[sn],
-                        normalize_key=sentiment,
+                        normalize_key=sent,
                         date_index=None,
                         directory='{directory}/{sn}'.format(
                             directory=directory,
                             sn=sn
                         ),
-                        suffix=sentiment,
+                        suffix=sent,
                         arima_auto_scale=arima_auto_scale,
                         lstm_epochs=lstm_epochs,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
-                    ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
 
-                    if 'arima' in ts_results_sentiment[sn]:
+                    scores = ts_sentiment.get_model_scores()
+                    ts_results_sentiment[sn][sent] = scores
+
+                    if ('arima' in ts_results_sentiment[sn][sent]):
                         with open('{directory}/adf_{sn}_{sent}.txt'.format(
                             directory=directory_report,
                             sn=sn,
-                            sent=sentiment
+                            sent=sent
                         ), 'w') as fp:
-                            print(
-                                ts_results_sentiment[sn]['arima']['adf'],
-                                file=fp
-                            )
+                            print(ts_results_sentiment[sn][sent]['arima']['adf'], file=fp)
 
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'arima' in v for k,v in ts_results_sentiment.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'arima' in v],
-                    performance=[v['arima']['mse']
-                        for k,v in ts_results_sentiment.items() if 'arima' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_arima_sentiment.png',
-                    rotation=90
-                )
+        #
+        # mse plot: aggregated on overall sentiment for a given stock.
+        #
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'arima' in v and
+            'mse' in v['arima']
+                for k,v in ts_results_sentiment[sn].items() for sn in screen_name
+        ):
+            plot_bar(
+                labels=['{a}/{b}'.format(a=k, b=sn)
+                    for k,v in ts_results_sentiment[sn].items()
+                        for sn in screen_name],
+                performance=[v['arima']['mse']
+                    for k,v in ts_results_sentiment[sn].items()
+                        for sn in screen_name
+                            if 'arima' in v and 'mse' in v['arima']],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_arima_sentiment.png',
+                rotation=30
+            )
 
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'lstm' in v for k,v in ts_results_sentiment.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'lstm' in v],
-                    performance=[v['lstm']['mse']
-                        for k,v in ts_results_sentiment.items() if 'lstm' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_lstm_sentiment.png',
-                    rotation=90
-                )
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            'lstm' in v and
+            'mse' in v['lstm']
+                for k,v in ts_results_sentiment[sn].items() for sn in screen_name
+        ):
+            plot_bar(
+                labels=['{a}/{b}'.format(a=k, b=sn)
+                    for k,v in ts_results_sentiment[sn].items()
+                        for sn in screen_name],
+                performance=[v['lstm']['mse'] for k,v in ts_results_sentiment[sn].items()
+                    for sn in screen_name
+                        if 'lstm' in v and 'mse' in v['lstm']],
+                directory='{directory}'.format(directory=directory),
+                filename='mse_overall_lstm_sentiment.png',
+                rotation=30
+            )
 
     #
     # timeseries analysis: overall stock index/volume
