@@ -165,44 +165,57 @@ def analyze(
         #
         # mse plot: aggregated on overall sentiment for a given stock.
         #
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'arima' in v and
-            'mse' in v['arima']
-                for k,v in ts_results_sentiment[sn].items() for sn in screen_name
-        ):
-            plot_bar(
-                labels=['{a}/{b}'.format(a=k, b=sn)
-                    for k,v in ts_results_sentiment[sn].items()
-                        for sn in screen_name],
-                performance=[v['arima']['mse']
+        for sent in sentiments:
+            if any(
+                pd.notnull(k) and
+                pd.notnull(v) and
+                'arima' in v and
+                'mse' in v['arima']
                     for k,v in ts_results_sentiment[sn].items()
                         for sn in screen_name
+                            if sent in ts_results_sentiment[sn]
+            ):
+                plot_bar(
+                    labels=[k
+                        for k,v in ts_results_sentiment[sn][sent].items()
                             if 'arima' in v and 'mse' in v['arima']],
-                directory='{directory}'.format(directory=directory),
-                filename='mse_overall_arima_sentiment.png',
-                rotation=30
-            )
+                    performance=[v['arima']['mse']
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if 'arima' in v and 'mse' in v['arima']],
+                    directory='{directory}'.format(directory=directory),
+                    filename='mse_overall_arima_{sent}.png'.format(sent=sent),
+                    rotation=60
+                )
 
-        if any(
-            pd.notnull(k) and
-            pd.notnull(v) and
-            'lstm' in v and
-            'mse' in v['lstm']
-                for k,v in ts_results_sentiment[sn].items() for sn in screen_name
-        ):
-            plot_bar(
-                labels=['{a}/{b}'.format(a=k, b=sn)
+            print('77777777777777777777777777777777777777777777777777')
+            print('77777777777777777777777777777777777777777777777777')
+            print('77777777777777777777777777777777777777777777777777')
+            [print(v)
+                for v in ts_results_sentiment[sn][sent]]
+            print('77777777777777777777777777777777777777777777777777')
+            print('77777777777777777777777777777777777777777777777777')
+            print('77777777777777777777777777777777777777777777777777')
+
+            if any(
+                pd.notnull(k) and
+                pd.notnull(v) and
+                'lstm' in v and
+                'mse' in v['lstm']
                     for k,v in ts_results_sentiment[sn].items()
-                        for sn in screen_name],
-                performance=[v['lstm']['mse'] for k,v in ts_results_sentiment[sn].items()
-                    for sn in screen_name
-                        if 'lstm' in v and 'mse' in v['lstm']],
-                directory='{directory}'.format(directory=directory),
-                filename='mse_overall_lstm_sentiment.png',
-                rotation=30
-            )
+                        for sn in screen_name
+                            if sent in ts_results_sentiment[sn]
+            ):
+                plot_bar(
+                    labels=[k
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if 'arima' in v and 'mse' in v['arima']],
+                    performance=[v['lstm']['mse']
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if 'lstm' in v and 'mse' in v['lstm']],
+                    directory='{directory}'.format(directory=directory),
+                    filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
+                    rotation=60
+                )
 
     #
     # timeseries analysis: overall stock index/volume
