@@ -170,19 +170,20 @@ def analyze(
                 pd.notnull(k) and
                 pd.notnull(v) and
                 k == 'arima' and
-                'mse' in v
-                    for k,v in ts_results_sentiment[sn][sent].items()
-                        for sn in screen_name
+                'mse' in v and
+                pd.notnull(v['mse'])
+                    for sn in screen_name
+                        for k,v in ts_results_sentiment[sn][sent].items()
             ):
                 plot_bar(
-                    labels=[k
-                        for k,v in ts_results_sentiment[sn][sent].items()
-                            for sn in screen_name
-                                if k == 'arima' and 'mse' in v],
+                    labels=[sn
+                        for sn in screen_name
+                            for k,v in ts_results_sentiment[sn][sent].items()
+                                if k == 'arima' and 'mse' in v and pd.notnull(v['mse'])],
                     performance=[v['mse']
-                        for k,v in ts_results_sentiment[sn][sent].items()
-                            for sn in screen_name
-                                if k == 'arima' and 'mse' in v],
+                        for sn in screen_name
+                            for k,v in ts_results_sentiment[sn][sent].items()
+                                if k == 'arima' and 'mse' in v and pd.notnull(v['mse'])],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
@@ -192,19 +193,20 @@ def analyze(
                 pd.notnull(k) and
                 pd.notnull(v) and
                 k == 'lstm' and
-                'mse' in v
-                    for k,v in ts_results_sentiment[sn][sent].items()
-                        for sn in screen_name
+                'mse' in v and
+                pd.notnull(v['mse'])
+                    for sn in screen_name
+                        for k,v in ts_results_sentiment[sn][sent].items()
             ):
                 plot_bar(
-                    labels=[k
-                        for k,v in ts_results_sentiment[sn][sent].items()
-                            for sn in screen_name
-                                if k == 'lstm' and 'mse' in v],
+                    labels=[sn
+                        for sn in screen_name
+                            for k,v in ts_results_sentiment[sn][sent].items()
+                                if k == 'lstm' and 'mse' in v and pd.notnull(v['mse'])],
                     performance=[v['mse']
-                        for k,v in ts_results_sentiment[sn][sent].items()
-                            for sn in screen_name
-                                if k == 'lstm' and 'mse' in v],
+                        for sn in screen_name
+                            for k,v in ts_results_sentiment[sn][sent].items()
+                                if k == 'lstm' and 'mse' in v and pd.notnull(v['mse'])],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
