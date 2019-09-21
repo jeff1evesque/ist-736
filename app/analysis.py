@@ -179,11 +179,17 @@ def analyze(
                     labels=[sn
                         for sn in screen_name
                             for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'arima' and 'mse' in v and pd.notnull(v['mse'])],
+                                if k == 'arima'
+                                    'mse' in v and
+                                    pd.notnull(v['mse']) and
+                                    v['mse'] > 0],
                     performance=[v['mse']
                         for sn in screen_name
                             for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'arima' and 'mse' in v and pd.notnull(v['mse'])],
+                                if k == 'arima'
+                                    'mse' in v and
+                                    pd.notnull(v['mse']) and
+                                    v['mse'] > 0],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
@@ -202,11 +208,17 @@ def analyze(
                     labels=[sn
                         for sn in screen_name
                             for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'lstm' and 'mse' in v and pd.notnull(v['mse'])],
+                                if k == 'lstm' and
+                                    'mse' in v and
+                                    pd.notnull(v['mse']) and
+                                    v['mse'] > 0],
                     performance=[v['mse']
                         for sn in screen_name
                             for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'lstm' and 'mse' in v and pd.notnull(v['mse'])],
+                                if k == 'lstm' and
+                                    'mse' in v and
+                                    pd.notnull(v['mse']) and
+                                    v['mse'] > 0],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
