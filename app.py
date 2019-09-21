@@ -31,7 +31,7 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-    ('BATS', 'BATS_AAPL'),
+##    ('BATS', 'BATS_AAPL'),
 ##    ('BATS', 'BATS_AMZN'),
 ##    ('BATS', 'BATS_GOOGL'),
 ##    ('BATS', 'BATS_MMT'),
@@ -39,7 +39,7 @@ codes = [
 ##    ('CHRIS', 'CBOE_VX1'),
 ##    ('NASDAQOMX', 'COMP-NASDAQ'),
 ##    ('FINRA', 'FNYX_MMM'),
-##    ('FINRA', 'FNSQ_SPY'),
+    ('FINRA', 'FNSQ_SPY'),
 ##    ('FINRA', 'FNYX_QQQ'),
 ##    ('EIA', 'PET_RWTC_D'),
 ##    ('WFC', 'PR_CON_15YFIXED_IR'),
@@ -119,5 +119,9 @@ for x in df_quandl:
             b=x['dataset']
         ),
         screen_name=screen_name,
-        stopwords=stopwords
+        stopwords=stopwords,
+        analysis_granger=True,
+        analysis_ts=False,
+        analysis_ts_sentiment=False,
+        analysis_classify=False
     )
