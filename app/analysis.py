@@ -18,7 +18,10 @@ def analyze(
     df_quandl,
     screen_name,
     stopwords=[],
-    directory='viz',
+    directory_granger='viz/granger',
+    directory_lstm='viz/lstm',
+    directory_arima='viz/arima',
+    directory_class='viz/classification',
     arima_auto_scale=None,
     lstm_epochs=750,
     directory_report='reports',
@@ -50,6 +53,9 @@ def analyze(
         'Short Volume'
     ]
     this_file = os.path.basename(__file__)
+    directories = directory_lstm + \
+        directory_arima + \
+        directory_class
 
     #
     # create directories
@@ -57,15 +63,10 @@ def analyze(
     if not os.path.exists(directory_report):
         os.makedirs(directory_report)
 
-    for i,sn in enumerate(screen_name):
-        if not os.path.exists('{directory}/{sn}/granger'.format(
-            directory=directory,
-            sn=sn
-        )):
-            os.makedirs('{directory}/{sn}/granger'.format(
-                directory=directory,
-                sn=sn
-            ))
+    for d in directories:
+        for i,sn in enumerate(screen_name):
+            if not os.path.exists('{d}/{sn}'.format(d=d, sn=sn)):
+                os.makedirs('{d}/{sn}'.format(d=d, sn=sn))
 
     #
     # join data: twitter and quandl
@@ -110,8 +111,8 @@ def analyze(
                     granger(
                         initialized_data[sn][[ts_index, sent]],
                         maxlag=4,
-                        directory='{directory}/{sn}/granger'.format(
-                            directory=directory,
+                        directory='{d}/{sn}'.format(
+                            d=directory_granger,
                             sn=sn
                         ),
                         suffix=sent
@@ -140,8 +141,12 @@ def analyze(
                         df=initialized_data[sn],
                         normalize_key=sent,
                         date_index=None,
-                        directory='{directory}/{sn}'.format(
-                            directory=directory,
+                        directory_arima='{d}/{sn}'.format(
+                            d=directory_arima,
+                            sn=sn
+                        ),
+                        directory_lstm='{d}/{sn}'.format(
+                            d=directory_lstm,
                             sn=sn
                         ),
                         suffix=sent,
@@ -188,7 +193,7 @@ def analyze(
                                 if k == 'arima' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{directory}'.format(directory=directory),
+                    directory='{d}'.format(d=directory_arima),
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
@@ -215,7 +220,7 @@ def analyze(
                                 if k == 'lstm' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{directory}'.format(directory=directory),
+                    directory='{d}'.format(d=directory_lstm),
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
@@ -238,7 +243,8 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory='{directory}'.format(directory=directory),
+            directory_arima='{d}'.format(d=directory_arima),
+            directory_lstm='{d}'.format(d=directory_lstm),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
@@ -250,13 +256,13 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory='{directory}'.format(directory=directory),
+                directory='{d}'.format(d=directory_arima),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
-            with open('{directory}/adf_{type}.txt'.format(
-                directory=directory_report,
+            with open('{d}/adf_{type}.txt'.format(
+                d=directory_report,
                 type=ts_index
             ), 'w') as fp:
                 print(ts_results['arima']['adf'], file=fp)
@@ -265,7 +271,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory='{directory}'.format(directory=directory),
+                directory='{d}'.format(d=directory_lstm),
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
@@ -278,7 +284,7 @@ def analyze(
             data = peak_detection(
                 data=joined_data_agg[sn],
                 ts_index=ts_index,
-                directory='{a}/{b}'.format(a=directory, b=sn),
+                directory='{a}/{b}'.format(a=directory_class, b=sn),
                 threshold=classify_threshold
             )
 
@@ -323,8 +329,8 @@ def analyze(
                             data,
                             key_class='trend',
                             key_text=classify_index,
-                            directory='{directory}/{sn}'.format(
-                                directory=directory,
+                            directory='{d}/{sn}'.format(
+                                d=directory_class,
                                 sn=sn
                             ),
                             top_words=25,
@@ -341,7 +347,7 @@ def analyze(
                     labels=[k for k,v in classify_results.items() if pd.notnull(k)],
                     performance=[v[0] for k,v in classify_results.items()
                         if pd.notnull(v) and isinstance(v, tuple)],
-                    directory='{directory}'.format(directory=directory),
+                    directory='{d}'.format(d=directory_class),
                     filename='accuracy_overall.png',
                     rotation=90
                 )

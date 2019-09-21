@@ -31,19 +31,19 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-###    ('BATS', 'BATS_AAPL'),
-###    ('BATS', 'BATS_AMZN'),
-    ('BATS', 'BATS_GOOGL'),
-###    ('BATS', 'BATS_MMT'),
-###    ('BATS', 'BATS_NFLX'),
-###    ('CHRIS', 'CBOE_VX1'),
-###    ('NASDAQOMX', 'COMP-NASDAQ'),
-###    ('FINRA', 'FNYX_MMM'),
-###    ('FINRA', 'FNSQ_SPY'),
-###    ('FINRA', 'FNYX_QQQ'),
-###    ('EIA', 'PET_RWTC_D'),
-###    ('WFC', 'PR_CON_15YFIXED_IR'),
-###    ('WFC', 'PR_CON_30YFIXED_APR')
+    ('BATS', 'BATS_AAPL'),
+##    ('BATS', 'BATS_AMZN'),
+##    ('BATS', 'BATS_GOOGL'),
+##    ('BATS', 'BATS_MMT'),
+##    ('BATS', 'BATS_NFLX'),
+##    ('CHRIS', 'CBOE_VX1'),
+##    ('NASDAQOMX', 'COMP-NASDAQ'),
+##    ('FINRA', 'FNYX_MMM'),
+##    ('FINRA', 'FNSQ_SPY'),
+##    ('FINRA', 'FNYX_QQQ'),
+##    ('EIA', 'PET_RWTC_D'),
+##    ('WFC', 'PR_CON_15YFIXED_IR'),
+##    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 end_date = date.today()
 start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
@@ -63,13 +63,13 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-explore(
-    data,
-    screen_name,
-    stopwords=stopwords,
-    stopwords_topics=stopwords_topics,
-    directory='viz/exploratory'
-)
+###explore(
+###    data,
+###    screen_name,
+###    stopwords=stopwords,
+###    stopwords_topics=stopwords_topics,
+###    directory='viz/exploratory'
+###)
 
 #
 # harvest quandl
@@ -97,8 +97,20 @@ for x in df_quandl:
         arima_auto_scale=arima_auto_scale,
         lstm_epochs=lstm_epochs,
         classify_threshold=classify_threshold,
-        directory='viz/{a}/{b}--{c}'.format(
+        directory_granger='viz/granger/{b}--{c}'.format(
+            b=x['database'].lower(),
+            c=x['dataset'].lower()
+        ),
+        directory_lstm='viz/lstm_{a}/{b}--{c}'.format(
             a=lstm_epochs,
+            b=x['database'].lower(),
+            c=x['dataset'].lower()
+        ),
+        directory_arima='viz/arima/{b}--{c}'.format(
+            b=x['database'].lower(),
+            c=x['dataset'].lower()
+        ),
+        directory_class='viz/classification/{b}--{c}'.format(
             b=x['database'].lower(),
             c=x['dataset'].lower()
         ),
