@@ -30,10 +30,10 @@ def analyze(
     classify_chi2=100,
     classify_threshold=[0.5],
     ts_index='value',
-    analysis_ts=False,
+    analysis_granger=True,
+    analysis_ts=True,
     analysis_ts_sentiment=True,
-    analysis_granger=False,
-    analysis_classify=False
+    analysis_classify=True
 ):
     '''
 
@@ -53,9 +53,12 @@ def analyze(
         'Short Volume'
     ]
     this_file = os.path.basename(__file__)
-    directories = directory_lstm + \
-        directory_arima + \
+    directories = [
+        directory_granger,
+        directory_lstm,
+        directory_arima,
         directory_class
+    ]
 
     #
     # create directories
@@ -65,8 +68,9 @@ def analyze(
 
     for d in directories:
         for i,sn in enumerate(screen_name):
-            if not os.path.exists('{d}/{sn}'.format(d=d, sn=sn)):
-                os.makedirs('{d}/{sn}'.format(d=d, sn=sn))
+            full_path = '{d}/{sn}'.format(d=d, sn=sn).split('/')
+            if not os.path.exists(os.path.join(*full_path)):
+                os.makedirs(os.path.join(*full_path))
 
     #
     # join data: twitter and quandl
