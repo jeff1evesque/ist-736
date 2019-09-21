@@ -169,49 +169,42 @@ def analyze(
             if any(
                 pd.notnull(k) and
                 pd.notnull(v) and
-                'arima' in v and
-                'mse' in v['arima']
-                    for k,v in ts_results_sentiment[sn].items()
+                k == 'arima' and
+                'mse' in v
+                    for k,v in ts_results_sentiment[sn][sent].items()
                         for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
             ):
                 plot_bar(
                     labels=[k
                         for k,v in ts_results_sentiment[sn][sent].items()
-                            if 'arima' in v and 'mse' in v['arima']],
-                    performance=[v['arima']['mse']
+                            for sn in screen_name
+                                if k == 'arima' and 'mse' in v],
+                    performance=[v['mse']
                         for k,v in ts_results_sentiment[sn][sent].items()
-                            if 'arima' in v and 'mse' in v['arima']],
+                            for sn in screen_name
+                                if k == 'arima' and 'mse' in v],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
 
-            print('77777777777777777777777777777777777777777777777777')
-            print('77777777777777777777777777777777777777777777777777')
-            print('77777777777777777777777777777777777777777777777777')
-            [print(v)
-                for v in ts_results_sentiment[sn][sent]]
-            print('77777777777777777777777777777777777777777777777777')
-            print('77777777777777777777777777777777777777777777777777')
-            print('77777777777777777777777777777777777777777777777777')
-
             if any(
                 pd.notnull(k) and
                 pd.notnull(v) and
-                'lstm' in v and
-                'mse' in v['lstm']
-                    for k,v in ts_results_sentiment[sn].items()
+                k == 'lstm' and
+                'mse' in v
+                    for k,v in ts_results_sentiment[sn][sent].items()
                         for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
             ):
                 plot_bar(
                     labels=[k
                         for k,v in ts_results_sentiment[sn][sent].items()
-                            if 'arima' in v and 'mse' in v['arima']],
-                    performance=[v['lstm']['mse']
+                            for sn in screen_name
+                                if k == 'lstm' and 'mse' in v],
+                    performance=[v['mse']
                         for k,v in ts_results_sentiment[sn][sent].items()
-                            if 'lstm' in v and 'mse' in v['lstm']],
+                            for sn in screen_name
+                                if k == 'lstm' and 'mse' in v],
                     directory='{directory}'.format(directory=directory),
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
