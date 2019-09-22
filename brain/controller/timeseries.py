@@ -18,7 +18,8 @@ class Timeseries():
         self,
         df,
         normalize_key,
-        directory='viz',
+        directory_arima='viz/arima',
+        directory_lstm='viz/lstm',
         flag_arima=True,
         flag_lstm=True,
         plot=True,
@@ -56,7 +57,7 @@ class Timeseries():
                 auto_scale=arima_auto_scale,
                 rolling_grid_search=rolling_grid_search,
                 catch_grid_search=catch_grid_search,
-                directory=directory,
+                directory=directory_arima,
                 suffix=suffix
             )
 
@@ -70,14 +71,14 @@ class Timeseries():
                 validation_split=lstm_validation_split,
                 num_cells=lstm_num_cells,
                 activation='linear',
-                directory=directory,
+                directory=directory_lstm,
                 suffix=suffix
             )
 
     def arima(
         self,
         normalize_key,
-        directory='viz',
+        directory='viz/arima',
         plot=True,
         show=False,
         suffix=None,
@@ -190,7 +191,7 @@ class Timeseries():
     def lstm(
         self,
         normalize_key,
-        directory='viz',
+        directory='viz/lstm',
         plot=True,
         show=False,
         suffix=None,

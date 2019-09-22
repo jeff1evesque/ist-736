@@ -10,77 +10,44 @@ from brain.controller.classifier import classify
 from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
 from brain.controller.peak_detection import peak_detection
-from app.join_data import join_data
 
 
 def analyze(
-    data,
+    df,
     df_quandl,
     screen_name,
     stopwords=[],
-    directory='viz',
+    directory_granger='viz/granger',
+    directory_lstm='viz/lstm',
+    directory_arima='viz/arima',
+    directory_class='viz/classification',
+    directory_report='reports',
     arima_auto_scale=None,
     lstm_epochs=750,
-    directory_report='reports',
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     classify_chi2=100,
     classify_threshold=[0.5],
     ts_index='value',
-    analysis_ts=False,
-    analysis_ts_sentiment=True,
-    analysis_granger=False,
-    analysis_classify=False
+    analysis_granger=True,
+    analysis_ts=True,
+    analysis_classify=True
 ):
     '''
 
-    general analysis on provided screen names.
+    general analysis on provided screen names:
+
+        - granger: normalized sentiment vs stock
+        - lstm: stock index/volume
+        - arima: stock index/volume
+        - classification: sentiment with classes defined by signal analysis
 
     '''
 
     classify_results = {}
     ts_results = {}
-    ts_results_sentiment = {}
     g = ['created_at', 'screen_name'] + sentiments
-    drop_cols = [
-        'compound',
-        'retweet_count',
-        'favorite_count',
-        'user_mentions',
-        'Short Volume'
-    ]
     this_file = os.path.basename(__file__)
-
-    #
-    # create directories
-    #
-    if not os.path.exists(directory_report):
-        os.makedirs(directory_report)
-
-    for i,sn in enumerate(screen_name):
-        if not os.path.exists('{directory}/{sn}/granger'.format(
-            directory=directory,
-            sn=sn
-        )):
-            os.makedirs('{directory}/{sn}/granger'.format(
-                directory=directory,
-                sn=sn
-            ))
-
-    #
-    # join data: twitter and quandl
-    #
-    # Note: memory footprint reduced by removing unused columns.
-    #
-    joined_data, joined_data_agg = join_data(
-        data=data,
-        df_quandl=df_quandl,
-        screen_name=screen_name,
-        drop_cols=drop_cols,
-        sentiments=sentiments,
-        classify_index=classify_index,
-        ts_index=ts_index
-    )
 
     #
     # granger analysis:
@@ -88,7 +55,7 @@ def analyze(
     # Note: requires vader sentiment scores.
     #
     if analysis_granger:
-        initialized_data = joined_data_agg
+        initialized_data = df
 
         for i,sn in enumerate(screen_name):
             # merge with consistent date format
@@ -105,87 +72,17 @@ def analyze(
             #
             # Note: this requires the above quandl join.
             #
-            for sentiment in sentiments:
-                if all(x in initialized_data[sn] for x in [ts_index, sentiment]):
+            for sent in sentiments:
+                if all(x in initialized_data[sn] for x in [ts_index, sent]):
                     granger(
-                        initialized_data[sn][[ts_index, sentiment]],
+                        initialized_data[sn][[ts_index, sent]],
                         maxlag=4,
-                        directory='{directory}/{sn}/granger'.format(
-                            directory=directory,
+                        directory='{d}/{sn}'.format(
+                            d=directory_granger,
                             sn=sn
                         ),
-                        suffix=sentiment
+                        suffix=sent
                     )
-
-    #
-    # timeseries analysis: sentiment
-    #
-    if analysis_ts_sentiment:
-        initialized_data = joined_data_agg
-
-        for i,sn in enumerate(screen_name):
-            #
-            # timeseries model on sentiment
-            #
-            for sentiment in sentiments:
-                if (
-                    'created_at' == initialized_data[sn].index.name and
-                    all(x in initialized_data[sn] for x in [sentiment])
-                ):
-                    ts_sentiment = Timeseries(
-                        df=initialized_data[sn],
-                        normalize_key=sentiment,
-                        date_index=None,
-                        directory='{directory}/{sn}'.format(
-                            directory=directory,
-                            sn=sn
-                        ),
-                        suffix=sentiment,
-                        arima_auto_scale=arima_auto_scale,
-                        lstm_epochs=lstm_epochs,
-                        lstm_dropout=0,
-                        catch_grid_search=True
-                    )
-                    ts_results_sentiment[sn] = ts_sentiment.get_model_scores()
-
-                    if 'arima' in ts_results_sentiment[sn]:
-                        with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                            directory=directory_report,
-                            sn=sn,
-                            sent=sentiment
-                        ), 'w') as fp:
-                            print(
-                                ts_results_sentiment[sn]['arima']['adf'],
-                                file=fp
-                            )
-
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'arima' in v for k,v in ts_results_sentiment.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'arima' in v],
-                    performance=[v['arima']['mse']
-                        for k,v in ts_results_sentiment.items() if 'arima' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_arima_sentiment.png',
-                    rotation=90
-                )
-
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                'lstm' in v for k,v in ts_results_sentiment.items()
-            ):
-                plot_bar(
-                    labels=[k for k,v in ts_results_sentiment.items() if 'lstm' in v],
-                    performance=[v['lstm']['mse']
-                        for k,v in ts_results_sentiment.items() if 'lstm' in v],
-                    directory='{directory}'.format(directory=directory),
-                    filename='mse_overall_lstm_sentiment.png',
-                    rotation=90
-                )
 
     #
     # timeseries analysis: overall stock index/volume
@@ -205,7 +102,8 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory='{directory}'.format(directory=directory),
+            directory_arima='{a}/sentiment'.format(directory_arima),
+            directory_lstm='{a}/sentiment'.format(directory_lstm),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
@@ -217,13 +115,13 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory='{directory}'.format(directory=directory),
+                directory='{a}/sentiment'.format(directory_arima),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
 
-            with open('{directory}/adf_{type}.txt'.format(
-                directory=directory_report,
+            with open('{d}/adf_{type}.txt'.format(
+                d=directory_report,
                 type=ts_index
             ), 'w') as fp:
                 print(ts_results['arima']['adf'], file=fp)
@@ -232,7 +130,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory='{directory}'.format(directory=directory),
+                directory='{a}/sentiment'.format(directory_lstm),
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
@@ -243,9 +141,9 @@ def analyze(
     if analysis_classify:
         for i,sn in enumerate(screen_name):
             data = peak_detection(
-                data=joined_data_agg[sn],
+                data=df[sn],
                 ts_index=ts_index,
-                directory='{a}/{b}'.format(a=directory, b=sn),
+                directory='{a}/{b}'.format(a=directory_class, b=sn),
                 threshold=classify_threshold
             )
 
@@ -290,8 +188,8 @@ def analyze(
                             data,
                             key_class='trend',
                             key_text=classify_index,
-                            directory='{directory}/{sn}'.format(
-                                directory=directory,
+                            directory='{d}/{sn}'.format(
+                                d=directory_class,
                                 sn=sn
                             ),
                             top_words=25,
@@ -308,7 +206,126 @@ def analyze(
                     labels=[k for k,v in classify_results.items() if pd.notnull(k)],
                     performance=[v[0] for k,v in classify_results.items()
                         if pd.notnull(v) and isinstance(v, tuple)],
-                    directory='{directory}'.format(directory=directory),
+                    directory=directory_class,
                     filename='accuracy_overall.png',
                     rotation=90
                 )
+
+def analyze_ts(
+    df,
+    screen_name,
+    sentiments=['negative', 'neutral', 'positive'],
+    arima_auto_scale=None,
+    lstm_epochs=750,
+    directory_lstm='viz/lstm',
+    directory_arima='viz/arima',
+    directory_report='reports'
+):
+    '''
+
+    timeseries analysis using arima, and lstm on sentiment scores.
+
+    '''
+
+    ts_results_sentiment = {}
+
+    for sn in screen_name:
+        ts_results_sentiment[sn] = {}
+
+        #
+        # timeseries model on sentiment
+        #
+        for sent in sentiments:
+            ts_results_sentiment[sn][sent] = {}
+
+            if (
+                'created_at' == df[sn].index.name and
+                sent in df[sn]
+                ):
+                    ts_sentiment = Timeseries(
+                        df=df[sn],
+                        normalize_key=sent,
+                        date_index=None,
+                        directory_arima='{d}/sentiment/{sn}'.format(
+                            d=directory_arima,
+                            sn=sn
+                        ),
+                        directory_lstm='{d}/sentiment/{sn}'.format(
+                            d=directory_lstm,
+                            sn=sn
+                        ),
+                        suffix=sent,
+                        arima_auto_scale=arima_auto_scale,
+                        lstm_epochs=lstm_epochs,
+                        lstm_dropout=0,
+                        catch_grid_search=True
+                    )
+
+                    scores = ts_sentiment.get_model_scores()
+                    ts_results_sentiment[sn][sent] = scores
+
+                    if ('arima' in ts_results_sentiment[sn][sent]):
+                        with open('{d}/adf_{sn}_{sent}.txt'.format(
+                            d=directory_report,
+                            sn=sn,
+                            sent=sent
+                        ), 'w') as fp:
+                            print(ts_results_sentiment[sn][sent]['arima']['adf'], file=fp)
+
+    #
+    # mse plot: aggregated on overall sentiment for a given stock.
+    #
+    for sent in sentiments:
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            k == 'arima' and
+            'mse' in v and
+            pd.notnull(v['mse'])
+                for sn in screen_name
+                    for k,v in ts_results_sentiment[sn][sent].items()
+        ):
+            plot_bar(
+                labels=[sn
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'arima'],
+                performance=[v['mse']
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'arima' and
+                                'mse' in v and
+                                pd.notnull(v['mse'])],
+                directory=directory_arima,
+                filename='mse_overall_arima_{sent}.png'.format(sent=sent),
+                rotation=60
+            )
+
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            k == 'lstm' and
+            'mse' in v and
+            pd.notnull(v['mse'])
+                for sn in screen_name
+                    for k,v in ts_results_sentiment[sn][sent].items()
+        ):
+            plot_bar(
+                labels=[sn
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'lstm'],
+                performance=[v['mse']
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'lstm' and
+                                'mse' in v and
+                                pd.notnull(v['mse'])],
+                directory=directory_lstm,
+                filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
+                rotation=60
+            )
