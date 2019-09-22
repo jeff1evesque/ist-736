@@ -57,7 +57,7 @@ def analyze(
         directory_report,
         '{a}/stock'.format(a=directory_lstm),
         '{a}/sentiment'.format(a=directory_lstm),
-        '{a}/stock'.format(a=directory_arima)
+        '{a}/stock'.format(a=directory_arima),
         '{a}/sentiment'.format(a=directory_arima)
     ]
     directories_sn = [directory_granger, directory_class]
@@ -65,8 +65,9 @@ def analyze(
     #
     # create directories
     #
-    if not os.path.exists(directories):
-        os.makedirs(directories)
+    for d in directories:
+        if not os.path.exists(d):
+            os.makedirs(d)
 
     for d in directories_sn:
         for i,sn in enumerate(screen_name):
