@@ -164,8 +164,11 @@ for x in df_quandl:
 #
 # sentiment timeseries: analysis on twitter corpus for each financial analyst.
 #
-# Note: only last instance of joined dataframe (i.e. df) is needed, since stock
-#       data is always a superset of twitter corpus.
+# Note: only last instance of joined dataframe (i.e. df) is needed, since the
+#       twitter corpus is independent of the different stock index. Generally,
+#       the intersection between twitter and different stock index (needed to
+#       eliminate redundancies, such as repeated dates from twitter corpus)
+#       will either not differ, or be an insignificant difference.
 #
 analyze_ts(
     df,
