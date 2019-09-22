@@ -55,8 +55,10 @@ def analyze(
     this_file = os.path.basename(__file__)
     directories = [
         directory_report,
-        directory_lstm,
-        directory_arima
+        '{a}/stock'.format(a=directory_lstm),
+        '{a}/sentiment'.format(a=directory_lstm),
+        '{a}/stock'.format(a=directory_arima)
+        '{a}/sentiment'.format(a=directory_arima)
     ]
     directories_sn = [directory_granger, directory_class]
 
@@ -164,8 +166,8 @@ def analyze(
                     ts_results_sentiment[sn][sent] = scores
 
                     if ('arima' in ts_results_sentiment[sn][sent]):
-                        with open('{directory}/adf_{sn}_{sent}.txt'.format(
-                            directory=directory_report,
+                        with open('{d}/adf_{sn}_{sent}.txt'.format(
+                            d=directory_report,
                             sn=sn,
                             sent=sent
                         ), 'w') as fp:
@@ -197,7 +199,7 @@ def analyze(
                                 if k == 'arima' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{d}'.format(d=directory_arima),
+                    directory='{a}/stock'.format(directory_arima),
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
@@ -224,7 +226,7 @@ def analyze(
                                 if k == 'lstm' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{d}'.format(d=directory_lstm),
+                    directory='{a}/stock'.format(directory_lstm),
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
@@ -247,8 +249,8 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory_arima=directory_arima,
-            directory_lstm=directory_lstm,
+            directory_arima='{a}/sentiment'.format(directory_arima),
+            directory_lstm='{a}/sentiment'.format(directory_lstm),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
@@ -260,7 +262,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory=directory_arima,
+                directory='{a}/sentiment'.format(directory_arima),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
@@ -275,7 +277,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory=directory_lstm,
+                directory='{a}/sentiment'.format(directory_lstm),
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
