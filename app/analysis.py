@@ -240,7 +240,7 @@ def analyze_ts(
 
             if (
                 'created_at' == df[sn].index.name and
-                    sent in df[sn]
+                sent in df[sn]
                 ):
                     ts_sentiment = Timeseries(
                         df=df[sn],
@@ -272,60 +272,60 @@ def analyze_ts(
                         ), 'w') as fp:
                             print(ts_results_sentiment[sn][sent]['arima']['adf'], file=fp)
 
-        #
-        # mse plot: aggregated on overall sentiment for a given stock.
-        #
-        for sent in sentiments:
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                k == 'arima' and
-                'mse' in v and
-                pd.notnull(v['mse'])
+    #
+    # mse plot: aggregated on overall sentiment for a given stock.
+    #
+    for sent in sentiments:
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            k == 'arima' and
+            'mse' in v and
+            pd.notnull(v['mse'])
+                for sn in screen_name
+                    for k,v in ts_results_sentiment[sn][sent].items()
+        ):
+            plot_bar(
+                labels=[sn
                     for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
                         for k,v in ts_results_sentiment[sn][sent].items()
-            ):
-                plot_bar(
-                    labels=[sn
-                        for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
-                            for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'arima'],
-                    performance=[v['mse']
-                        for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
-                            for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'arima' and
-                                    'mse' in v and
-                                    pd.notnull(v['mse'])],
-                    directory=directory_arima,
-                    filename='mse_overall_arima_{sent}.png'.format(sent=sent),
-                    rotation=60
-                )
+                            if k == 'arima'],
+                performance=[v['mse']
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'arima' and
+                                'mse' in v and
+                                pd.notnull(v['mse'])],
+                directory=directory_arima,
+                filename='mse_overall_arima_{sent}.png'.format(sent=sent),
+                rotation=60
+            )
 
-            if any(
-                pd.notnull(k) and
-                pd.notnull(v) and
-                k == 'lstm' and
-                'mse' in v and
-                pd.notnull(v['mse'])
+        if any(
+            pd.notnull(k) and
+            pd.notnull(v) and
+            k == 'lstm' and
+            'mse' in v and
+            pd.notnull(v['mse'])
+                for sn in screen_name
+                    for k,v in ts_results_sentiment[sn][sent].items()
+        ):
+            plot_bar(
+                labels=[sn
                     for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
                         for k,v in ts_results_sentiment[sn][sent].items()
-            ):
-                plot_bar(
-                    labels=[sn
-                        for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
-                            for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'lstm'],
-                    performance=[v['mse']
-                        for sn in screen_name
-                            if sent in ts_results_sentiment[sn]
-                            for k,v in ts_results_sentiment[sn][sent].items()
-                                if k == 'lstm' and
-                                    'mse' in v and
-                                    pd.notnull(v['mse'])],
-                    directory=directory_lstm,
-                    filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
-                    rotation=60
-                )
+                            if k == 'lstm'],
+                performance=[v['mse']
+                    for sn in screen_name
+                        if sent in ts_results_sentiment[sn]
+                        for k,v in ts_results_sentiment[sn][sent].items()
+                            if k == 'lstm' and
+                                'mse' in v and
+                                pd.notnull(v['mse'])],
+                directory=directory_lstm,
+                filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
+                rotation=60
+            )
