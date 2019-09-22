@@ -66,8 +66,9 @@ def analyze(
     # create directories
     #
     for d in directories:
-        if not os.path.exists(d):
-            os.makedirs(d)
+        full_path = d.split('/')
+        if not os.path.exists(os.path.join(*full_path)):
+            os.makedirs(os.path.join(*full_path))
 
     for d in directories_sn:
         for i,sn in enumerate(screen_name):
