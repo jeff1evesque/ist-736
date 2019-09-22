@@ -56,11 +56,14 @@ def analyze(
     directories = [
         directory_report,
         '{a}/stock'.format(a=directory_lstm),
-        '{a}/sentiment'.format(a=directory_lstm),
-        '{a}/stock'.format(a=directory_arima),
-        '{a}/sentiment'.format(a=directory_arima)
+        '{a}/stock'.format(a=directory_arima)
     ]
-    directories_sn = [directory_granger, directory_class]
+    directories_sn = [
+        directory_granger,
+        directory_class,
+        directory_lstm,
+        directory_arima
+    ]
 
     #
     # create directories
@@ -71,7 +74,7 @@ def analyze(
             os.makedirs(os.path.join(*full_path))
 
     for d in directories_sn:
-        for i,sn in enumerate(screen_name):
+        for sn in screen_name:
             full_path = '{d}/{sn}'.format(d=d, sn=sn).split('/')
             if not os.path.exists(os.path.join(*full_path)):
                 os.makedirs(os.path.join(*full_path))
@@ -201,7 +204,7 @@ def analyze(
                                 if k == 'arima' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{a}/stock'.format(directory_arima),
+                    directory=directory_arima,
                     filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
@@ -228,7 +231,7 @@ def analyze(
                                 if k == 'lstm' and
                                     'mse' in v and
                                     pd.notnull(v['mse'])],
-                    directory='{a}/stock'.format(directory_lstm),
+                    directory=directory_lstm,
                     filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                     rotation=60
                 )
