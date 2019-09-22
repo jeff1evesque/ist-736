@@ -54,19 +54,19 @@ def analyze(
     ]
     this_file = os.path.basename(__file__)
     directories = [
-        directory_granger,
+        directory_report,
         directory_lstm,
-        directory_arima,
-        directory_class
+        directory_arima
     ]
+    directories_sn = [directory_granger, directory_class]
 
     #
     # create directories
     #
-    if not os.path.exists(directory_report):
-        os.makedirs(directory_report)
+    if not os.path.exists(directories):
+        os.makedirs(directories)
 
-    for d in directories:
+    for d in directories_sn:
         for i,sn in enumerate(screen_name):
             full_path = '{d}/{sn}'.format(d=d, sn=sn).split('/')
             if not os.path.exists(os.path.join(*full_path)):
