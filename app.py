@@ -9,6 +9,13 @@
 #   pip install numpy==1.16.2
 #
 
+#
+# nltk data
+#
+import nltk
+for x in ['averaged_perceptron_tagger', 'stopwords']:
+    nltk.download(x)
+
 import re
 import pandas as pd
 from pathlib import Path
@@ -54,7 +61,7 @@ classify_index = 'full_text'
 ts_index = 'value'
 
 arima_auto_scale = None
-lstm_epochs = 750
+lstm_epochs = 3000
 classify_threshold = [0.5]
 classify_chi2 = 100
 
