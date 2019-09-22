@@ -247,8 +247,8 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory_arima='{d}'.format(d=directory_arima),
-            directory_lstm='{d}'.format(d=directory_lstm),
+            directory_arima=directory_arima,
+            directory_lstm=directory_lstm,
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
@@ -260,7 +260,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory='{d}'.format(d=directory_arima),
+                directory=directory_arima,
                 filename='mse_overall_arima.png',
                 rotation=90
             )
@@ -275,7 +275,7 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory='{d}'.format(d=directory_lstm),
+                directory=directory_lstm,
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
@@ -351,7 +351,7 @@ def analyze(
                     labels=[k for k,v in classify_results.items() if pd.notnull(k)],
                     performance=[v[0] for k,v in classify_results.items()
                         if pd.notnull(v) and isinstance(v, tuple)],
-                    directory='{d}'.format(d=directory_class),
+                    directory=directory_class,
                     filename='accuracy_overall.png',
                     rotation=90
                 )
