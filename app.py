@@ -151,12 +151,10 @@ for x in df_quandl:
         arima_auto_scale=arima_auto_scale,
         lstm_epochs=lstm_epochs,
         classify_threshold=classify_threshold,
+        sub_directory=sub_directory,
         directory_granger='viz/granger/{a}'.format(a=sub_directory),
-        directory_lstm='viz/lstm_{a}/{b}'.format(
-            a=lstm_epochs,
-            b=sub_directory
-        ),
-        directory_arima='viz/arima/{a}'.format(a=sub_directory),
+        directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+        directory_arima='viz/arima',
         directory_class='viz/classification/{a}'.format(a=sub_directory),
         directory_report='reports/{a}'.format(a=x['dataset']),
         screen_name=screen_name,
@@ -164,7 +162,7 @@ for x in df_quandl:
         classify_index=classify_index,
         ts_index=ts_index,
         analysis_granger=False,
-        analysis_ts=False,
+        analysis_ts=True,
         analysis_classify=False
     )
 

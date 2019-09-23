@@ -17,6 +17,7 @@ def analyze(
     df_quandl,
     screen_name,
     stopwords=[],
+    sub_directory='',
     directory_granger='viz/granger',
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
@@ -102,8 +103,14 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory_arima='{a}/sentiment'.format(a=directory_arima),
-            directory_lstm='{a}/sentiment'.format(a=directory_lstm),
+            directory_arima='{a}/stock/{b}'.format(
+                a=directory_arima,
+                b=sub_directory
+            ),
+            directory_lstm='{a}/stock/{b}'.format(
+                a=directory_arima,
+                b=sub_directory
+            ),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
@@ -115,7 +122,10 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory='{a}/sentiment'.format(a=directory_arima),
+                directory='{a}/stock/{b}'.format(
+                    a=directory_arima,
+                    b=sub_directory
+                ),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
@@ -130,7 +140,10 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory='{a}/sentiment'.format(a=directory_lstm),
+                directory='{a}/stock/{b}'.format(
+                    a=directory_arima,
+                    b=sub_directory
+                ),
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
