@@ -22,6 +22,7 @@ class Lstm():
     def __init__(
         self,
         data,
+        num_cells=4,
         n_steps_in=4,
         n_steps_out=1,
         train=False,
@@ -108,7 +109,7 @@ class Lstm():
 
         # train
         if train:
-            self.train()
+            self.train(num_cells=num_cells)
 
     def scale(self, data=None, feature_range=(-1, 1)):
         '''

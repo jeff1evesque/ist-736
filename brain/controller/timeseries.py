@@ -221,7 +221,8 @@ class Timeseries():
             dropout=dropout,
             batch_size=batch_size,
             validation_split=validation_split,
-            activation=activation
+            activation=activation,
+            num_cells=num_cells
         )
 
         # predict
