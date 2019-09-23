@@ -5,6 +5,7 @@ import os
 
 def create_directory(
     screen_name,
+    stock_codes,
     directory_granger='viz/granger',
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
@@ -15,13 +16,31 @@ def create_directory(
 
     create directories needed for analysis.
 
+    @screen_name, list of financial analyst names.
+    @stock_codes, must of a list of two element tuples, consisting of
+        the quandl database, and stock name.
+
     '''
 
-    directories = [
-        directory_report,
-        '{a}/stock'.format(a=directory_lstm),
-        '{a}/stock'.format(a=directory_arima)
-    ]
+    #
+    # define directories
+    #
+    directories = [directory_report]
+    stock_codes = ['{b}--{c}'.format(
+        b=x[0].lower(),
+        c=x[1].lower()
+    ) for x in stock_codes]
+
+    directories.extend(['{a}/stock/{b}'.format(
+        a=directory_arima,
+        b=b
+    ) for b in stock_codes])
+
+    directories.extend(['{a}/stock/{b}'.format(
+        a=directory_lstm,
+        b=b
+    ) for b in stock_codes])
+
     directories_sn = [
         directory_granger,
         directory_class,
@@ -38,7 +57,7 @@ def create_directory(
             os.makedirs(os.path.join(*full_path))
 
     for d in directories_sn:
-        for sn in screen_name:
-            full_path = '{d}/{sn}'.format(d=d, sn=sn).split('/')
+        for x in screen_name:
+            full_path = '{d}/{x}'.format(d=d, x=x).split('/')
             if not os.path.exists(os.path.join(*full_path)):
                 os.makedirs(os.path.join(*full_path))
