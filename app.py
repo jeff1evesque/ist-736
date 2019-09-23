@@ -61,8 +61,8 @@ classify_index = 'full_text'
 ts_index = 'value'
 
 arima_auto_scale = None
-lstm_epochs = 750
-lstm_num_cells=6
+lstm_epochs = 3000
+lstm_num_cells=4
 classify_threshold = [0.5]
 classify_chi2 = 100
 
