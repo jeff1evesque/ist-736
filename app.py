@@ -61,7 +61,8 @@ classify_index = 'full_text'
 ts_index = 'value'
 
 arima_auto_scale = None
-lstm_epochs = 3000
+lstm_epochs = 750
+lstm_num_cells=6
 classify_threshold = [0.5]
 classify_chi2 = 100
 
@@ -151,6 +152,7 @@ for x in df_quandl:
         df_quandl=x['data'],
         arima_auto_scale=arima_auto_scale,
         lstm_epochs=lstm_epochs,
+        lstm_num_cells=lstm_num_cells,
         classify_threshold=classify_threshold,
         sub_directory=sub_directory,
         directory_granger='viz/granger/{a}'.format(a=sub_directory),
@@ -176,11 +178,12 @@ for x in df_quandl:
 #       eliminate redundancies, such as repeated dates from twitter corpus)
 #       will either not differ, or be an insignificant difference.
 #
-analyze_ts(
-    df,
-    screen_name,
-    arima_auto_scale=arima_auto_scale,
-    lstm_epochs=lstm_epochs,
-    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
-    directory_arima='viz/arima'
-)
+##analyze_ts(
+##    df,
+##    screen_name,
+##    arima_auto_scale=arima_auto_scale,
+##    lstm_epochs=lstm_epochs,
+##    lstm_num_cells=lstm_num_cells,
+##    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+##    directory_arima='viz/arima'
+##)

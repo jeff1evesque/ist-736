@@ -25,6 +25,7 @@ def analyze(
     directory_report='reports',
     arima_auto_scale=None,
     lstm_epochs=750,
+    lstm_num_cells=4,
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     classify_chi2=100,
@@ -114,6 +115,7 @@ def analyze(
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
+            lstm_num_cells=lstm_num_cells,
             lstm_dropout=0
         )
         ts_results = ts_stock.get_model_scores()
@@ -230,6 +232,7 @@ def analyze_ts(
     sentiments=['negative', 'neutral', 'positive'],
     arima_auto_scale=None,
     lstm_epochs=750,
+    lstm_num_cells=4,
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_report='reports'
@@ -270,6 +273,7 @@ def analyze_ts(
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
                         lstm_epochs=lstm_epochs,
+                        lstm_num_cells=lstm_num_cells,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
