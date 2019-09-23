@@ -80,7 +80,8 @@ drop_cols = [
 # create directories
 #
 create_directory(
-    screen_name,
+    screen_name=screen_name,
+    stock_codes=codes,
     directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs)
 )
 
