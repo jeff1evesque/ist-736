@@ -108,7 +108,7 @@ def analyze(
                 b=sub_directory
             ),
             directory_lstm='{a}/stock/{b}'.format(
-                a=directory_arima,
+                a=directory_lstm,
                 b=sub_directory
             ),
             suffix=ts_index,
@@ -141,7 +141,7 @@ def analyze(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
                 directory='{a}/stock/{b}'.format(
-                    a=directory_arima,
+                    a=directory_lstm,
                     b=sub_directory
                 ),
                 filename='mse_overall_lstm.png',
