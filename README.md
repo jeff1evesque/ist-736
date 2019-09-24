@@ -9,7 +9,7 @@ To address this overall question, different techniques were applied.
 - exploratory analysis: [topic modeling](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/topic_model.py) determines which stock to study
 - [sentiment analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/exploratory/sentiment.py): text corpus are normalized into sentiment scores
 - [granger analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/granger.py): find significant sentiment scores and stock index
-- timeseries analysis: determine LSTM and ARIMA comparison for sentiment and stock series
+- timeseries analysis: determine [LSTM](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/lstm.py) and [ARIMA](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/arima.py) comparison for sentiment and stock series
 
 While the main focus of the study were between timeseries models, classification analysis was also performed. Specifically, signal analysis was used as the basis for classification:
 
