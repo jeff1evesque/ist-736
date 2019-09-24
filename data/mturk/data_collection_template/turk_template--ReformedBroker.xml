@@ -9,11 +9,11 @@
 
     <div>
         <strong>Instructions: </strong> 
-        <p>Collect the latest 1600 tweets from "ReformedBroker" starting from the date 5/8/2019.</p>
-        <p>For the "created_at" value, please enter the date pattern "m/d/yyyy HH:MM:SS XX"</p>
-        <p><b>Example:</b> "5/8/2019 16:04:07 AM".</p>
-        <p><b>Note:</b> day/month/XXXX does not have leading zero.</p>
-        <p>Also, paste the corresponding tweet or retweet as-is, and ignore any images.</p>
+        <p>Collect the latest 1600 tweets only from "ReformedBroker" starting from the date 5/8/2019.</p>
+        <p>Please provide the associated date each tweet/retweet was created with the pattern "m/d/yyyy HH:MM:00 XX"</p>
+        <p><b>Example:</b> "5/8/2019 16:04:00 PM".</p>
+        <p><b>Note:</b> day/month/XXXX does not have leading zero, and the seconds is set to "00".</p>
+        <p>Also, paste the corresponding tweet or retweet text as-is, and ignore any images.</p>
         <br/>
         <div>
             <div>
@@ -23,11 +23,6 @@
                        a batch with an input file containing multiple website URLs -->
                 <a href="${url}" target="_blank">${url}</a>
 
-            </div>
-
-            <div>
-               <p><strong>Re-enter "ReformedBroker"</strong></p>
-               <crowd-input name="screen_name" placeholder="ReformedBroker" />
             </div>
 
             <div>
