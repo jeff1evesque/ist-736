@@ -6,15 +6,15 @@ This is a final project for a short 10 week course in text mining. Coding, [visu
 
 To address this overall question, different techniques were applied.
 
-- exploratory analysis: topic modeling determines which stock to study
-- sentiment analysis: text corpus are normalized into sentiment scores
-- granger analysis: find significant sentiment scores and stock index
+- exploratory analysis: [topic modeling](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/topic_model.py) determines which stock to study
+- [sentiment analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/exploratory/sentiment.py): text corpus are normalized into sentiment scores
+- [granger analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/granger.py): find significant sentiment scores and stock index
 - timeseries analysis: determine LSTM and ARIMA comparison for sentiment and stock series
 
 While the main focus of the study were between timeseries models, classification analysis was also performed. Specifically, signal analysis was used as the basis for classification:
 
-- signal analysis: apply signal analysis to determine exceeding index points
-- classification analysis: TF-IDF text corpus (X) trained against signal results
+- [signal analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/peak_detection.py): apply signal analysis to determine exceeding index points
+- [classification analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/text_classifier.py): TF-IDF text corpus (X) trained against signal results
 
 In general, points exceeding the upper limit threshold was binned a value `1`, while points below the lower threshold was binned a value `-1`. This approach provided the target vector (y) when using the TF-IDF corpus (X) during classifcation:
 
