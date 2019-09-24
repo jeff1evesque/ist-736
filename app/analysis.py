@@ -17,6 +17,7 @@ def analyze(
     df_quandl,
     screen_name,
     stopwords=[],
+    sub_directory='',
     directory_granger='viz/granger',
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
@@ -24,6 +25,7 @@ def analyze(
     directory_report='reports',
     arima_auto_scale=None,
     lstm_epochs=750,
+    lstm_num_cells=4,
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     classify_chi2=100,
@@ -102,11 +104,18 @@ def analyze(
             df=df_quandl,
             normalize_key=ts_index,
             date_index='date',
-            directory_arima='{a}/sentiment'.format(directory_arima),
-            directory_lstm='{a}/sentiment'.format(directory_lstm),
+            directory_arima='{a}/stock/{b}'.format(
+                a=directory_arima,
+                b=sub_directory
+            ),
+            directory_lstm='{a}/stock/{b}'.format(
+                a=directory_lstm,
+                b=sub_directory
+            ),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
             lstm_epochs=lstm_epochs,
+            lstm_num_cells=lstm_num_cells,
             lstm_dropout=0
         )
         ts_results = ts_stock.get_model_scores()
@@ -115,7 +124,10 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
-                directory='{a}/sentiment'.format(directory_arima),
+                directory='{a}/stock/{b}'.format(
+                    a=directory_arima,
+                    b=sub_directory
+                ),
                 filename='mse_overall_arima.png',
                 rotation=90
             )
@@ -130,7 +142,10 @@ def analyze(
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
-                directory='{a}/sentiment'.format(directory_lstm),
+                directory='{a}/stock/{b}'.format(
+                    a=directory_lstm,
+                    b=sub_directory
+                ),
                 filename='mse_overall_lstm.png',
                 rotation=90
             )
@@ -217,6 +232,7 @@ def analyze_ts(
     sentiments=['negative', 'neutral', 'positive'],
     arima_auto_scale=None,
     lstm_epochs=750,
+    lstm_num_cells=4,
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_report='reports'
@@ -257,6 +273,7 @@ def analyze_ts(
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
                         lstm_epochs=lstm_epochs,
+                        lstm_num_cells=lstm_num_cells,
                         lstm_dropout=0,
                         catch_grid_search=True
                     )
@@ -298,7 +315,7 @@ def analyze_ts(
                             if k == 'arima' and
                                 'mse' in v and
                                 pd.notnull(v['mse'])],
-                directory=directory_arima,
+                directory='{a}/sentiment'.format(directory_arima),
                 filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                 rotation=60
             )
@@ -325,7 +342,7 @@ def analyze_ts(
                             if k == 'lstm' and
                                 'mse' in v and
                                 pd.notnull(v['mse'])],
-                directory=directory_lstm,
+                directory='{a}/sentiment'.format(directory_lstm),
                 filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                 rotation=60
             )

@@ -9,6 +9,13 @@
 #   pip install numpy==1.16.2
 #
 
+#
+# nltk data
+#
+import nltk
+for x in ['averaged_perceptron_tagger', 'stopwords']:
+    nltk.download(x)
+
 import re
 import pandas as pd
 from pathlib import Path
@@ -55,6 +62,7 @@ ts_index = 'value'
 
 arima_auto_scale = None
 lstm_epochs = 750
+lstm_num_cells=6
 classify_threshold = [0.5]
 classify_chi2 = 100
 
@@ -73,7 +81,8 @@ drop_cols = [
 # create directories
 #
 create_directory(
-    screen_name,
+    screen_name=screen_name,
+    stock_codes=codes,
     directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs)
 )
 
@@ -143,13 +152,12 @@ for x in df_quandl:
         df_quandl=x['data'],
         arima_auto_scale=arima_auto_scale,
         lstm_epochs=lstm_epochs,
+        lstm_num_cells=lstm_num_cells,
         classify_threshold=classify_threshold,
+        sub_directory=sub_directory,
         directory_granger='viz/granger/{a}'.format(a=sub_directory),
-        directory_lstm='viz/lstm_{a}/{b}'.format(
-            a=lstm_epochs,
-            b=sub_directory
-        ),
-        directory_arima='viz/arima/{a}'.format(a=sub_directory),
+        directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+        directory_arima='viz/arima',
         directory_class='viz/classification/{a}'.format(a=sub_directory),
         directory_report='reports/{a}'.format(a=x['dataset']),
         screen_name=screen_name,
@@ -157,7 +165,7 @@ for x in df_quandl:
         classify_index=classify_index,
         ts_index=ts_index,
         analysis_granger=False,
-        analysis_ts=False,
+        analysis_ts=True,
         analysis_classify=False
     )
 
@@ -170,11 +178,12 @@ for x in df_quandl:
 #       eliminate redundancies, such as repeated dates from twitter corpus)
 #       will either not differ, or be an insignificant difference.
 #
-analyze_ts(
-    df,
-    screen_name,
-    arima_auto_scale=arima_auto_scale,
-    lstm_epochs=lstm_epochs,
-    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
-    directory_arima='viz/arima'
-)
+##analyze_ts(
+##    df,
+##    screen_name,
+##    arima_auto_scale=arima_auto_scale,
+##    lstm_epochs=lstm_epochs,
+##    lstm_num_cells=lstm_num_cells,
+##    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+##    directory_arima='viz/arima'
+##)
