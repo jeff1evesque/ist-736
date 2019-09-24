@@ -1,13 +1,24 @@
 # ist-736
 
-This is a final project for a short 10 week course in text mining. Coding, visualizations, and overall report were improved after completion of the course, since the project was submitted as one of among several projects within a portfolio requirement for graduation. In general, the project attempts to address several items, including the larger question -- Can Market Sentiment Predict the Stock Market? To address this overall question, different techniques were applied.
+This is a final project for a short 10 week course in text mining. Coding, [visualizations](https://github.com/jeff1evesque/ist-736/tree/master/viz), and overall report were improved after completion of the course, since the project was submitted as one of among several projects within a portfolio requirement for graduation. In general, the project attempts to address several items, including the larger question -- Can Market Sentiment Predict the Stock Market?
+
+## Analysis
+
+To address this overall question, different techniques were applied.
 
 - exploratory analysis: topic modeling determines which stock to study
 - sentiment analysis: text corpus are normalized into sentiment scores
 - granger analysis: find significant sentiment scores and stock index
-- signal analysis: apply signal analysis to determine exceeding index points
-- classification analysis: TFIDF text corpus (X) trained against signal results
 - timeseries analysis: determine LSTM and ARIMA comparison for sentiment and stock series
+
+While the main focus of the study were between timeseries models, classification analysis was also performed. Specifically, signal analysis was used as the basis for classification:
+
+- signal analysis: apply signal analysis to determine exceeding index points
+- classification analysis: TF-IDF text corpus (X) trained against signal results
+
+In general, points exceeding the upper limit threshold was binned a value `1`, while points below the lower threshold was binned a value `-1`. This approach provided the target vector (y) when using the TF-IDF corpus (X) during classifcation:
+
+![threshold_animation](https://user-images.githubusercontent.com/2907085/65475387-66335900-de4d-11e9-992e-3d658d11c3f4.gif)
 
 While the exact details of the project can be reviewed from the associated [`write-up.docx`](https://github.com/jeff1evesque/ist-736/blob/master/write-up.docx), the remaining segments in this document will remain succinct.
 
