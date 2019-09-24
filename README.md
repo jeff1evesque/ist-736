@@ -16,9 +16,11 @@ While the main focus of the study were between timeseries models, classification
 - [signal analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/peak_detection.py): apply signal analysis to determine exceeding index points
 - [classification analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/text_classifier.py): TF-IDF text corpus (X) trained against signal results
 
-In general, points exceeding the upper limit threshold was binned a value `1`, while points below the lower threshold was binned a value `-1`. This approach provided the target vector (y) when using the TF-IDF corpus (X) during classifcation:
+In general, points exceeding the upper limit threshold was binned a value `1`, while points below the lower threshold was binned a value `-1`. This approach provided the target vector (y) when using the TF-IDF corpus (X) during classification:
 
 ![threshold_animation](https://user-images.githubusercontent.com/2907085/65475387-66335900-de4d-11e9-992e-3d658d11c3f4.gif)
+
+**Note:** the above animation was borrowed, and [associated code](https://stackoverflow.com/a/56451135) was adjusted to meet the requirements for this study.
 
 While the exact details of the project can be reviewed from the associated [`write-up.docx`](https://github.com/jeff1evesque/ist-736/blob/master/write-up.docx), the remaining segments in this document will remain succinct.
 
