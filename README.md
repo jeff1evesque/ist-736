@@ -78,7 +78,7 @@ codes = [
 ]
 ```
 
-This is largely due to an exponentiating [memory requirement](https://github.com/jeff1evesque/ist-736/issues/125), due to keeping multiple trained neural networks in memory. Should this codebase be extended to an application, the latter issue would need to be resolved. Nevertheless, additional configurations can be adjusted in the same file, including the number of epochs, lstm cells, signal analysis threshold (i.e. `classify_threshold`), and TF-IDF feature reduction for classification (i.e. `classify_chi2`) can be made. After dependenices and necessary changes have been made, the script can be executed in a piecewise fashion:
+This is largely due to an exponentiating [memory requirement](https://github.com/jeff1evesque/ist-736/issues/125), due to keeping multiple trained neural networks in memory. Should this codebase be extended to an application, the latter issue would need to be resolved. Nevertheless, additional configurations can be adjusted in the same file, including the number of epochs, lstm cells, signal analysis threshold (i.e. `classify_threshold`), and TF-IDF feature reduction for classification (i.e. `classify_chi2`) can be made. After dependenices and necessary changes have been made, the script can be executed in a stepwise fashion:
 
 ```bash
 $ pwd
