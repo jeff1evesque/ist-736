@@ -49,7 +49,7 @@ Two different datasets were acquired via the [Twython](https://twython.readthedo
 - [financial analyst](https://github.com/jeff1evesque/ist-736/tree/master/data/twitter) tweets
 - [stock market](https://github.com/jeff1evesque/ist-736/tree/master/data/quandl) index/volume measures
 
-Due to limitations of the twitter API, roughly 3200 tweets could be collected for a given [user timeline](https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline). However, the quandl data has a much larger limit. This imposed a [limitation](https://github.com/jeff1evesque/ist-736/blob/master/app/join_data.py) upon joining the data. Specifically, only a subset of the twitter corpus was utilized during the analysis.
+Due to limitations of the twitter API, roughly 3200 tweets could be collected for a given [user timeline](https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline). However, the quandl data has a much larger limit. This imposed a [limitation](https://github.com/jeff1evesque/ist-736/blob/master/app/join_data.py) upon joining the data. Specifically, only a subset of the quandl dataset was utilized during the analysis.
 
 ## Execution
 
