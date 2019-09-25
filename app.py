@@ -40,12 +40,12 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-    ('BATS', 'BATS_AAPL'),
+##    ('BATS', 'BATS_AAPL'),
 ##    ('BATS', 'BATS_AMZN'),
 ##    ('BATS', 'BATS_GOOGL'),
 ##    ('BATS', 'BATS_MMT'),
 ##    ('BATS', 'BATS_NFLX'),
-##    ('CHRIS', 'CBOE_VX1'),
+    ('CHRIS', 'CBOE_VX1'),
 ##    ('NASDAQOMX', 'COMP-NASDAQ'),
 ##    ('FINRA', 'FNYX_MMM'),
 ##    ('FINRA', 'FNSQ_SPY'),
@@ -160,9 +160,9 @@ for x in df_quandl:
             df=df,
             df_quandl=x['data'],
             arima_auto_scale=arima_auto_scale,
-            lstm_units=lstm_units,
             lstm_epochs=lstm_epochs,
             lstm_num_cells=lstm_num_cells,
+            lstm_units=lstm_units,
             classify_threshold=classify_threshold,
             sub_directory=sub_directory,
             directory_granger='viz/granger/{a}'.format(a=sub_directory),
@@ -196,9 +196,9 @@ if analysis_ts_sentiment:
         df,
         screen_name,
         arima_auto_scale=arima_auto_scale,
-        lstm_units=lstm_units,
         lstm_epochs=lstm_epochs,
         lstm_num_cells=lstm_num_cells,
+        lstm_units=lstm_units,
         directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
         directory_arima='viz/arima'
     )

@@ -115,7 +115,7 @@ def analyze(
             ),
             suffix=ts_index,
             arima_auto_scale=(50, 0.15),
-            units=lstm_units,
+            lstm_units=lstm_units,
             lstm_epochs=lstm_epochs,
             lstm_num_cells=lstm_num_cells,
             lstm_dropout=0
@@ -275,7 +275,7 @@ def analyze_ts(
                         ),
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
-                        units=lstm_units,
+                        lstm_units=lstm_units,
                         lstm_epochs=lstm_epochs,
                         lstm_num_cells=lstm_num_cells,
                         lstm_dropout=0,
