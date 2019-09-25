@@ -11,6 +11,7 @@ def model(
     normalize_key,
     model_type='arima',
     date_index='date',
+    units=50,
     epochs=100,
     dropout=0.2,
     batch_size=32,
@@ -118,7 +119,8 @@ def model(
                 batch_size=batch_size,
                 validation_split=validation_split,
                 activation=activation,
-                num_cells=num_cells
+                num_cells=num_cells,
+                units=units
             )
 
         return(model)

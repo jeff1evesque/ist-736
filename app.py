@@ -69,6 +69,7 @@ analysis_classify=False
 arima_auto_scale = None
 lstm_epochs = 3000
 lstm_num_cells = 4
+lstm_units = 50
 classify_threshold = [0.5]
 classify_chi2 = 100
 
@@ -159,6 +160,7 @@ for x in df_quandl:
             df=df,
             df_quandl=x['data'],
             arima_auto_scale=arima_auto_scale,
+            lstm_units=lstm_units,
             lstm_epochs=lstm_epochs,
             lstm_num_cells=lstm_num_cells,
             classify_threshold=classify_threshold,
@@ -194,6 +196,7 @@ if analysis_ts_sentiment:
         df,
         screen_name,
         arima_auto_scale=arima_auto_scale,
+        lstm_units=lstm_units,
         lstm_epochs=lstm_epochs,
         lstm_num_cells=lstm_num_cells,
         directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),

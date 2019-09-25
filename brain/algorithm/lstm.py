@@ -342,6 +342,7 @@ class Lstm():
     def train(
         self,
         epochs=100,
+        units=50,
         dropout=0.2,
         batch_size=32,
         validation_split=0.2,
@@ -383,7 +384,7 @@ class Lstm():
         for cell in range(num_cells - 1):
             if cell == 0:
                 self.regressor.add(LSTM(
-                    units = 50,
+                    units = units,
                     return_sequences = True,
                     input_shape = (
                         self.n_steps_in,
@@ -393,7 +394,7 @@ class Lstm():
 
             else:
                 self.regressor.add(LSTM(
-                    units = 50,
+                    units = units,
                     return_sequences = True
                 ))
 
@@ -403,7 +404,7 @@ class Lstm():
         # lstm cell (last): with dropout regularization
         #
         self.regressor.add(LSTM(
-            units = 50,
+            units = units,
             return_sequences = False
         ))
         self.regressor.add(Dropout(dropout))
