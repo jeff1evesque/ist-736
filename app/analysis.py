@@ -315,7 +315,7 @@ def analyze_ts(
                             if k == 'arima' and
                                 'mse' in v and
                                 pd.notnull(v['mse'])],
-                directory=directory_arima,
+                directory='{a}/sentiment'.format(directory_arima),
                 filename='mse_overall_arima_{sent}.png'.format(sent=sent),
                 rotation=60
             )
@@ -342,7 +342,7 @@ def analyze_ts(
                             if k == 'lstm' and
                                 'mse' in v and
                                 pd.notnull(v['mse'])],
-                directory=directory_lstm,
+                directory='{a}/sentiment'.format(directory_lstm),
                 filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                 rotation=60
             )
