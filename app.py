@@ -68,7 +68,7 @@ analysis_classify=False
 
 arima_auto_scale = None
 lstm_epochs = 3000
-lstm_num_cells=4
+lstm_num_cells = 4
 classify_threshold = [0.5]
 classify_chi2 = 100
 
