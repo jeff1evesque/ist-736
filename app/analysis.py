@@ -27,6 +27,7 @@ def analyze(
     lstm_units=50,
     lstm_epochs=750,
     lstm_num_cells=4,
+    lstm_dropout=0,
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     classify_chi2=100,
@@ -118,7 +119,7 @@ def analyze(
             lstm_units=lstm_units,
             lstm_epochs=lstm_epochs,
             lstm_num_cells=lstm_num_cells,
-            lstm_dropout=0
+            lstm_dropout=lstm_dropout
         )
         ts_results = ts_stock.get_model_scores()
 
@@ -278,7 +279,7 @@ def analyze_ts(
                         lstm_units=lstm_units,
                         lstm_epochs=lstm_epochs,
                         lstm_num_cells=lstm_num_cells,
-                        lstm_dropout=0,
+                        lstm_dropout=lstm_dropout,
                         catch_grid_search=True
                     )
 
