@@ -14,7 +14,7 @@ To address this overall question, different techniques were applied.
 While the main focus of the study were between timeseries models, classification analysis was also performed. Specifically, signal analysis was used as the basis for classification:
 
 - [signal analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/peak_detection.py): apply signal analysis to determine exceeding index points
-- [classification analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/text_classifier.py): TF-IDF text corpus (X) trained against signal results
+- [classification analysis](https://github.com/jeff1evesque/ist-736/blob/master/brain/algorithm/text_classifier.py): TF-IDF text corpus (X) trained against signal results (y)
 
 In general, points exceeding the upper limit threshold was binned a value `1`, while points below the lower threshold was binned a value `-1`. This approach provided the target vector (y) when using the TF-IDF corpus (X) during classification:
 
