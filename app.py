@@ -71,12 +71,12 @@ ts_index = 'value'
 
 analysis_explore=False
 analysis_granger=False
-analysis_ts_stock=False
+analysis_ts_stock=True
 analysis_ts_sentiment=False
-analysis_classify=True
+analysis_classify=False
 
 arima_auto_scale = None
-lstm_epochs = 3000
+lstm_epochs = 1500
 lstm_num_cells = 4
 lstm_units = 50
 lstm_dropout = 0.2
