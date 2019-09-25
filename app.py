@@ -61,10 +61,10 @@ classify_index = 'full_text'
 ts_index = 'value'
 
 analysis_explore=False
-analysis_granger=False,
-analysis_ts=False,
+analysis_granger=False
+analysis_ts_stock=False
+analysis_ts_sentiment=True
 analysis_classify=False
-analysis_ts_sentiment=True,
 
 arima_auto_scale = None
 lstm_epochs = 3000
@@ -154,7 +154,7 @@ for x in df_quandl:
     #
     # general analysis
     #
-    if (analysis_granger or analysis_ts or analysis_classify):
+    if (analysis_granger or analysis_ts_stock or analysis_classify):
         analyze(
             df=df,
             df_quandl=x['data'],
