@@ -342,7 +342,7 @@ def analyze_ts(
                             if k == 'lstm' and
                                 'mse' in v and
                                 pd.notnull(v['mse'])],
-                directory='{a}/sentiment'.format(directory_lstm),
+                directory='{a}/sentiment'.format(a=directory_lstm),
                 filename='mse_overall_lstm_{sent}.png'.format(sent=sent),
                 rotation=60
             )
