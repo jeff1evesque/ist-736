@@ -16,6 +16,15 @@ import nltk
 for x in ['averaged_perceptron_tagger', 'stopwords']:
     nltk.download(x)
 
+#
+# register converters
+#
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
+
+#
+# general import
+#
 import re
 import pandas as pd
 from pathlib import Path
@@ -40,17 +49,17 @@ screen_name = [
     'SJosephBurns'
 ]
 codes = [
-##    ('BATS', 'BATS_AAPL'),
+    ('BATS', 'BATS_AAPL'),
 ##    ('BATS', 'BATS_AMZN'),
 ##    ('BATS', 'BATS_GOOGL'),
 ##    ('BATS', 'BATS_MMT'),
 ##    ('BATS', 'BATS_NFLX'),
-    ('CHRIS', 'CBOE_VX1'),
+##    ('CHRIS', 'CBOE_VX1'),
 ##    ('NASDAQOMX', 'COMP-NASDAQ'),
 ##    ('FINRA', 'FNYX_MMM'),
 ##    ('FINRA', 'FNSQ_SPY'),
 ##    ('FINRA', 'FNYX_QQQ'),
-##    ('EIA', 'PET_RWTC_D'),
+##      ('EIA', 'PET_RWTC_D'),
 ##    ('WFC', 'PR_CON_15YFIXED_IR'),
 ##    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
@@ -62,9 +71,9 @@ ts_index = 'value'
 
 analysis_explore=False
 analysis_granger=False
-analysis_ts_stock=True
+analysis_ts_stock=False
 analysis_ts_sentiment=False
-analysis_classify=False
+analysis_classify=True
 
 arima_auto_scale = None
 lstm_epochs = 3000
