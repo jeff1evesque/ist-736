@@ -41,24 +41,30 @@ screen_name = [
 ]
 codes = [
     ('BATS', 'BATS_AAPL'),
-##    ('BATS', 'BATS_AMZN'),
-##    ('BATS', 'BATS_GOOGL'),
-##    ('BATS', 'BATS_MMT'),
-##    ('BATS', 'BATS_NFLX'),
-##    ('CHRIS', 'CBOE_VX1'),
-##    ('NASDAQOMX', 'COMP-NASDAQ'),
-##    ('FINRA', 'FNYX_MMM'),
-##    ('FINRA', 'FNSQ_SPY'),
-##    ('FINRA', 'FNYX_QQQ'),
-##    ('EIA', 'PET_RWTC_D'),
-##    ('WFC', 'PR_CON_15YFIXED_IR'),
-##    ('WFC', 'PR_CON_30YFIXED_APR')
+    ('BATS', 'BATS_AMZN'),
+    ('BATS', 'BATS_GOOGL'),
+    ('BATS', 'BATS_MMT'),
+    ('BATS', 'BATS_NFLX'),
+    ('CHRIS', 'CBOE_VX1'),
+    ('NASDAQOMX', 'COMP-NASDAQ'),
+    ('FINRA', 'FNYX_MMM'),
+    ('FINRA', 'FNSQ_SPY'),
+    ('FINRA', 'FNYX_QQQ'),
+    ('EIA', 'PET_RWTC_D'),
+    ('WFC', 'PR_CON_15YFIXED_IR'),
+    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 end_date = date.today()
 start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
 sentiments = ['negative', 'neutral', 'positive']
 classify_index = 'full_text'
 ts_index = 'value'
+
+analysis_explore=False
+analysis_granger=False,
+analysis_ts=False,
+analysis_classify=False
+analysis_ts_sentiment=True,
 
 arima_auto_scale = None
 lstm_epochs = 3000
@@ -98,13 +104,14 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-###explore(
-###    data,
-###    screen_name,
-###    stopwords=stopwords,
-###    stopwords_topics=stopwords_topics,
-###    directory='viz/exploratory'
-###)
+if analysis_explore:
+    explore(
+        data,
+        screen_name,
+        stopwords=stopwords,
+        stopwords_topics=stopwords_topics,
+        directory='viz/exploratory'
+    )
 
 #
 # harvest quandl
@@ -147,27 +154,31 @@ for x in df_quandl:
     #
     # general analysis
     #
-    analyze(
-        df=df,
-        df_quandl=x['data'],
-        arima_auto_scale=arima_auto_scale,
-        lstm_epochs=lstm_epochs,
-        lstm_num_cells=lstm_num_cells,
-        classify_threshold=classify_threshold,
-        sub_directory=sub_directory,
-        directory_granger='viz/granger/{a}'.format(a=sub_directory),
-        directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
-        directory_arima='viz/arima',
-        directory_class='viz/classification/{a}'.format(a=sub_directory),
-        directory_report='reports/{a}'.format(a=x['dataset']),
-        screen_name=screen_name,
-        stopwords=stopwords,
-        classify_index=classify_index,
-        ts_index=ts_index,
-        analysis_granger=False,
-        analysis_ts=True,
-        analysis_classify=False
-    )
+    if (analysis_granger or analysis_ts or analysis_classify):
+        analyze(
+            df=df,
+            df_quandl=x['data'],
+            arima_auto_scale=arima_auto_scale,
+            lstm_epochs=lstm_epochs,
+            lstm_num_cells=lstm_num_cells,
+            classify_threshold=classify_threshold,
+            sub_directory=sub_directory,
+            directory_granger='viz/granger/{a}'.format(a=sub_directory),
+            directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+            directory_arima='viz/arima',
+            directory_class='viz/classification/{a}'.format(a=sub_directory),
+            directory_report='reports/{a}'.format(a=x['dataset']),
+            screen_name=screen_name,
+            stopwords=stopwords,
+            classify_index=classify_index,
+            ts_index=ts_index,
+            analysis_granger=False,
+            analysis_ts=False,
+            analysis_classify=False
+        )
+
+    else:
+        break
 
 #
 # sentiment timeseries: analysis on twitter corpus for each financial analyst.
@@ -178,12 +189,13 @@ for x in df_quandl:
 #       eliminate redundancies, such as repeated dates from twitter corpus)
 #       will either not differ, or be an insignificant difference.
 #
-##analyze_ts(
-##    df,
-##    screen_name,
-##    arima_auto_scale=arima_auto_scale,
-##    lstm_epochs=lstm_epochs,
-##    lstm_num_cells=lstm_num_cells,
-##    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
-##    directory_arima='viz/arima'
-##)
+if analysis_ts_sentiment:
+    analyze_ts(
+        df,
+        screen_name,
+        arima_auto_scale=arima_auto_scale,
+        lstm_epochs=lstm_epochs,
+        lstm_num_cells=lstm_num_cells,
+        directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+        directory_arima='viz/arima'
+    )
