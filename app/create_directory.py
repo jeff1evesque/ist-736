@@ -26,20 +26,25 @@ def create_directory(
     # define directories
     #
     directories = [directory_report]
-    stock_codes = ['{b}--{c}'.format(
+    codes = ['{b}--{c}'.format(
         b=x[0].lower(),
         c=x[1].lower()
     ) for x in stock_codes]
 
+    directories.extend(['{a}/{b}'.format(
+        a=directory_report,
+        b=x[1]
+    ) for x in stock_codes])
+
     directories.extend(['{a}/stock/{b}'.format(
         a=directory_arima,
         b=b
-    ) for b in stock_codes])
+    ) for b in codes])
 
     directories.extend(['{a}/stock/{b}'.format(
         a=directory_lstm,
         b=b
-    ) for b in stock_codes])
+    ) for b in codes])
 
     directories_sn = [
         directory_granger,
