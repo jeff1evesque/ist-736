@@ -33,7 +33,7 @@ def create_directory(
     directories = ['{a}/{b}'.format(
         a=directory_report,
         b=x[1]
-    ) for x in stock_codes])
+    ) for x in stock_codes]
 
     directories.extend(['{a}/stock/{b}'.format(
         a=directory_arima,
