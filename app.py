@@ -41,18 +41,18 @@ screen_name = [
 ]
 codes = [
     ('BATS', 'BATS_AAPL'),
-    ('BATS', 'BATS_AMZN'),
-    ('BATS', 'BATS_GOOGL'),
-    ('BATS', 'BATS_MMT'),
-    ('BATS', 'BATS_NFLX'),
-    ('CHRIS', 'CBOE_VX1'),
-    ('NASDAQOMX', 'COMP-NASDAQ'),
-    ('FINRA', 'FNYX_MMM'),
-    ('FINRA', 'FNSQ_SPY'),
-    ('FINRA', 'FNYX_QQQ'),
-    ('EIA', 'PET_RWTC_D'),
-    ('WFC', 'PR_CON_15YFIXED_IR'),
-    ('WFC', 'PR_CON_30YFIXED_APR')
+##    ('BATS', 'BATS_AMZN'),
+##    ('BATS', 'BATS_GOOGL'),
+##    ('BATS', 'BATS_MMT'),
+##    ('BATS', 'BATS_NFLX'),
+##    ('CHRIS', 'CBOE_VX1'),
+##    ('NASDAQOMX', 'COMP-NASDAQ'),
+##    ('FINRA', 'FNYX_MMM'),
+##    ('FINRA', 'FNSQ_SPY'),
+##    ('FINRA', 'FNYX_QQQ'),
+##    ('EIA', 'PET_RWTC_D'),
+##    ('WFC', 'PR_CON_15YFIXED_IR'),
+##    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 end_date = date.today()
 start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
@@ -62,8 +62,8 @@ ts_index = 'value'
 
 analysis_explore=False
 analysis_granger=False
-analysis_ts_stock=False
-analysis_ts_sentiment=True
+analysis_ts_stock=True
+analysis_ts_sentiment=False
 analysis_classify=False
 
 arima_auto_scale = None
@@ -170,11 +170,11 @@ for x in df_quandl:
             directory_report='reports/{a}'.format(a=x['dataset']),
             screen_name=screen_name,
             stopwords=stopwords,
-            classify_index=classify_index,
             ts_index=ts_index,
-            analysis_granger=False,
-            analysis_ts=False,
-            analysis_classify=False
+            classify_index=classify_index,
+            analysis_granger=analysis_granger,
+            analysis_ts=analysis_ts_stock,
+            analysis_classify=analysis_classify
         )
 
     else:
