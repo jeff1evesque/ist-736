@@ -237,6 +237,7 @@ def analyze_ts(
     lstm_units=50,
     lstm_epochs=750,
     lstm_num_cells=4,
+    lstm_dropout=0,
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_report='reports'
