@@ -127,7 +127,7 @@ for x in df_quandl:
     if (
         m['analysis_granger'] or
         m['analysis_ts_stock'] or
-        m'[analysis_classify']
+        m['analysis_classify']
     ):
         analyze(
             df=df,
