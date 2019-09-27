@@ -1,6 +1,6 @@
 # ist-736
 
-This is a final project for a short 10 week course in text mining. Coding, [visualizations](https://github.com/jeff1evesque/ist-736/tree/master/viz), and overall report were improved after completion of the course, since the project was submitted as one of among several projects within a portfolio requirement for graduation. In general, the project attempts to address several items, including the larger question -- Can Market Sentiment Predict the Stock Market?
+This is a final project for a short 10 week course in text mining. Coding, [visualizations](https://github.com/jeff1evesque/ist-736/tree/master/viz), and overall report were improved after completion of the course, then submitted within a portfolio requirement for graduation. In general, the project attempts to address several items, including the larger question -- Can Market Sentiment Predict the Stock Market?
 
 ## Analysis
 
@@ -53,7 +53,7 @@ Due to limitations of the twitter API, roughly 3200 tweets could be collected fo
 
 ## Execution
 
-Original aspiration was to complete the codebase using the [app-factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/). Due to time constraint, the codebase was not expanded as an application. However, a provided [`config-TEMPLATE.py`](https://github.com/jeff1evesque/ist-736/blob/master/config-TEMPLATE.py) is required at minimum to be copied as `config.py` in the same directory. If additional twitter user timelines, or quandl stock index would be studied, the contents of the copied `config.py` need to match registered API tokens for each of the service providers. However, to run the codebase to reflect the choices made in this study, then no API keys need to be pasted into the configuration. Instead, the contents of the [`app.py`](https://github.com/jeff1evesque/ist-736/blob/master/app.py) need to be properly commented out. Specifically, only one analysis can be performed at a given time. Moreover, timeseries sentiment models (consisting of both ARIMA and LSTM) has an added constraint. Specifically, only one stock code can be implemented at a given time:
+Original aspiration was to complete the codebase using the [app-factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/). Due to time constraint, the codebase was not expanded as an application. However, a provided [`config-TEMPLATE.py`](https://github.com/jeff1evesque/ist-736/blob/master/config-TEMPLATE.py) is required at minimum to be copied as `config.py` in the same directory. If additional twitter user timelines, or quandl stock index would be studied, the contents of the copied `config.py` need to match registered API tokens for each of the service providers. However, to run the codebase to reflect the choices made in this study, then no API keys need to be pasted into the configuration. Instead, additional configurations need to be properly commented out. Specifically, only one analysis can be performed at a given time. Moreover, timeseries sentiment models (consisting of both ARIMA and LSTM) has an added constraint. Specifically, only one stock code can be implemented at a given time:
 
 ```python
 screen_name = [
@@ -80,7 +80,7 @@ codes = [
 ]
 ```
 
-This is largely due to an exponentiating [memory requirement](https://github.com/jeff1evesque/ist-736/issues/125), due to keeping multiple trained neural networks in memory. Should this codebase be extended to an application, the latter issue would need to be resolved. Nevertheless, additional configurations can be adjusted in the same file, including the number of epochs, lstm cells, signal analysis threshold (i.e. `classify_threshold`), and TF-IDF feature reduction for classification (i.e. `classify_chi2`) can be made. After dependenices and necessary changes have been made, the script can be executed in a stepwise fashion:
+This is largely due to an exponentiating memory requirement, due to keeping multiple trained arima models in memory. Should this codebase be extended to an application, the latter issue could resolve itself. Nevertheless, additional controls can be adjusted in the same `config.py`, including the number of epochs, lstm cells, number of neurons (i.e. `lstm_units`), signal analysis threshold (i.e. `classify_threshold`), and TF-IDF feature reduction for classification (i.e. `classify_chi2`) can be made. After dependencies and necessary changes have been made, the script can be executed in a stepwise fashion:
 
 ```bash
 $ pwd
