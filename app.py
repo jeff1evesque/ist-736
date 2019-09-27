@@ -35,7 +35,7 @@ from config import (
     model_control as m,
     model_config as c,
     sentiments,
-    results as s
+    save_results as s
 )
 
 #

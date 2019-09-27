@@ -44,7 +44,7 @@ model_config = {
     'classify_chi2': 100
 }
 
-result = {
+save_result = {
     'lstm': True,
     'lstm_log': True,
     'lstm_log_plot': True,
