@@ -133,7 +133,7 @@ for x in df_quandl:
         analyze(
             df=df,
             df_quandl=x['data'],
-            arima_auto_scale=c['=arima_auto_scale'],
+            arima_auto_scale=c['arima_auto_scale'],
             lstm_epochs=c['lstm_epochs'],
             lstm_dropout=c['lstm_dropout'],
             lstm_num_cells=c['lstm_num_cells'],
@@ -150,9 +150,9 @@ for x in df_quandl:
             screen_name=accounts,
             stopwords=stopwords,
             ts_index=c['ts_index'],
-            analysis_granger=analysis_granger,
-            analysis_ts=analysis_ts_stock,
-            analysis_classify=analysis_classify
+            analysis_granger=m['analysis_granger'],
+            analysis_ts=m['analysis_ts_stock'],
+            analysis_classify=m['analysis_classify']
         )
 
     else:
