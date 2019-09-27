@@ -1,13 +1,20 @@
 #!/usr/bin/python
 
+import gc
 import math
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from keras.backend.tensorflow_backend import (
+    set_session,
+    clear_session,
+    get_session
+)
 
 
 class Lstm():
@@ -538,3 +545,30 @@ class Lstm():
         '''
 
         return(self.data.index.values)
+
+    def reset_memory(self, model=None):
+        '''
+
+        reset tensorflow graph, clear gpu memory, garbage collect.
+
+        '''
+
+        sess = get_session()
+        clear_session()
+        sess.close()
+
+        try:
+            del model
+
+        except:
+            pass
+
+        #
+        # reset config: similar to when session created.
+        #
+        config = tf.ConfigProto()
+        config.gpu_options.per_process_gpu_memory_fraction = 1
+        config.gpu_options.visible_device_list = '0'
+        set_session(tensorflow.Session(config=config))
+
+        gc.collect()

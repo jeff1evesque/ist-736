@@ -288,6 +288,9 @@ class Timeseries():
                 xticks=xticks
             )
 
+            # reset memory
+            l.reset_memory(model=l.get_model())
+
     def get_model_scores(self, key=None):
         '''
 
