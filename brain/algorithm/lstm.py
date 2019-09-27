@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -22,7 +22,7 @@ class Lstm():
 
     apply lstm variant of recurrent neural network.
 
-    Note: keras==2.1.2 is required.
+    Note: keras==2.1.2 is required, and h5py.
 
     '''
 
@@ -558,7 +558,10 @@ class Lstm():
         sess.close()
 
         try:
-            del model
+            if model:
+                del model
+            else:
+                del self.regressor
 
         except:
             pass
@@ -572,3 +575,36 @@ class Lstm():
         set_session(tensorflow.Session(config=config))
 
         gc.collect()
+
+    def save(self, file_path='lstm', model=None):
+        '''
+
+        save current model.
+
+        '''
+
+        try:
+            if model:
+                model.save('{a}.h5'.format(a=file_path))
+            else:
+                self.regressor.save('{a}.h5'.format(a=file_path))
+
+        except:
+            print(self.banner_border)
+            print('No model saved: {a}.h5'.format(a=file_path))
+            print(self.banner_border)
+
+    def load(self, file_path='lstm'):
+        '''
+
+        load model into memory.
+
+        '''
+
+        try:
+            self.regressor = load_model('{a}.h5'.format(a=file_path))
+
+        except:
+            print(self.banner_border)
+            print('No model loaded: {a}.h5'.format(a=file_path))
+            print(self.banner_border)
