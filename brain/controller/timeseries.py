@@ -52,7 +52,9 @@ class Timeseries():
         else:
             suffix=''
 
+        #
         # implement models
+        #
         if flag_arima:
             self.arima(
                 normalize_key=normalize_key,
@@ -77,7 +79,7 @@ class Timeseries():
                 num_cells=lstm_num_cells,
                 activation='linear',
                 directory=directory_lstm,
-                directory_model=directory_lstm_model,
+                directory_lstm_model=directory_lstm_model,
                 suffix=suffix,
                 save_model=lstm_save,
                 save_model_log=lstm_save_log
@@ -156,7 +158,9 @@ class Timeseries():
                     value_vars=['actual', 'predicted']
                 )
 
-                # plot
+                #
+                # overall plot
+                #
                 plot_ts(
                     data=pd.DataFrame({
                         'values': train_actual,
@@ -181,7 +185,9 @@ class Timeseries():
                     xticks=xticks
                 )
 
+                #
                 # trend analysis
+                #
                 decomposed = a[0].get_decomposed()
                 decomposed.plot()
                 plt.savefig(
@@ -200,7 +206,7 @@ class Timeseries():
         self,
         normalize_key,
         directory='viz/lstm',
-        directory_model='model/lstm',
+        directory_lstm_model='model/lstm',
         plot=True,
         show=False,
         suffix=None,
@@ -238,7 +244,9 @@ class Timeseries():
             num_cells=num_cells
         )
 
+        #
         # predict
+        #
         if l.get_status(type='train_flag'):
             l.predict()
             self.model_scores['lstm'] = {
@@ -272,7 +280,9 @@ class Timeseries():
                 value_vars=['actual', 'predicted']
             )
 
-            # plot
+            #
+            # overall plot
+            #
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
@@ -302,7 +312,7 @@ class Timeseries():
         #
         if save_model and isinstance(save_model, bool):
             l.save(file_path='{a}/lstm{b}.h5'.format(
-                a=directory_model,
+                a=directory_lstm_model,
                 b=suffix
             ))
 
@@ -327,18 +337,20 @@ class Timeseries():
                 xlab='epoch',
                 ylab='loss',
                 hue='variable',
-                directory=directory_model,
+                directory=directory_lstm_model,
                 filename=suffix,
                 rotation=90,
                 xticks=xticks
             )
 
             l.get_fit_history().to_csv('{a}/lstm{b}.csv'.format(
-                a=directory_model,
+                a=directory_lstm_model,
                 b=suffix
             ))
 
+        #
         # reset memory
+        #
         l.reset_memory()
 
     def get_model_scores(self, key=None):

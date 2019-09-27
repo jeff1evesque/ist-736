@@ -35,7 +35,7 @@ from config import (
     model_control as m,
     model_config as c,
     sentiments,
-    save_results as s
+    save_result as s
 )
 
 #
@@ -130,7 +130,6 @@ for x in df_quandl:
             lstm_dropout=c['lstm_dropout'],
             lstm_num_cells=c['lstm_num_cells'],
             lstm_units=c['lstm_units'],
-            lstm_log=s['lstm_log'],
             lstm_save=s['lstm'],
             lstm_save_log=s['lstm_log'],
             classify_chi2=c['classify_chi2'],
@@ -149,7 +148,7 @@ for x in df_quandl:
             analysis_granger=m['analysis_granger'],
             analysis_ts=m['analysis_ts_stock'],
             analysis_classify=m['analysis_classify'],
-            plot=s['model_plots']
+            plot=s['model_plot']
         )
 
     else:
@@ -173,10 +172,10 @@ if m['analysis_ts_sentiment']:
         lstm_dropout=c['lstm_dropout'],
         lstm_num_cells=c['lstm_num_cells'],
         lstm_units=c['lstm_units'],
-        lstm_save_log=s['lstm_log'],
         lstm_save=s['lstm'],
+        lstm_save_log=s['lstm_log'],
         directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
         directory_lstm_model='model/lstm_{a}'.format(a=c['lstm_epochs']),
         directory_arima='viz/arima',
-        plot=s['model_plots']
+        plot=s['model_plot']
     )

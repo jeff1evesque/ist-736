@@ -22,12 +22,15 @@ def analyze(
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_class='viz/classification',
+    directory_lstm_model='model/lstm',
     directory_report='reports',
     arima_auto_scale=None,
     lstm_units=50,
     lstm_epochs=750,
     lstm_num_cells=4,
     lstm_dropout=0,
+    lstm_save=False,
+    lstm_save_log=True,
     sentiments = ['negative', 'neutral', 'positive'],
     classify_index='full_text',
     classify_chi2=100,
@@ -35,7 +38,8 @@ def analyze(
     ts_index='value',
     analysis_granger=True,
     analysis_ts=True,
-    analysis_classify=True
+    analysis_classify=True,
+    plot=False
 ):
     '''
 
@@ -119,11 +123,12 @@ def analyze(
             lstm_units=lstm_units,
             lstm_epochs=lstm_epochs,
             lstm_num_cells=lstm_num_cells,
-            lstm_dropout=lstm_dropout
+            lstm_dropout=lstm_dropout,
+            directory_lstm_model=directory_lstm_model
         )
         ts_results = ts_stock.get_model_scores()
 
-        if 'arima' in ts_results:
+        if plot and 'arima' in ts_results:
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['arima']['mse'],
@@ -141,7 +146,7 @@ def analyze(
             ), 'w') as fp:
                 print(ts_results['arima']['adf'], file=fp)
 
-        if 'lstm' in ts_results:
+        if plot and 'lstm' in ts_results:
             plot_bar(
                 labels=['overall'],
                 performance=ts_results['lstm']['mse'],
@@ -215,7 +220,7 @@ def analyze(
                             k=classify_chi2
                         )
 
-            if any(
+            if plot and any(
                 pd.notnull(k) and
                 pd.notnull(v) and
                 isinstance(v, tuple) for k,v in classify_results.items()
@@ -238,8 +243,11 @@ def analyze_ts(
     lstm_epochs=750,
     lstm_num_cells=4,
     lstm_dropout=0,
+    lstm_save=False,
+    lstm_save_log=True,
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
+    directory_lstm_model='model/lstm',
     directory_report='reports'
 ):
     '''
@@ -275,6 +283,7 @@ def analyze_ts(
                             d=directory_lstm,
                             sn=sn
                         ),
+                        directory_lstm_model=directory_lstm_model,
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
                         lstm_units=lstm_units,
@@ -299,7 +308,7 @@ def analyze_ts(
     # mse plot: aggregated on overall sentiment for a given stock.
     #
     for sent in sentiments:
-        if any(
+        if plot and any(
             pd.notnull(k) and
             pd.notnull(v) and
             k == 'arima' and
@@ -326,7 +335,7 @@ def analyze_ts(
                 rotation=60
             )
 
-        if any(
+        if plot and any(
             pd.notnull(k) and
             pd.notnull(v) and
             k == 'lstm' and
