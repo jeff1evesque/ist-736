@@ -4,7 +4,7 @@
 # this project requires the following packages:
 #
 #   pip update
-#   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow seaborn
+#   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow seaborn h5py
 #   pip install keras==2.1.2
 #   pip install numpy==1.16.2
 #
@@ -37,77 +37,36 @@ from app.join_data import join_data
 from app.analysis import analyze, analyze_ts
 from app.create_directory import create_directory
 from brain.utility.stopwords import stopwords, stopwords_topics
+from config import (
+    twitter_accounts as accounts,
+    stock_codes,
+    drop_cols,
+    model_control as m,
+    model_config as c
+)
 
 #
 # local variables
 #
-screen_name = [
-    'jimcramer',
-    'ReformedBroker',
-    'TheStalwart',
-    'LizAnnSonders',
-    'SJosephBurns'
-]
-codes = [
-    ('BATS', 'BATS_AAPL'),
-##    ('BATS', 'BATS_AMZN'),
-##    ('BATS', 'BATS_GOOGL'),
-##    ('BATS', 'BATS_MMT'),
-##    ('BATS', 'BATS_NFLX'),
-##    ('CHRIS', 'CBOE_VX1'),
-##    ('NASDAQOMX', 'COMP-NASDAQ'),
-##    ('FINRA', 'FNYX_MMM'),
-##    ('FINRA', 'FNSQ_SPY'),
-##    ('FINRA', 'FNYX_QQQ'),
-##      ('EIA', 'PET_RWTC_D'),
-##    ('WFC', 'PR_CON_15YFIXED_IR'),
-##    ('WFC', 'PR_CON_30YFIXED_APR')
-]
 end_date = date.today()
 start_date = end_date - dateutil.relativedelta.relativedelta(years=5)
-sentiments = ['negative', 'neutral', 'positive']
-classify_index = 'full_text'
-ts_index = 'value'
-
-analysis_explore=False
-analysis_granger=False
-analysis_ts_stock=True
-analysis_ts_sentiment=False
-analysis_classify=False
-
-arima_auto_scale = None
-lstm_epochs = 1500
-lstm_num_cells = 4
-lstm_units = 50
-lstm_dropout = 0.2
-classify_threshold = [0.5]
-classify_chi2 = 100
-
-stopwords.extend([x.lower() for x in screen_name])
+stopwords.extend([x.lower() for x in accounts])
 stopwords_topics.extend(stopwords)
-
-drop_cols = [
-    'compound',
-    'retweet_count',
-    'favorite_count',
-    'user_mentions',
-    'Short Volume'
-]
 
 #
 # create directories
 #
 create_directory(
-    screen_name=screen_name,
-    stock_codes=codes,
-    directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs)
+    screen_name=accounts,
+    stock_codes=stock_codes,
+    directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs'])
 )
 
 #
 # harvest tweets
 #
 data, start_date, end_date = tweet_sn(
-    screen_name,
+    accounts,
     start_date.strftime('%Y-%m-%d'),
     end_date.strftime('%Y-%m-%d')
 )
@@ -115,10 +74,10 @@ data, start_date, end_date = tweet_sn(
 #
 # exploration: specific and overall tweets
 #
-if analysis_explore:
+if m['analysis_explore']:
     explore(
         data,
-        screen_name,
+        accounts,
         stopwords=stopwords,
         stopwords_topics=stopwords_topics,
         directory='viz/exploratory'
@@ -128,7 +87,7 @@ if analysis_explore:
 # harvest quandl
 #
 df_quandl = quandl(
-    codes=codes,
+    codes=stock_codes,
     start_date=start_date,
     end_date=end_date
 )
@@ -155,36 +114,41 @@ for x in df_quandl:
     df = join_data(
         data=data,
         df_quandl=x['data'],
-        screen_name=screen_name,
+        screen_name=accounts,
         drop_cols=drop_cols,
         sentiments=sentiments,
-        classify_index=classify_index,
-        ts_index=ts_index
+        classify_index=c['classify_index'],
+        ts_index=c['ts_index']
     )[1]
 
     #
     # general analysis
     #
-    if (analysis_granger or analysis_ts_stock or analysis_classify):
+    if (
+        m['analysis_granger'] or
+        m['analysis_ts_stock'] or
+        m'[analysis_classify']
+    ):
         analyze(
             df=df,
             df_quandl=x['data'],
-            arima_auto_scale=arima_auto_scale,
-            lstm_epochs=lstm_epochs,
-            lstm_dropout=lstm_dropout,
-            lstm_num_cells=lstm_num_cells,
-            lstm_units=lstm_units,
-            classify_threshold=classify_threshold,
+            arima_auto_scale=c['=arima_auto_scale'],
+            lstm_epochs=c['lstm_epochs'],
+            lstm_dropout=c['lstm_dropout'],
+            lstm_num_cells=c['lstm_num_cells'],
+            lstm_units=c['lstm_units'],
+            classify_chi2=c['classify_chi2'],
+            classify_index=c['classify_index'],
+            classify_threshold=c['classify_threshold'],
             sub_directory=sub_directory,
             directory_granger='viz/granger/{a}'.format(a=sub_directory),
-            directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+            directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
             directory_arima='viz/arima',
             directory_class='viz/classification/{a}'.format(a=sub_directory),
             directory_report='reports/{a}'.format(a=x['dataset']),
-            screen_name=screen_name,
+            screen_name=accounts,
             stopwords=stopwords,
-            ts_index=ts_index,
-            classify_index=classify_index,
+            ts_index=c['ts_index'],
             analysis_granger=analysis_granger,
             analysis_ts=analysis_ts_stock,
             analysis_classify=analysis_classify
@@ -202,15 +166,15 @@ for x in df_quandl:
 #       eliminate redundancies, such as repeated dates from twitter corpus)
 #       will either not differ, or be an insignificant difference.
 #
-if analysis_ts_sentiment:
+if m['analysis_ts_sentiment']:
     analyze_ts(
         df,
-        screen_name,
-        arima_auto_scale=arima_auto_scale,
-        lstm_epochs=lstm_epochs,
-        lstm_dropout=lstm_dropout,
-        lstm_num_cells=lstm_num_cells,
-        lstm_units=lstm_units,
-        directory_lstm='viz/lstm_{a}'.format(a=lstm_epochs),
+        accounts,
+        arima_auto_scale=c['=arima_auto_scale'],
+        lstm_epochs=c['lstm_epochs'],
+        lstm_dropout=c['lstm_dropout'],
+        lstm_num_cells=c['lstm_num_cells'],
+        lstm_units=c['lstm_units'],
+        directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
         directory_arima='viz/arima'
     )
