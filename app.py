@@ -1,15 +1,6 @@
 #!/usr/bin/python
 
 #
-# this project requires the following packages:
-#
-#   pip update
-#   pip install Twython Quandl wordcloud scikit-plot statsmodels patsy tensorflow seaborn h5py
-#   pip install keras==2.1.2
-#   pip install numpy==1.16.2
-#
-
-#
 # nltk data
 #
 import nltk
