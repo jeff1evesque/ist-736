@@ -47,7 +47,6 @@ model_config = {
 save_result = {
     'lstm': True,
     'lstm_log': True,
-    'lstm_log_plot': True,
     'model_plots': True
 }
 

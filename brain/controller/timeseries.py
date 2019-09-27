@@ -38,6 +38,7 @@ class Timeseries():
         lstm_activation='linear',
         lstm_num_cells=4,
         lstm_save=False,
+        lstm_save_log=False,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -78,7 +79,8 @@ class Timeseries():
                 directory=directory_lstm,
                 directory_model=directory_lstm_model,
                 suffix=suffix,
-                save_model=lstm_save
+                save_model=lstm_save,
+                save_model_log=lstm_save_log
             )
 
     def arima(
@@ -211,7 +213,8 @@ class Timeseries():
         activation='linear',
         num_cells=4,
         xticks=True,
-        save_model=False
+        save_model=False,
+        save_model_log=True
     ):
 
         '''
@@ -294,15 +297,49 @@ class Timeseries():
                 xticks=xticks
             )
 
-            # save model
-            if save_model and isinstance(save_model, bool):
-                l.save(file_path='{a}/lstm{b}.h5'.format(
-                    a=directory_model,
-                    b=suffix
-                ))
+        #
+        # save model
+        #
+        if save_model and isinstance(save_model, bool):
+            l.save(file_path='{a}/lstm{b}.h5'.format(
+                a=directory_model,
+                b=suffix
+            ))
 
-            # reset memory
-            l.reset_memory(model=l.get_model())
+        #
+        # save model log
+        #
+        if save_model_log and isinstance(save_model_log, bool):
+            loss_df = pd.DataFrame({
+                'train': l.get_fit_history('loss'),
+                'validation': l.get_fit_history('val_loss'),
+                'epoch': range(1, len(l.get_fit_history('loss')) + 1)
+            })
+
+            loss_df_long = pd.melt(
+                loss_df,
+                id_vars=['epoch'],
+                value_vars=['loss', 'val_loss']
+            )
+
+            plot_ts(
+                data=loss_df_long,
+                xlab='epoch',
+                ylab='loss',
+                hue='variable',
+                directory=directory_model,
+                filename=suffix,
+                rotation=90,
+                xticks=xticks
+            )
+
+            l.get_fit_history().to_csv('{a}/lstm{b}.csv'.format(
+                a=directory_model,
+                b=suffix
+            ))
+
+        # reset memory
+        l.reset_memory()
 
     def get_model_scores(self, key=None):
         '''
