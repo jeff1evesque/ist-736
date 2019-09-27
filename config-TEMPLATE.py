@@ -71,6 +71,8 @@ stock_codes = [
 ##    ('WFC', 'PR_CON_30YFIXED_APR')
 ]
 
+sentiments = ['negative', 'neutral', 'positive']
+
 drop_cols = [
     'compound',
     'retweet_count',
