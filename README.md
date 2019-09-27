@@ -39,7 +39,8 @@ $ sudo pip install nltk \
     seaborn \
     wordcloud \
     keras \
-    numpy
+    numpy \
+    h5py
 ```
 
 ## Data
