@@ -10,6 +10,7 @@ def create_directory(
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_class='viz/classification',
+    directory_lstm_model='model/lstm',
     directory_report='reports'
 ):
     '''
@@ -42,6 +43,11 @@ def create_directory(
 
     directories.extend(['{a}/stock/{b}'.format(
         a=directory_lstm,
+        b=b
+    ) for b in codes])
+
+    directories.extend(['{a}/stock/{b}'.format(
+        a=directory_lstm_model,
         b=b
     ) for b in codes])
 

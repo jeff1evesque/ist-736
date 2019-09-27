@@ -576,7 +576,7 @@ class Lstm():
 
         gc.collect()
 
-    def save(self, file_path='lstm', model=None):
+    def save(self, file_path='lstm,h5', model=None):
         '''
 
         save current model.
@@ -585,16 +585,16 @@ class Lstm():
 
         try:
             if model:
-                model.save('{a}.h5'.format(a=file_path))
+                model.save(file_path)
             else:
-                self.regressor.save('{a}.h5'.format(a=file_path))
+                self.regressor.save(file_path)
 
         except:
             print(self.banner_border)
-            print('No model saved: {a}.h5'.format(a=file_path))
+            print('No model saved: {a}'.format(a=file_path))
             print(self.banner_border)
 
-    def load(self, file_path='lstm'):
+    def load(self, file_path='lstm.h5'):
         '''
 
         load model into memory.
@@ -602,9 +602,9 @@ class Lstm():
         '''
 
         try:
-            self.regressor = load_model('{a}.h5'.format(a=file_path))
+            self.regressor = load_model('{a}'.format(a=file_path))
 
         except:
             print(self.banner_border)
-            print('No model loaded: {a}.h5'.format(a=file_path))
+            print('No model loaded: {a}'.format(a=file_path))
             print(self.banner_border)

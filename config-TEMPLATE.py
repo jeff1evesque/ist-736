@@ -44,6 +44,13 @@ model_config = {
     'classify_chi2': 100
 }
 
+save_result = {
+    'save_lstm': True,
+    'save_lstm_log': True,
+    'save_lstm_log_plot': True,
+    'save_model_plots': True
+}
+
 #
 # application controls
 #

@@ -20,6 +20,7 @@ class Timeseries():
         normalize_key,
         directory_arima='viz/arima',
         directory_lstm='viz/lstm',
+        directory_lstm_model='model/lstm',
         flag_arima=True,
         flag_lstm=True,
         plot=True,
@@ -36,6 +37,7 @@ class Timeseries():
         lstm_validation_split=0,
         lstm_activation='linear',
         lstm_num_cells=4,
+        lstm_save=False,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -74,7 +76,9 @@ class Timeseries():
                 num_cells=lstm_num_cells,
                 activation='linear',
                 directory=directory_lstm,
-                suffix=suffix
+                directory_model=directory_lstm_model,
+                suffix=suffix,
+                save_model=lstm_save
             )
 
     def arima(
@@ -194,6 +198,7 @@ class Timeseries():
         self,
         normalize_key,
         directory='viz/lstm',
+        directory_model='model/lstm',
         plot=True,
         show=False,
         suffix=None,
@@ -205,7 +210,8 @@ class Timeseries():
         validation_split=0,
         activation='linear',
         num_cells=4,
-        xticks=True
+        xticks=True,
+        save_model=False
     ):
 
         '''
@@ -287,6 +293,13 @@ class Timeseries():
                 rotation=90,
                 xticks=xticks
             )
+
+            # save model
+            if save_model and isinstance(save_model, bool):
+                l.save(file_path='{a}/lstm{b}.h5'.format(
+                    a=directory_model,
+                    b=suffix
+                ))
 
             # reset memory
             l.reset_memory(model=l.get_model())

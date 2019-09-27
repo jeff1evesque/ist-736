@@ -34,7 +34,8 @@ from config import (
     drop_cols,
     model_control as m,
     model_config as c,
-    sentiments
+    sentiments,
+    save_results as s
 )
 
 #
@@ -129,12 +130,14 @@ for x in df_quandl:
             lstm_dropout=c['lstm_dropout'],
             lstm_num_cells=c['lstm_num_cells'],
             lstm_units=c['lstm_units'],
+            lstm_save=s['save_lstm'],
             classify_chi2=c['classify_chi2'],
             classify_index=c['classify_index'],
             classify_threshold=c['classify_threshold'],
             sub_directory=sub_directory,
             directory_granger='viz/granger/{a}'.format(a=sub_directory),
             directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
+            directory_lstm_model='model/lstm_{a}'.format(a=c['lstm_epochs']),
             directory_arima='viz/arima',
             directory_class='viz/classification/{a}'.format(a=sub_directory),
             directory_report='reports/{a}'.format(a=x['dataset']),
@@ -143,7 +146,8 @@ for x in df_quandl:
             ts_index=c['ts_index'],
             analysis_granger=m['analysis_granger'],
             analysis_ts=m['analysis_ts_stock'],
-            analysis_classify=m['analysis_classify']
+            analysis_classify=m['analysis_classify'],
+            plot=s['save_model_plots']
         )
 
     else:
@@ -162,11 +166,14 @@ if m['analysis_ts_sentiment']:
     analyze_ts(
         df,
         accounts,
-        arima_auto_scale=c['=arima_auto_scale'],
+        arima_auto_scale=c['arima_auto_scale'],
         lstm_epochs=c['lstm_epochs'],
         lstm_dropout=c['lstm_dropout'],
         lstm_num_cells=c['lstm_num_cells'],
         lstm_units=c['lstm_units'],
+        lstm_save=s['save_lstm'],
         directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
-        directory_arima='viz/arima'
+        directory_lstm_model='model/lstm_{a}'.format(a=c['lstm_epochs']),
+        directory_arima='viz/arima',
+        plot=s['save_model_plots']
     )
