@@ -29,21 +29,38 @@ model_control = {
     'analysis_granger': False,
     'analysis_ts_stock': True,
     'analysis_ts_sentiment': False,
-    'analysis_classify': False
+    'analysis_classify': False,
+    'model_mnb': True,
+    'model_mnb_pos': True,
+    'model_bnb': True,
+    'model_bnb_pos': True,
+    'model_svm': True,
+    'model_svm_pos': True,
 }
 
 model_config = {
+    'split_size': 0.2,
     'classify_index': 'full_text',
     'ts_index': 'value',
+    'granger_lag': 4,
     'arima_auto_scale': None,
     'lstm_epochs': 750,
+    'lstm_batch_size': 32,
     'lstm_num_cells': 4,
     'lstm_units': 50,
     'lstm_dropout': 0.2,
+    'lstm_activation': 'linear',
+    'lstm_validation_split': 0,
     'classify_threshold': [0.5],
-    'classify_chi2': 100
+    'classify_chi2': 100,
+    'classify_ngram': (1,1),
+    'classify_kfold': 5,
+    'classify_top_words': 25
 }
 
+#
+# save results
+#
 save_result = {
     'lstm': True,
     'lstm_log': True,
@@ -72,7 +89,7 @@ stock_codes = [
 ##    ('FINRA', 'FNYX_MMM'),
 ##    ('FINRA', 'FNSQ_SPY'),
 ##    ('FINRA', 'FNYX_QQQ'),
-##      ('EIA', 'PET_RWTC_D'),
+##    ('EIA', 'PET_RWTC_D'),
 ##    ('WFC', 'PR_CON_15YFIXED_IR'),
 ##    ('WFC', 'PR_CON_30YFIXED_APR')
 ]

@@ -572,7 +572,7 @@ class Lstm():
         config = tf.ConfigProto()
         config.gpu_options.per_process_gpu_memory_fraction = 1
         config.gpu_options.visible_device_list = '0'
-        set_session(tensorflow.Session(config=config))
+        set_session(tf.Session(config=config))
 
         gc.collect()
 

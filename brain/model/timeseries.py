@@ -5,19 +5,14 @@ import pandas as pd
 from pathlib import Path
 from brain.algorithm.arima import Arima
 from brain.algorithm.lstm import Lstm
+from config import model_config as c
+
 
 def model(
     df,
     normalize_key,
     model_type='arima',
     date_index='date',
-    units=50,
-    epochs=100,
-    dropout=0.2,
-    batch_size=32,
-    validation_split=0,
-    activation='linear',
-    num_cells=4,
     log_delta=0.01,
     auto_scale=None,
     rolling_grid_search=False,
@@ -114,13 +109,13 @@ def model(
 
         if model.get_status(type='train_flag'):
             model.train(
-                epochs=epochs,
-                dropout=dropout,
-                batch_size=batch_size,
-                validation_split=validation_split,
-                activation=activation,
-                num_cells=num_cells,
-                units=units
+                epochs=c['lstm_epochs'],
+                dropout=c['lstm_dropout'],
+                batch_size=c['lstm_batch_size'],
+                validation_split=c['lstm_validation_split'],
+                activation=c['lstm_activation'],
+                num_cells=c['lstm_num_cells'],
+                units=c['lstm_units']
             )
 
         return(model)

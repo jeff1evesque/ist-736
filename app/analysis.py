@@ -10,6 +10,11 @@ from brain.controller.classifier import classify
 from brain.controller.timeseries import Timeseries
 from brain.controller.granger import granger
 from brain.controller.peak_detection import peak_detection
+from config import (
+    sentiments,
+    model_control as ctrl,
+    model_config as cfg,
+)
 
 
 def analyze(
@@ -25,20 +30,8 @@ def analyze(
     directory_lstm_model='model/lstm',
     directory_report='reports',
     arima_auto_scale=None,
-    lstm_units=50,
-    lstm_epochs=750,
-    lstm_num_cells=4,
-    lstm_dropout=0,
     lstm_save=False,
     lstm_save_log=True,
-    sentiments = ['negative', 'neutral', 'positive'],
-    classify_index='full_text',
-    classify_chi2=100,
-    classify_threshold=[0.5],
-    ts_index='value',
-    analysis_granger=True,
-    analysis_ts=True,
-    analysis_classify=True,
     plot=False
 ):
     '''
@@ -62,7 +55,7 @@ def analyze(
     #
     # Note: requires vader sentiment scores.
     #
-    if analysis_granger:
+    if ctrl['analysis_granger']:
         initialized_data = df
 
         for i,sn in enumerate(screen_name):
@@ -81,10 +74,9 @@ def analyze(
             # Note: this requires the above quandl join.
             #
             for sent in sentiments:
-                if all(x in initialized_data[sn] for x in [ts_index, sent]):
+                if all(x in initialized_data[sn] for x in [cfg['ts_index'], sent]):
                     granger(
-                        initialized_data[sn][[ts_index, sent]],
-                        maxlag=4,
+                        initialized_data[sn][[cfg['ts_index'], sent]],
                         directory='{d}/{sn}'.format(
                             d=directory_granger,
                             sn=sn
@@ -95,7 +87,7 @@ def analyze(
     #
     # timeseries analysis: overall stock index/volume
     #
-    if analysis_ts:
+    if ctrl['analysis_ts_stock']:
         #
         # timeseries analysis: if dataset not 50 elements or more (x), use the
         #     default (p,q,d) range. Otherwise, the grid search (p,q,d) range
@@ -108,7 +100,7 @@ def analyze(
         #
         ts_stock = Timeseries(
             df=df_quandl,
-            normalize_key=ts_index,
+            normalize_key=cfg['ts_index'],
             date_index='date',
             directory_arima='{a}/stock/{b}'.format(
                 a=directory_arima,
@@ -118,12 +110,8 @@ def analyze(
                 a=directory_lstm,
                 b=sub_directory
             ),
-            suffix=ts_index,
+            suffix=cfg['ts_index'],
             arima_auto_scale=(50, 0.15),
-            lstm_units=lstm_units,
-            lstm_epochs=lstm_epochs,
-            lstm_num_cells=lstm_num_cells,
-            lstm_dropout=lstm_dropout,
             directory_lstm_model=directory_lstm_model
         )
         ts_results = ts_stock.get_model_scores()
@@ -142,7 +130,7 @@ def analyze(
 
             with open('{d}/adf_{type}.txt'.format(
                 d=directory_report,
-                type=ts_index
+                type=cfg['ts_index']
             ), 'w') as fp:
                 print(ts_results['arima']['adf'], file=fp)
 
@@ -161,13 +149,13 @@ def analyze(
     #
     # classification analysis: twitter corpus (X), with stock index (y)
     #
-    if analysis_classify:
+    if ctrl['analysis_classify']:
         for i,sn in enumerate(screen_name):
             data = peak_detection(
                 data=df[sn],
-                ts_index=ts_index,
+                ts_index=cfg['ts_index'],
                 directory='{a}/{b}'.format(a=directory_class, b=sn),
-                threshold=classify_threshold
+                threshold=cfg['classify_threshold']
             )
 
             #
@@ -200,8 +188,8 @@ def analyze(
             #       can reduce the default to 2 classes. Each additional threshold
             #       adds two additional classes.
             #
-            if data.shape[0] > (3 + ((len(classify_threshold) - 1) * 2)) * 20:
-                if all(x in data for x in ['trend', classify_index]):
+            if data.shape[0] > (3 + ((len(cfg['classify_threshold']) - 1) * 2)) * 20:
+                if all(x in data for x in ['trend', cfg['classify_index']]):
                     #
                     # target vector: requires a minimum of 2 unique classes to
                     #     train a classifier.
@@ -210,14 +198,12 @@ def analyze(
                         classify_results[sn] = classify(
                             data,
                             key_class='trend',
-                            key_text=classify_index,
+                            key_text=cfg['classify_index'],
                             directory='{d}/{sn}'.format(
                                 d=directory_class,
                                 sn=sn
                             ),
-                            top_words=25,
-                            stopwords=stopwords,
-                            k=classify_chi2
+                            stopwords=stopwords
                         )
 
             if plot and any(
@@ -237,12 +223,7 @@ def analyze(
 def analyze_ts(
     df,
     screen_name,
-    sentiments=['negative', 'neutral', 'positive'],
     arima_auto_scale=None,
-    lstm_units=50,
-    lstm_epochs=750,
-    lstm_num_cells=4,
-    lstm_dropout=0,
     lstm_save=False,
     lstm_save_log=True,
     directory_lstm='viz/lstm',
@@ -286,10 +267,6 @@ def analyze_ts(
                         directory_lstm_model=directory_lstm_model,
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
-                        lstm_units=lstm_units,
-                        lstm_epochs=lstm_epochs,
-                        lstm_num_cells=lstm_num_cells,
-                        lstm_dropout=lstm_dropout,
                         catch_grid_search=True
                     )
 

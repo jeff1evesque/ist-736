@@ -7,6 +7,7 @@ from brain.model.timeseries import model
 from brain.view.timeseries import plot_ts
 import matplotlib.pyplot as plt
 
+
 class Timeseries():
     '''
 
@@ -30,13 +31,6 @@ class Timeseries():
         diff=1,
         xticks=True,
         arima_auto_scale=None,
-        lstm_units=50,
-        lstm_epochs=100,
-        lstm_dropout=0.2,
-        lstm_batch_size=32,
-        lstm_validation_split=0,
-        lstm_activation='linear',
-        lstm_num_cells=4,
         lstm_save=False,
         lstm_save_log=False,
         rolling_grid_search=False,
@@ -71,13 +65,6 @@ class Timeseries():
             self.lstm(
                 normalize_key=normalize_key,
                 date_index=date_index,
-                units=lstm_units,
-                epochs=lstm_epochs,
-                dropout=lstm_dropout,
-                batch_size=lstm_batch_size,
-                validation_split=lstm_validation_split,
-                num_cells=lstm_num_cells,
-                activation='linear',
                 directory=directory_lstm,
                 directory_lstm_model=directory_lstm_model,
                 suffix=suffix,
@@ -211,13 +198,6 @@ class Timeseries():
         show=False,
         suffix=None,
         date_index='date',
-        units=50,
-        epochs=100,
-        dropout=0.2,
-        batch_size=32,
-        validation_split=0,
-        activation='linear',
-        num_cells=4,
         xticks=True,
         save_model=False,
         save_model_log=True
@@ -234,14 +214,7 @@ class Timeseries():
             df=self.df,
             model_type='lstm',
             normalize_key=normalize_key,
-            date_index=date_index,
-            units=units,
-            epochs=epochs,
-            dropout=dropout,
-            batch_size=batch_size,
-            validation_split=validation_split,
-            activation=activation,
-            num_cells=num_cells
+            date_index=date_index
         )
 
         #
