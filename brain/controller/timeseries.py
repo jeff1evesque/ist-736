@@ -6,6 +6,7 @@ import pandas as pd
 from brain.model.timeseries import model
 from brain.view.timeseries import plot_ts
 import matplotlib.pyplot as plt
+from config import save_result as s
 
 
 class Timeseries():
@@ -31,8 +32,6 @@ class Timeseries():
         diff=1,
         xticks=True,
         arima_auto_scale=None,
-        lstm_save=False,
-        lstm_save_log=False,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -67,9 +66,7 @@ class Timeseries():
                 date_index=date_index,
                 directory=directory_lstm,
                 directory_lstm_model=directory_lstm_model,
-                suffix=suffix,
-                save_model=lstm_save,
-                save_model_log=lstm_save_log
+                suffix=suffix
             )
 
     def arima(
@@ -198,9 +195,7 @@ class Timeseries():
         show=False,
         suffix=None,
         date_index='date',
-        xticks=True,
-        save_model=False,
-        save_model_log=True
+        xticks=True
     ):
 
         '''
@@ -283,7 +278,7 @@ class Timeseries():
         #
         # save model
         #
-        if save_model and isinstance(save_model, bool):
+        if s['lstm'] and isinstance(s['lstm'], bool):
             l.save(file_path='{a}/lstm{b}.h5'.format(
                 a=directory_lstm_model,
                 b=suffix
@@ -292,7 +287,7 @@ class Timeseries():
         #
         # save model log
         #
-        if save_model_log and isinstance(save_model_log, bool):
+        if s['lstm_log'] and isinstance(s['lstm_log'], bool):
             loss_df = pd.DataFrame({
                 'train': l.get_fit_history('loss'),
                 'validation': l.get_fit_history('val_loss'),
