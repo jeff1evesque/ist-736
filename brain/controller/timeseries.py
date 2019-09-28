@@ -6,6 +6,8 @@ import pandas as pd
 from brain.model.timeseries import model
 from brain.view.timeseries import plot_ts
 import matplotlib.pyplot as plt
+from config import save_result as s
+
 
 class Timeseries():
     '''
@@ -20,6 +22,7 @@ class Timeseries():
         normalize_key,
         directory_arima='viz/arima',
         directory_lstm='viz/lstm',
+        directory_lstm_model='model/lstm',
         flag_arima=True,
         flag_lstm=True,
         plot=True,
@@ -29,13 +32,6 @@ class Timeseries():
         diff=1,
         xticks=True,
         arima_auto_scale=None,
-        lstm_units=50,
-        lstm_epochs=100,
-        lstm_dropout=0.2,
-        lstm_batch_size=32,
-        lstm_validation_split=0,
-        lstm_activation='linear',
-        lstm_num_cells=4,
         rolling_grid_search=False,
         catch_grid_search=False
     ):
@@ -49,7 +45,9 @@ class Timeseries():
         else:
             suffix=''
 
+        #
         # implement models
+        #
         if flag_arima:
             self.arima(
                 normalize_key=normalize_key,
@@ -66,14 +64,8 @@ class Timeseries():
             self.lstm(
                 normalize_key=normalize_key,
                 date_index=date_index,
-                units=lstm_units,
-                epochs=lstm_epochs,
-                dropout=lstm_dropout,
-                batch_size=lstm_batch_size,
-                validation_split=lstm_validation_split,
-                num_cells=lstm_num_cells,
-                activation='linear',
                 directory=directory_lstm,
+                directory_lstm_model=directory_lstm_model,
                 suffix=suffix
             )
 
@@ -150,7 +142,9 @@ class Timeseries():
                     value_vars=['actual', 'predicted']
                 )
 
-                # plot
+                #
+                # overall plot
+                #
                 plot_ts(
                     data=pd.DataFrame({
                         'values': train_actual,
@@ -175,7 +169,9 @@ class Timeseries():
                     xticks=xticks
                 )
 
+                #
                 # trend analysis
+                #
                 decomposed = a[0].get_decomposed()
                 decomposed.plot()
                 plt.savefig(
@@ -194,17 +190,11 @@ class Timeseries():
         self,
         normalize_key,
         directory='viz/lstm',
+        directory_lstm_model='model/lstm',
         plot=True,
         show=False,
         suffix=None,
         date_index='date',
-        units=50,
-        epochs=100,
-        dropout=0.2,
-        batch_size=32,
-        validation_split=0,
-        activation='linear',
-        num_cells=4,
         xticks=True
     ):
 
@@ -219,17 +209,12 @@ class Timeseries():
             df=self.df,
             model_type='lstm',
             normalize_key=normalize_key,
-            date_index=date_index,
-            units=units,
-            epochs=epochs,
-            dropout=dropout,
-            batch_size=batch_size,
-            validation_split=validation_split,
-            activation=activation,
-            num_cells=num_cells
+            date_index=date_index
         )
 
+        #
         # predict
+        #
         if l.get_status(type='train_flag'):
             l.predict()
             self.model_scores['lstm'] = {
@@ -263,7 +248,9 @@ class Timeseries():
                 value_vars=['actual', 'predicted']
             )
 
-            # plot
+            #
+            # overall plot
+            #
             plot_ts(
                 data=pd.DataFrame({
                     'values': train_actual,
@@ -288,8 +275,51 @@ class Timeseries():
                 xticks=xticks
             )
 
-            # reset memory
-            l.reset_memory(model=l.get_model())
+        #
+        # save model
+        #
+        if s['lstm'] and isinstance(s['lstm'], bool):
+            l.save(file_path='{a}/lstm{b}.h5'.format(
+                a=directory_lstm_model,
+                b=suffix
+            ))
+
+        #
+        # save model log
+        #
+        if s['lstm_log'] and isinstance(s['lstm_log'], bool):
+            loss_df = pd.DataFrame({
+                'train_loss': l.get_fit_history('loss'),
+                'test_loss': l.get_fit_history('val_loss'),
+                'epoch': range(1, len(l.get_fit_history('loss')) + 1)
+            })
+
+            loss_df_long = pd.melt(
+                loss_df,
+                id_vars=['epoch'],
+                value_vars=['train_loss', 'test_loss']
+            )
+
+            plot_ts(
+                data=loss_df_long,
+                xlab='epoch',
+                ylab='value',
+                hue='variable',
+                directory=directory_lstm_model,
+                filename='lstm',
+                rotation=0,
+                xticks=xticks
+            )
+
+            loss_df.to_csv('{a}/lstm{b}.csv'.format(
+                a=directory_lstm_model,
+                b=suffix
+            ))
+
+        #
+        # reset memory
+        #
+        l.reset_memory()
 
     def get_model_scores(self, key=None):
         '''

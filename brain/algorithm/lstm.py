@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, LSTM, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -22,7 +22,7 @@ class Lstm():
 
     apply lstm variant of recurrent neural network.
 
-    Note: keras==2.1.2 is required.
+    Note: keras==2.1.2 is required, and h5py.
 
     '''
 
@@ -531,6 +531,9 @@ class Lstm():
                 'val_loss': [0.0502210383056177]
             }
 
+        Note: the history object only contains values if the 'validation' was
+              set during the train.
+
         '''
 
         if history_key:
@@ -558,7 +561,10 @@ class Lstm():
         sess.close()
 
         try:
-            del model
+            if model:
+                del model
+            else:
+                del self.regressor
 
         except:
             pass
@@ -569,6 +575,39 @@ class Lstm():
         config = tf.ConfigProto()
         config.gpu_options.per_process_gpu_memory_fraction = 1
         config.gpu_options.visible_device_list = '0'
-        set_session(tensorflow.Session(config=config))
+        set_session(tf.Session(config=config))
 
         gc.collect()
+
+    def save(self, file_path='lstm,h5', model=None):
+        '''
+
+        save current model.
+
+        '''
+
+        try:
+            if model:
+                model.save(file_path)
+            else:
+                self.regressor.save(file_path)
+
+        except:
+            print(self.banner_border)
+            print('No model saved: {a}'.format(a=file_path))
+            print(self.banner_border)
+
+    def load(self, file_path='lstm.h5'):
+        '''
+
+        load model into memory.
+
+        '''
+
+        try:
+            self.regressor = load_model('{a}'.format(a=file_path))
+
+        except:
+            print(self.banner_border)
+            print('No model loaded: {a}'.format(a=file_path))
+            print(self.banner_border)

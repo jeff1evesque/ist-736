@@ -5,29 +5,23 @@ from collections import OrderedDict
 from brain.model.classifier import model as m_model
 from brain.model.classifier import model_pos as mp_model
 from brain.view.plot import plot_cm, plot_bar
+from config import (
+    model_control as ctrl,
+    model_config as cfg,
+)
+
 
 def classify(
     df,
     key_class='screen_name',
-    key_text='full_text',
     kfold=True,
     prf=True,
-    n_splits=5,
-    top_words=20,
     ngram=(1,1),
     rotation=90,
     directory='viz',
-    flag_mnb=True,
-    flag_mnb_pos=True,
-    flag_bnb=True,
-    flag_bnb_pos=True,
-    flag_svm=True,
-    flag_svm_pos=True,
     plot=True,
-    split_size=0.2,
     validate=True,
-    stopwords=None,
-    k=1000
+    stopwords=None
 ):
     '''
 
@@ -41,23 +35,20 @@ def classify(
     prf_scores = {}
     indicative_words = {}
 
-    if ngram == (1,1):
+    if cfg['classify_ngram'] == (1,1):
         suffix = ''
     else:
         suffix = '_ngram'
 
     # multinomial naive bayes
-    if flag_mnb:
+    if ctrl['model_mnb']:
         mnb = m_model(
             df=df,
             key_class=key_class,
-            key_text=key_text,
             max_length=math.inf,
-            ngram=ngram,
-            split_size=split_size,
+            ngram=cfg['classify_ngram'],
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
         model_scores['mnb'] = mnb.get_accuracy()
 
@@ -66,7 +57,7 @@ def classify(
         #
         log_prob = mnb.get_word_scores(
             mnb.get_clf(),
-            top_words=top_words
+            top_words=c['classify_top_words']
         )
 
         terms = mnb.get_feature_names()
@@ -103,7 +94,7 @@ def classify(
             keywords = mnb.get_top_features(
                 mnb.get_feature_names(),
                 mnb.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             plot_bar(
@@ -111,7 +102,7 @@ def classify(
                 performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
+                    count=c['classify_top_words'],
                     suffix=suffix
                 ),
                 rotation=rotation
@@ -145,7 +136,7 @@ def classify(
                 performance=[x[0] for x in indicative_words['positive']],
                 directory=directory,
                 filename='top_{count}_positive_words_mnb'.format(
-                    count=top_words
+                    count=c['classify_top_words']
                 ),
                 rotation=rotation
             )
@@ -155,7 +146,7 @@ def classify(
                 performance=[x[0] for x in indicative_words['negative']],
                 directory=directory,
                 filename='top_{count}_negative_words_mnb'.format(
-                    count=top_words
+                    count=c['classify_top_words']
                 ),
                 rotation=rotation
             )
@@ -170,7 +161,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_mnb{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -180,24 +171,20 @@ def classify(
         if kfold:
             kfold_scores['mnb'] = mnb.get_kfold_scores(
                 model_type='multinomial',
-                n_splits=n_splits,
-                ngram=ngram,
-                k=k
+                n_splits=cfg['classify_kfold'],
+                ngram=cfg['classify_ngram']
             )
 
         if prf:
             prf_scores['mnb'] = mnb.get_precision_recall_fscore()
 
-    if flag_mnb_pos:
+    if ctrl['model_mnb_pos']:
         mnb_pos = mp_model(
             df=df,
             key_class=key_class,
-            key_text=key_text,
             max_length=math.inf,
-            split_size=split_size,
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
         model_scores['mnb_pos'] = mnb_pos.get_accuracy()
 
@@ -206,7 +193,7 @@ def classify(
         #
         log_prob = mnb_pos.get_word_scores(
             mnb_pos.get_clf(),
-            top_words=top_words
+            top_words=c['classify_top_words']
         )
 
         terms = mnb.get_feature_names()
@@ -240,7 +227,7 @@ def classify(
             keywords = mnb_pos.get_top_features(
                 mnb_pos.get_feature_names(),
                 mnb_pos.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             keywords = OrderedDict(
@@ -252,7 +239,7 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
+                filename='top_{count}_tfidf'.format(count=c['classify_top_words']),
                 rotation=rotation
             )
 
@@ -280,7 +267,7 @@ def classify(
                 performance=[x[0] for x in indicative_words['positive']],
                 directory=directory,
                 filename='top_{count}_positive_words_mnb_pos'.format(
-                    count=top_words
+                    count=c['classify_top_words']
                 ),
                 rotation=rotation
             )
@@ -290,7 +277,7 @@ def classify(
                 performance=[x[0] for x in indicative_words['negative']],
                 directory=directory,
                 filename='top_{count}_negative_words_mnb_pos'.format(
-                    count=top_words
+                    count=c['classify_top_words']
                 ),
                 rotation=rotation
             )
@@ -305,7 +292,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_mnb_pos{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -315,26 +302,22 @@ def classify(
         if kfold:
             kfold_scores['mnb_pos'] = mnb_pos.get_kfold_scores(
                 model_type='multinomial',
-                n_splits=n_splits,
-                k=k
+                n_splits=cfg['classify_kfold']
             )
 
         if prf:
             prf_scores['mnb_pos'] = mnb_pos.get_precision_recall_fscore()
 
     # bernoulli naive bayes
-    if flag_bnb:
+    if ctrl['model_bnb']:
         bnb = m_model(
             df=df,
             model_type='bernoulli',
             key_class=key_class,
-            key_text=key_text,
             max_length=0,
-            ngram=ngram,
-            split_size=split_size,
+            ngram=cfg['classify_ngram'],
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
         model_scores['bnb'] = bnb.get_accuracy()
 
@@ -354,7 +337,7 @@ def classify(
             keywords = bnb.get_top_features(
                 bnb.get_feature_names(type='bow'),
                 bnb.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             # sort values: largest to smallest
@@ -369,7 +352,7 @@ def classify(
                 performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
+                    count=c['classify_top_words'],
                     suffix=suffix
                 ),
                 rotation=rotation
@@ -407,7 +390,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_bnb{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -417,25 +400,21 @@ def classify(
         if kfold:
             kfold_scores['bnb'] = bnb.get_kfold_scores(
                 model_type='bernoulli',
-                n_splits=n_splits,
-                ngram=ngram,
-                k=k
+                n_splits=cfg['classify_kfold'],
+                ngram=cfg['classify_ngram']
             )
 
         if prf:
             prf_scores['bnb'] = bnb.get_precision_recall_fscore()
 
-    if flag_bnb_pos:
+    if ctrl['model_bnb_pos']:
         bnb_pos = mp_model(
             df=df,
             model_type='bernoulli',
             key_class=key_class,
-            key_text=key_text,
             max_length=0,
-            split_size=split_size,
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
         model_scores['bnb_pos'] = bnb_pos.get_accuracy()
 
@@ -452,7 +431,7 @@ def classify(
             keywords = bnb_pos.get_top_features(
                 bnb_pos.get_feature_names(type='bow'),
                 bnb_pos.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             # sort values: largest to smallest
@@ -465,7 +444,7 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
+                filename='top_{count}_tfidf'.format(count=c['classify_top_words']),
                 rotation=rotation
             )
 
@@ -497,7 +476,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_bnb_pos{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -507,25 +486,21 @@ def classify(
         if kfold:
             kfold_scores['bnb_pos'] = bnb_pos.get_kfold_scores(
                 model_type='bernoulli',
-                n_splits=n_splits,
-                k=k
+                n_splits=cfg['classify_kfold']
             )
 
         if prf:
             prf_scores['bnb_pos'] = bnb_pos.get_precision_recall_fscore()
 
     # support vector machine
-    if flag_svm:
+    if ctrl['model_svm']:
         svm = m_model(
             df=df,
             model_type='svm',
             key_class=key_class,
-            key_text=key_text,
-            ngram=ngram,
-            split_size=split_size,
+            ngram=cfg['classify_ngram'],
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
         model_scores['svm'] = svm.get_accuracy()
 
@@ -545,7 +520,7 @@ def classify(
             keywords = svm.get_top_features(
                 svm.get_feature_names(),
                 svm.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             # sort values: largest to smallest
@@ -560,7 +535,7 @@ def classify(
                 performance=[*keywords.values()],
                 directory=directory,
                 filename='top_{count}_tfidf{suffix}'.format(
-                    count=top_words,
+                    count=c['classify_top_words'],
                     suffix=suffix
                 ),
                 rotation=rotation
@@ -598,7 +573,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_svm{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -608,24 +583,20 @@ def classify(
         if kfold:
             kfold_scores['svm'] = svm.get_kfold_scores(
                 model_type='svm',
-                n_splits=n_splits,
-                ngram=ngram,
-                k=k
+                n_splits=cfg['classify_kfold'],
+                ngram=cfg['classify_ngram']
             )
 
         if prf:
             prf_scores['svm'] = svm.get_precision_recall_fscore()
 
-    if flag_svm_pos:
+    if ctrl['model_svm_pos']:
         svm_pos = mp_model(
             df=df,
             model_type='svm',
             key_class=key_class,
-            key_text=key_text,
-            split_size=split_size,
             validate=validate,
-            stopwords=stopwords,
-            k=k
+            stopwords=stopwords
         )
 
         if plot:
@@ -641,7 +612,7 @@ def classify(
             keywords = svm_pos.get_top_features(
                 svm_pos.get_feature_names(),
                 svm_pos.sort_coo(tfidf.tocoo()),
-                top_words
+                c['classify_top_words']
             )
 
             # sort values: largest to smallest
@@ -655,7 +626,7 @@ def classify(
                 labels=[*keywords],
                 performance=[*keywords.values()],
                 directory=directory,
-                filename='top_{count}_tfidf'.format(count=top_words),
+                filename='top_{count}_tfidf'.format(count=c['classify_top_words']),
                 rotation=rotation
             )
 
@@ -687,7 +658,7 @@ def classify(
                 top_chi2[1],
                 directory=directory,
                 filename='top{t}_chi2_{key_class}_svm_pos{suffix}'.format(
-                    t=top_words,
+                    t=c['classify_top_words'],
                     key_class=key_class,
                     suffix=suffix
                 ),
@@ -697,8 +668,7 @@ def classify(
         if kfold:
             kfold_scores['svm_pos'] = svm_pos.get_kfold_scores(
                 model_type='svm',
-                n_splits=n_splits,
-                k=k
+                n_splits=cfg['classify_kfold']
             )
 
         if prf:

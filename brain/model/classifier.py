@@ -3,18 +3,17 @@
 import re
 from pathlib import Path
 from brain.algorithm.text_classifier import Model as alg
+from config import model_config as c
+
 
 def model(
     df=None,
     model_type='multinomial',
-    key_text='text',
     key_class='screen_name',
     max_length=280,
     ngram=(1,1),
-    split_size=0.2,
     validate=True,
-    stopwords=None,
-    k=1000
+    stopwords=None
 ):
     '''
 
@@ -26,18 +25,18 @@ def model(
     if df is not None:
         model = alg(
             df=df,
-            key_text=key_text,
+            key_text=cfg['classify_index'],
             key_class=key_class,
             ngram=ngram,
-            split_size=split_size,
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
     else:
         model = alg(
-            key_text=key_text,
+            key_text=cfg['classify_index'],
             key_class=key_class,
             ngram=ngram,
-            split_size=split_size,
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
 
@@ -62,7 +61,7 @@ def model(
         model_type=model_type,
         validate=validate,
         max_length=max_length,
-        k=k
+        k=c['classify_chi2']
     )
 
     return(model)
@@ -70,14 +69,11 @@ def model(
 def model_pos(
     df,
     model_type='multinomial',
-    key_text='SentimentText',
     key_class='Sentiment',
     max_length=280,
     stem=False,
-    split_size=0.2,
     validate=True,
-    stopwords=None,
-    k=1000
+    stopwords=None
 ):
     '''
 
@@ -89,18 +85,18 @@ def model_pos(
     if df is not None:
         model = alg(
             df=df,
-            key_text=key_text,
+            key_text=cfg['classify_index'],
             key_class=key_class,
             stem=False,
-            split_size=split_size,
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
     else:
         model = alg(
-            key_text=key_text,
+            key_text=cfg['classify_index'],
             key_class=key_class,
             stem=False,
-            split_size=split_size,
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
 
@@ -137,7 +133,7 @@ def model_pos(
         model_type=model_type,
         validate=validate,
         max_length=max_length,
-        k=k
+        k=c['classify_chi2']
     )
 
     return(model)

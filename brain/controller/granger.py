@@ -3,9 +3,10 @@
 import numpy as np
 from brain.algorithm.granger import granger as gr
 from brain.view.plot import plot_bar
+from config import model_config as c
 
 
-def granger(df, maxlag=1, directory='viz', suffix='', plot=True):
+def granger(df, directory='viz', suffix='', plot=True):
     '''
 
     implement granger test for causality.
@@ -32,7 +33,7 @@ def granger(df, maxlag=1, directory='viz', suffix='', plot=True):
     #
     # ensure each proposed lag has 15x observations
     #
-    for lag in reversed(range(maxlag+1)):
+    for lag in reversed(range(c['maxlag']+1)):
         if len(df.index) > 15 * lag:
             maxlag = lag
             break
