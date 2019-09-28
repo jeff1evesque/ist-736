@@ -59,7 +59,7 @@ model_config = {
 }
 
 #
-# save results
+# save controls
 #
 save_result = {
     'lstm': True,
