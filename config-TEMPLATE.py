@@ -36,6 +36,8 @@ model_control = {
     'model_bnb_pos': True,
     'model_svm': True,
     'model_svm_pos': True,
+    'model_arima': True,
+    'model_lstm': True
 }
 
 model_config = {

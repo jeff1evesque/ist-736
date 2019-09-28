@@ -30,8 +30,6 @@ def analyze(
     directory_lstm_model='model/lstm',
     directory_report='reports',
     arima_auto_scale=None,
-    lstm_save=False,
-    lstm_save_log=True,
     plot=False
 ):
     '''
@@ -115,7 +113,9 @@ def analyze(
                 b=sub_directory
             ),
             suffix=cfg['ts_index'],
-            arima_auto_scale=(50, 0.15)
+            arima_auto_scale=(50, 0.15),
+            flag_arima=ctrl['model_arima'],
+            flag_lstm=ctrl['model_lstm']
         )
         ts_results = ts_stock.get_model_scores()
 
@@ -227,8 +227,6 @@ def analyze_ts(
     df,
     screen_name,
     arima_auto_scale=None,
-    lstm_save=False,
-    lstm_save_log=True,
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_lstm_model='model/lstm',
@@ -273,7 +271,9 @@ def analyze_ts(
                         ),
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
-                        catch_grid_search=True
+                        catch_grid_search=True,
+                        flag_arima=ctrl['model_arima'],
+                        flag_lstm=ctrl['model_lstm']
                     )
 
                     scores = ts_sentiment.get_model_scores()
