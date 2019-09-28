@@ -531,6 +531,9 @@ class Lstm():
                 'val_loss': [0.0502210383056177]
             }
 
+        Note: the history object only contains values if the 'validation' was
+              set during the train.
+
         '''
 
         if history_key:

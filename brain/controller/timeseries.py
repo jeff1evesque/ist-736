@@ -289,29 +289,29 @@ class Timeseries():
         #
         if s['lstm_log'] and isinstance(s['lstm_log'], bool):
             loss_df = pd.DataFrame({
-                'train': l.get_fit_history('loss'),
-                'validation': l.get_fit_history('val_loss'),
+                'train_loss': l.get_fit_history('loss'),
+                'test_loss': l.get_fit_history('val_loss'),
                 'epoch': range(1, len(l.get_fit_history('loss')) + 1)
             })
 
             loss_df_long = pd.melt(
                 loss_df,
                 id_vars=['epoch'],
-                value_vars=['loss', 'val_loss']
+                value_vars=['train_loss', 'test_loss']
             )
 
             plot_ts(
                 data=loss_df_long,
                 xlab='epoch',
-                ylab='loss',
+                ylab='value',
                 hue='variable',
                 directory=directory_lstm_model,
-                filename=suffix,
-                rotation=90,
+                filename='lstm',
+                rotation=0,
                 xticks=xticks
             )
 
-            l.get_fit_history().to_csv('{a}/lstm{b}.csv'.format(
+            loss_df.to_csv('{a}/lstm{b}.csv'.format(
                 a=directory_lstm_model,
                 b=suffix
             ))

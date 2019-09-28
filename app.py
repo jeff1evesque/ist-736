@@ -52,7 +52,8 @@ stopwords_topics.extend(stopwords)
 create_directory(
     screen_name=accounts,
     stock_codes=stock_codes,
-    directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs'])
+    directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
+    directory_lstm_model='viz/lstm_{a}/model'.format(a=c['lstm_epochs'])
 )
 
 #
@@ -131,7 +132,9 @@ for x in df_quandl:
             sub_directory=sub_directory,
             directory_granger='viz/granger/{a}'.format(a=sub_directory),
             directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
-            directory_lstm_model='model/lstm_{a}'.format(a=c['lstm_epochs']),
+            directory_lstm_model='viz/lstm_{a}/model'.format(
+                a=c['lstm_epochs']
+            ),
             directory_arima='viz/arima',
             directory_class='viz/classification/{a}'.format(a=sub_directory),
             directory_report='reports/{a}'.format(a=x['dataset']),
@@ -160,7 +163,7 @@ if m['analysis_ts_sentiment']:
         lstm_save=s['lstm'],
         lstm_save_log=s['lstm_log'],
         directory_lstm='viz/lstm_{a}'.format(a=c['lstm_epochs']),
-        directory_lstm_model='model/lstm_{a}'.format(a=c['lstm_epochs']),
+        directory_lstm_model='viz/lstm_{a}/model'.format(a=c['lstm_epochs']),
         directory_arima='viz/arima',
         plot=s['model_plot']
     )

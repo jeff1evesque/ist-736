@@ -10,7 +10,7 @@ def create_directory(
     directory_lstm='viz/lstm',
     directory_arima='viz/arima',
     directory_class='viz/classification',
-    directory_lstm_model='model/lstm',
+    directory_lstm_model='viz/lstm/model',
     directory_report='reports'
 ):
     '''
@@ -55,6 +55,7 @@ def create_directory(
         directory_granger,
         directory_class,
         '{a}/sentiment'.format(a=directory_lstm),
+        '{a}/sentiment'.format(a=directory_lstm_model),
         '{a}/sentiment'.format(a=directory_arima)
     ]
 

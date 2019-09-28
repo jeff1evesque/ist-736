@@ -28,7 +28,7 @@ def model(
             key_text=cfg['classify_index'],
             key_class=key_class,
             ngram=ngram,
-            split_size=c['split_size'],
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
     else:
@@ -36,7 +36,7 @@ def model(
             key_text=cfg['classify_index'],
             key_class=key_class,
             ngram=ngram,
-            split_size=c['split_size'],
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
 
@@ -88,7 +88,7 @@ def model_pos(
             key_text=cfg['classify_index'],
             key_class=key_class,
             stem=False,
-            split_size=c['split_size'],
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
     else:
@@ -96,7 +96,7 @@ def model_pos(
             key_text=cfg['classify_index'],
             key_class=key_class,
             stem=False,
-            split_size=c['split_size'],
+            split_size=c['classify_split_size'],
             stopwords=stopwords
         )
 

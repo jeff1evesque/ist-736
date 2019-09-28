@@ -39,7 +39,6 @@ model_control = {
 }
 
 model_config = {
-    'split_size': 0.2,
     'classify_index': 'full_text',
     'ts_index': 'value',
     'granger_lag': 4,
@@ -50,8 +49,9 @@ model_config = {
     'lstm_units': 50,
     'lstm_dropout': 0.2,
     'lstm_activation': 'linear',
-    'lstm_validation_split': 0,
+    'lstm_validation_split': 0.2,
     'classify_threshold': [0.5],
+    'classify_split_size': 0.2,
     'classify_chi2': 100,
     'classify_ngram': (1,1),
     'classify_kfold': 5,

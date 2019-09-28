@@ -110,9 +110,12 @@ def analyze(
                 a=directory_lstm,
                 b=sub_directory
             ),
+            directory_lstm_model='{a}/stock/{b}'.format(
+                a=directory_lstm_model,
+                b=sub_directory
+            ),
             suffix=cfg['ts_index'],
-            arima_auto_scale=(50, 0.15),
-            directory_lstm_model=directory_lstm_model
+            arima_auto_scale=(50, 0.15)
         )
         ts_results = ts_stock.get_model_scores()
 
@@ -264,7 +267,10 @@ def analyze_ts(
                             d=directory_lstm,
                             sn=sn
                         ),
-                        directory_lstm_model=directory_lstm_model,
+                        directory_lstm_model='{d}/sentiment/{sn}'.format(
+                            d=directory_lstm_model,
+                            sn=sn
+                        ),
                         suffix=sent,
                         arima_auto_scale=arima_auto_scale,
                         catch_grid_search=True
