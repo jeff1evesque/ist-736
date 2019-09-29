@@ -12,7 +12,7 @@ from brain.controller.granger import granger
 from brain.controller.peak_detection import peak_detection
 from config import (
     sentiments,
-    model_control as ctrl,
+    analysis_control as ctrl,
     model_config as cfg,
 )
 

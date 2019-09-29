@@ -24,12 +24,15 @@ quandl_api = {
 #
 # model controls
 #
-model_control = {
+analysis_control = {
     'analysis_explore': False,
     'analysis_granger': False,
     'analysis_ts_stock': True,
     'analysis_ts_sentiment': False,
-    'analysis_classify': False,
+    'analysis_classify': False
+}
+
+model_control = {
     'model_mnb': True,
     'model_mnb_pos': True,
     'model_bnb': True,
