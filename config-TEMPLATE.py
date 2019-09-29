@@ -55,6 +55,8 @@ model_config = {
     'lstm_dropout': 0.2,
     'lstm_activation': 'linear',
     'lstm_validation_split': 0.2,
+    'lstm_steps_in': 4,
+    'lstm_steps_out': 1,
     'classify_threshold': [0.5],
     'classify_split_size': 0.2,
     'classify_chi2': 100,

@@ -96,7 +96,9 @@ def model(
                 data=pd.Series(
                     df[normalize_key].values,
                     [pd.Timestamp(x) for x in df[date_index].tolist()]
-                )
+                ),
+                n_steps_in=c['lstm_steps_in'],
+                n_steps_out=c['lstm_steps_out']
             )
 
         else:
@@ -104,7 +106,9 @@ def model(
                 data=pd.Series(
                     df[normalize_key].values,
                     [pd.Timestamp(x) for x in df.index.values]
-                )
+                ),
+                n_steps_in=c['lstm_steps_in'],
+                n_steps_out=c['lstm_steps_out']
             )
 
         if model.get_status(type='train_flag'):
