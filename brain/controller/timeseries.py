@@ -294,19 +294,22 @@ class Timeseries():
                 'epoch': range(1, len(l.get_fit_history('loss')) + 1)
             })
 
-            loss_df_long = pd.melt(
-                loss_df,
-                id_vars=['epoch'],
-                value_vars=['train_loss', 'test_loss']
+            plot_ts(
+                data=loss_df,
+                xlab='epoch',
+                ylab='train_loss',
+                directory=directory_lstm_model,
+                filename='lstm_train',
+                rotation=0,
+                xticks=xticks
             )
 
             plot_ts(
-                data=loss_df_long,
+                data=loss_df,
                 xlab='epoch',
-                ylab='value',
-                hue='variable',
+                ylab='test_loss',
                 directory=directory_lstm_model,
-                filename='lstm',
+                filename='lstm_test',
                 rotation=0,
                 xticks=xticks
             )
